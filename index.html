@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -96,8 +95,8 @@
         }
 
         #map.isometric-fallback {
-            transform: perspective(1200px) rotateX(40deg) scale(1.2);
-            transform-origin: center 40%;
+            transform: perspective(1200px) rotateX(40deg) scale(1.25);
+            transform-origin: center 30%;
         }
 
         /* Controls */
@@ -167,6 +166,7 @@
         .teleport-section {
             padding-top: 12px;
             border-top: 1px solid #e5e7eb;
+            display: none; /* Masquer la téléportation par boutons */
         }
 
         .teleport-label {
@@ -1729,6 +1729,8 @@
         let joystickActive = false;
         let joystickInterval = null;
         let joystickDirection = { x: 0, y: 0 };
+        let teleportMode = false; // Mode téléportation activé
+        let selectedTeleportPOI = null; // POI sélectionné pour téléportation
 
         const COLLECTION_RADIUS = 50;
         const DUST_RADIUS = 30;
@@ -1935,7 +1937,61 @@
                     strokeWeight: 1,
                 });
 
+                // Événement de clic sur le marqueur POI pour activer le mode téléportation
+                marker.addListener('click', () => {
+                    teleportMode = true;
+                    selectedTeleportPOI = poi;
+                    
+                    // Changer l'apparence du marqueur pour indiquer la sélection
+                    marker.setIcon({
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 10,
+                        fillColor: '#FBBF24',
+                        fillOpacity: 1,
+                        strokeColor: '#FFFFFF',
+                        strokeWeight: 3,
+                    });
+                    
+                    // Message à l'utilisateur
+                    alert(`📍 ${poi.name} sélectionné ! Cliquez sur la carte pour vous téléporter.`);
+                });
+
                 poiMarkers.push({ marker, circle, poi });
+            });
+
+            // Événement de clic sur la carte pour se téléporter
+            map.addListener('click', (event) => {
+                if (teleportMode && selectedTeleportPOI) {
+                    const clickedLocation = {
+                        lat: event.latLng.lat(),
+                        lng: event.latLng.lng()
+                    };
+                    
+                    // Téléporter le joueur
+                    playerPos = clickedLocation;
+                    playerMarker.setPosition(clickedLocation);
+                    map.panTo(clickedLocation);
+                    
+                    // Réinitialiser le mode téléportation
+                    teleportMode = false;
+                    
+                    // Remettre l'apparence normale du marqueur POI
+                    poiMarkers.forEach(({ marker, poi }) => {
+                        if (poi.id === selectedTeleportPOI.id) {
+                            marker.setIcon({
+                                path: google.maps.SymbolPath.CIRCLE,
+                                scale: 8,
+                                fillColor: '#EF4444',
+                                fillOpacity: 0.8,
+                                strokeColor: '#FFFFFF',
+                                strokeWeight: 2,
+                            });
+                        }
+                    });
+                    
+                    selectedTeleportPOI = null;
+                    checkNearbyPOI();
+                }
             });
 
             checkNearbyPOI();
