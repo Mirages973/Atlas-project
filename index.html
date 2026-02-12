@@ -101,7 +101,16 @@
         }
 
         #map.isometric-fallback .gm-style {
-            transform: none;
+            transform: perspective(1200px) rotateX(32deg) scale(1.08);
+            transform-origin: center 72%;
+            flex: 1;
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        #map.isometric-fallback {
+            transform: perspective(1200px) rotateX(38deg) scale(1.18);
+            transform-origin: center 70%;
         }
 
         /* Controls */
@@ -1314,7 +1323,7 @@
 
         <!-- Controls -->
         <div class="controls">
-            <div class="controls-hint">Touchez la carte pour vous téléporter. Bouton 📍 actif = suivi GPS (désactivez-le pour téléporter librement).</div>
+            <div class="controls-hint">Utilisez les flèches ← ↑ → ↓ ou touchez la carte pour vous téléporter</div>
             
             <div id="nearbyPOI" class="nearby-poi hidden">
                 <div class="nearby-poi-header">
@@ -1801,18 +1810,14 @@
             createMap();
         }
 
-        function applyIsometricCamera(options = {}) {
+        function applyIsometricCamera() {
             if (!map) return;
-
-            const keepCurrentZoom = options.keepCurrentZoom !== false;
-            const currentZoom = typeof map.getZoom === 'function' ? map.getZoom() : null;
-            const targetZoom = keepCurrentZoom && currentZoom ? currentZoom : 17.2;
 
             if (typeof map.moveCamera === 'function') {
                 map.moveCamera({
                     tilt: ISOMETRIC_TILT,
                     heading: ISOMETRIC_HEADING,
-                    zoom: targetZoom
+                    zoom: 17.2
                 });
             } else {
                 if (typeof map.setTilt === 'function') {
@@ -1821,8 +1826,8 @@
                 if (typeof map.setHeading === 'function') {
                     map.setHeading(ISOMETRIC_HEADING);
                 }
-                if (typeof map.setZoom === 'function' && !keepCurrentZoom) {
-                    map.setZoom(targetZoom);
+                if (typeof map.setZoom === 'function' && map.getZoom() < 17) {
+                    map.setZoom(17);
                 }
             }
 
@@ -1849,8 +1854,8 @@
                 ]
             });
 
-            applyIsometricCamera({ keepCurrentZoom: false });
-            google.maps.event.addListenerOnce(map, 'idle', () => applyIsometricCamera({ keepCurrentZoom: true }));
+            applyIsometricCamera();
+            google.maps.event.addListenerOnce(map, 'idle', applyIsometricCamera);
 
             playerMarker = new google.maps.Marker({
                 position: playerPos,
@@ -1931,14 +1936,11 @@
             updateDustVisibility();
 
             map.addListener('click', (event) => {
+                if (gpsActive) return;
                 if (document.getElementById('collectionsPanel').classList.contains('show') ||
                     document.getElementById('cardPopup').classList.contains('show') ||
                     document.getElementById('cardDetailView').classList.contains('show')) {
                     return;
-                }
-
-                if (gpsActive) {
-                    disableGPSTracking();
                 }
 
                 teleportToLatLng(event.latLng);
