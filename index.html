@@ -550,6 +550,12 @@
             align-items: center;
         }
 
+        @media (max-width: 480px) {
+            .card-display {
+                padding: 16px;
+            }
+        }
+
         .card-frame {
             background: white;
             border-radius: 16px;
@@ -558,6 +564,14 @@
             max-width: 280px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             position: relative;
+        }
+
+        @media (max-width: 480px) {
+            .card-frame {
+                max-width: 220px;
+                padding: 12px;
+                border-radius: 12px;
+            }
         }
 
         .card-rarity-badge {
@@ -614,8 +628,21 @@
             position: relative;
         }
 
+        @media (max-width: 480px) {
+            .card-art-area {
+                min-height: 140px;
+                margin-bottom: 12px;
+            }
+        }
+
         .card-art-placeholder {
             font-size: 80px;
+        }
+
+        @media (max-width: 480px) {
+            .card-art-placeholder {
+                font-size: 60px;
+            }
         }
 
         .card-footer {
@@ -760,6 +787,13 @@
             margin-top: 12px;
         }
 
+        @media (max-width: 480px) {
+            .card-related-characters {
+                gap: 6px;
+                margin-top: 8px;
+            }
+        }
+
         .related-char {
             width: 40px;
             height: 40px;
@@ -770,6 +804,15 @@
             justify-content: center;
             color: white;
             font-size: 24px;
+        }
+
+        @media (max-width: 480px) {
+            .related-char {
+                width: 30px;
+                height: 30px;
+                font-size: 18px;
+                border-radius: 6px;
+            }
         }
 
         .related-char.green {
@@ -1788,6 +1831,35 @@
         window.addEventListener('load', startApp);
 
         function initMap() {
+            // Essayer d'obtenir la position GPS pour centrer la carte
+            if ('geolocation' in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        // Position GPS réelle obtenue
+                        playerPos = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        createMap();
+                    },
+                    (error) => {
+                        // Erreur GPS - utiliser Lyon par défaut
+                        console.log('GPS non disponible, position par défaut à Lyon');
+                        createMap();
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 5000,
+                        maximumAge: 0
+                    }
+                );
+            } else {
+                // Pas de géolocalisation - utiliser Lyon par défaut
+                createMap();
+            }
+        }
+
+        function createMap() {
             map = new google.maps.Map(document.getElementById('map'), {
                 center: playerPos,
                 zoom: 15,
