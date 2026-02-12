@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Lyon Cards - Prototype</title>
     <style>
         * {
@@ -506,6 +506,24 @@
             gap: 16px;
         }
 
+        .card-detail-title-section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-detail-dust-display {
+            background: rgba(255,255,255,0.2);
+            padding: 6px 12px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
         .card-detail-back {
             background: none;
             border: none;
@@ -520,6 +538,7 @@
             overflow-y: auto;
             display: flex;
             flex-direction: column;
+            padding-bottom: max(0px, env(safe-area-inset-bottom));
         }
 
         /* Card Display */
@@ -770,26 +789,30 @@
             display: flex;
             background: #f3f4f6;
             border-bottom: 2px solid #e5e7eb;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .card-tab {
             flex: 1;
             background: none;
             border: none;
-            padding: 16px 8px;
-            font-size: 14px;
+            padding: 12px 4px;
+            font-size: 11px;
             font-weight: 600;
             color: #6b7280;
             cursor: pointer;
             border-bottom: 3px solid transparent;
             transition: all 0.2s;
+            white-space: nowrap;
+            min-width: 70px;
         }
 
         .card-tab.journal-tab {
             background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
             color: white;
             border-radius: 8px 8px 0 0;
-            margin: 0 4px;
+            margin: 0 2px;
         }
 
         .card-tab.journal-tab:hover {
@@ -800,6 +823,7 @@
             color: #4F46E5;
             border-bottom-color: #4F46E5;
             background: white;
+            font-size: 12px;
         }
 
         .card-tab.journal-tab.active {
@@ -1343,7 +1367,13 @@
         <div id="cardDetailView" class="card-detail-view">
         <div class="card-detail-header">
             <button onclick="closeCardDetail()" class="card-detail-back">←</button>
-            <h2 class="collections-title" id="cardDetailHeaderTitle"></h2>
+            <div class="card-detail-title-section">
+                <h2 class="collections-title" id="cardDetailHeaderTitle"></h2>
+                <div class="card-detail-dust-display">
+                    <span>💜</span>
+                    <span id="cardDetailDustCounter">0</span>
+                </div>
+            </div>
         </div>
         <div class="card-detail-body">
             <!-- Card Display -->
@@ -1521,7 +1551,7 @@
         </div>
 
         <!-- Inventaire -->
-        <div class="journal-screen-footer">
+        <div class="journal-screen-footer" style="padding-bottom: max(16px, env(safe-area-inset-bottom));">
             <div class="journal-inventory-title">Inventaire</div>
             <div class="inventory-grid">
                 <div class="interaction-button">🐕</div>
@@ -2076,6 +2106,7 @@
             document.getElementById('cardDetailHeaderTitle').textContent = card.name;
             document.getElementById('cardDetailName').textContent = card.name;
             document.getElementById('cardCategory').textContent = card.type;
+            document.getElementById('cardDetailDustCounter').textContent = memorialDust;
             
             updateCardLevelDisplay();
             
@@ -2148,6 +2179,7 @@
             // Retirer la poudre
             memorialDust -= DUST_INCREMENT;
             document.getElementById('dustCounter').textContent = memorialDust;
+            document.getElementById('cardDetailDustCounter').textContent = memorialDust;
             
             // Ajouter l'expérience
             cardLevel.experience += DUST_INCREMENT;
