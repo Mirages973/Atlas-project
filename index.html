@@ -15,39 +15,20 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             overflow: hidden;
             height: 100vh;
-            background: #1f2937;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: white;
+            margin: 0;
         }
 
         .app-container {
-            width: 390px;
-            height: 844px;
+            width: 100vw;
+            height: 100vh;
             max-height: 100vh;
-            margin: 0 auto;
+            margin: 0;
             background: white;
             display: flex;
             flex-direction: column;
             position: relative;
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
-            border-radius: 20px;
             overflow: hidden;
-        }
-
-        /* Responsive pour mobile */
-        @media (max-width: 480px) {
-            body {
-                background: white;
-            }
-            
-            .app-container {
-                width: 100vw;
-                height: 100vh;
-                max-height: 100vh;
-                border-radius: 0;
-                box-shadow: none;
-            }
         }
 
         /* Header */
@@ -56,7 +37,7 @@
             color: white;
             padding: 16px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            z-index: 10;
+            z-index: 30;
         }
 
         .header-content {
@@ -92,6 +73,12 @@
         #map {
             flex: 1;
             position: relative;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        #map.isometric-fallback .gm-style {
+            transform: none;
         }
 
         /* Controls */
@@ -156,44 +143,6 @@
 
         .collect-btn:hover {
             background: #059669;
-        }
-
-        .teleport-section {
-            padding-top: 12px;
-            border-top: 1px solid #e5e7eb;
-        }
-
-        .teleport-label {
-            font-size: 12px;
-            color: #6b7280;
-            margin-bottom: 8px;
-        }
-
-        .teleport-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            max-height: 120px;
-            overflow-y: auto;
-        }
-
-        .teleport-btn {
-            background: #EEF2FF;
-            color: #4F46E5;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 13px;
-            cursor: pointer;
-            text-align: left;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            transition: background 0.2s;
-        }
-
-        .teleport-btn:hover {
-            background: #E0E7FF;
         }
 
         /* Card Popup */
@@ -1342,7 +1291,7 @@
 
         <!-- Controls -->
         <div class="controls">
-            <div class="controls-hint">Utilisez les flèches ← ↑ → ↓ pour vous déplacer</div>
+            <div class="controls-hint">Téléportation: touchez la carte. Bouton 📍 = GPS temps réel (si actif, un tap carte le coupe puis vous téléporte).</div>
             
             <div id="nearbyPOI" class="nearby-poi hidden">
                 <div class="nearby-poi-header">
@@ -1364,10 +1313,6 @@
                 <button onclick="collectDust()" class="collect-btn" style="background: #A855F7;">Collecter la poudre</button>
             </div>
 
-            <div class="teleport-section">
-                <div class="teleport-label">Téléportation rapide:</div>
-                <div class="teleport-grid" id="teleportGrid"></div>
-            </div>
         </div>
 
         <!-- Card Popup -->
@@ -1700,8 +1645,11 @@
             { id: 'dust30', lat: 45.7620, lng: 4.8500 },
         ];
 
+        const LYON_CENTER = { lat: 45.7640, lng: 4.8357 };
+        const isMobileDevice = window.matchMedia('(max-width: 768px)').matches || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
         // State
-        let playerPos = { lat: 45.7640, lng: 4.8357 };
+        let playerPos = { ...LYON_CENTER };
         let collectedCards = [];
         let cardLevels = {}; // { cardId: { level: 1, experience: 0 } }
         let memorialDust = 0; // Quantité de poudre mémorielle
@@ -1724,6 +1672,8 @@
         const COLLECTION_RADIUS = 50;
         const DUST_RADIUS = 30;
         const MOVE_SPEED = 0.000015;
+        const ISOMETRIC_TILT = 67.5;
+        const ISOMETRIC_HEADING = 20;
         const DUST_INCREMENT = 50; // Montant ajouté par clic sur le bouton
         const MIN_DUST_DROP = 25;
         const MAX_DUST_DROP = 75;
@@ -1816,53 +1766,55 @@
             script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
             script.onload = initMap;
             document.head.appendChild(script);
-
-            const teleportGrid = document.getElementById('teleportGrid');
-            POIS.slice(0, 8).forEach(poi => {
-                const btn = document.createElement('button');
-                btn.className = 'teleport-btn';
-                btn.textContent = `⚡ ${poi.name}`;
-                btn.onclick = () => teleportTo(poi);
-                teleportGrid.appendChild(btn);
-            });
         }
         
         // Démarrer l'app automatiquement
         window.addEventListener('load', startApp);
 
         function initMap() {
-            // Essayer d'obtenir la position GPS pour centrer la carte
-            if ('geolocation' in navigator) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        // Position GPS réelle obtenue
-                        playerPos = {
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude
-                        };
-                        createMap();
-                    },
-                    (error) => {
-                        // Erreur GPS - utiliser Lyon par défaut
-                        console.log('GPS non disponible, position par défaut à Lyon');
-                        createMap();
-                    },
-                    {
-                        enableHighAccuracy: true,
-                        timeout: 5000,
-                        maximumAge: 0
-                    }
-                );
+            // Point de départ : Lyon sur web et mobile.
+            // Sur mobile, l'utilisateur peut ensuite activer le GPS via le bouton 📍.
+            playerPos = { ...LYON_CENTER };
+            createMap();
+        }
+
+        function applyIsometricCamera(options = {}) {
+            if (!map) return;
+
+            const keepCurrentZoom = options.keepCurrentZoom !== false;
+            const currentZoom = typeof map.getZoom === 'function' ? map.getZoom() : null;
+            const targetZoom = keepCurrentZoom && currentZoom ? currentZoom : 17.2;
+
+            if (typeof map.moveCamera === 'function') {
+                map.moveCamera({
+                    tilt: ISOMETRIC_TILT,
+                    heading: ISOMETRIC_HEADING,
+                    zoom: targetZoom
+                });
             } else {
-                // Pas de géolocalisation - utiliser Lyon par défaut
-                createMap();
+                if (typeof map.setTilt === 'function') {
+                    map.setTilt(ISOMETRIC_TILT);
+                }
+                if (typeof map.setHeading === 'function') {
+                    map.setHeading(ISOMETRIC_HEADING);
+                }
+                if (typeof map.setZoom === 'function' && !keepCurrentZoom) {
+                    map.setZoom(targetZoom);
+                }
             }
+
+            const mapElement = document.getElementById('map');
+            const currentTilt = typeof map.getTilt === 'function' ? (map.getTilt() || 0) : 0;
+            mapElement.classList.toggle('isometric-fallback', currentTilt < 30);
         }
 
         function createMap() {
             map = new google.maps.Map(document.getElementById('map'), {
                 center: playerPos,
-                zoom: 15,
+                zoom: 17.2,
+                tilt: ISOMETRIC_TILT,
+                heading: ISOMETRIC_HEADING,
+                mapTypeId: 'roadmap',
                 disableDefaultUI: true,
                 zoomControl: true,
                 styles: [
@@ -1873,6 +1825,9 @@
                     }
                 ]
             });
+
+            applyIsometricCamera({ keepCurrentZoom: false });
+            google.maps.event.addListenerOnce(map, 'idle', () => applyIsometricCamera({ keepCurrentZoom: true }));
 
             playerMarker = new google.maps.Marker({
                 position: playerPos,
@@ -1951,6 +1906,24 @@
             });
 
             updateDustVisibility();
+
+            const teleportFromMapEvent = (event) => {
+                if (!event || !event.latLng) return;
+                if (document.getElementById('collectionsPanel').classList.contains('show') ||
+                    document.getElementById('cardPopup').classList.contains('show') ||
+                    document.getElementById('cardDetailView').classList.contains('show')) {
+                    return;
+                }
+
+                if (gpsActive) {
+                    disableGPSTracking();
+                }
+
+                teleportToLatLng(event.latLng);
+            };
+
+            map.addListener('click', teleportFromMapEvent);
+            map.addListener('mouseup', teleportFromMapEvent);
         }
 
         function updateDustVisibility() {
@@ -2006,15 +1979,21 @@
             if (playerMarker && map) {
                 playerMarker.setPosition(playerPos);
                 map.panTo(playerPos);
+                applyIsometricCamera();
             }
             checkNearbyPOI();
         });
 
-        function teleportTo(poi) {
-            playerPos = { lat: poi.lat, lng: poi.lng };
+        function teleportToLatLng(latLng) {
+            playerPos = {
+                lat: latLng.lat(),
+                lng: latLng.lng()
+            };
+
             if (playerMarker && map) {
                 playerMarker.setPosition(playerPos);
                 map.panTo(playerPos);
+                applyIsometricCamera();
             }
             checkNearbyPOI();
         }
@@ -2331,8 +2310,23 @@
         }
 
         // GPS Functions
+        function disableGPSTracking() {
+            const gpsBtn = document.getElementById('gpsBtn');
+            if (gpsWatchId) {
+                navigator.geolocation.clearWatch(gpsWatchId);
+                gpsWatchId = null;
+            }
+            gpsActive = false;
+            gpsBtn.classList.remove('active');
+        }
+
         function toggleGPS() {
             const gpsBtn = document.getElementById('gpsBtn');
+
+            if (!isMobileDevice) {
+                alert('La géolocalisation en direct est réservée au mode téléphone. Sur web, la carte reste centrée sur Lyon.');
+                return;
+            }
             
             if (!gpsActive) {
                 // Activer le GPS
@@ -2347,6 +2341,7 @@
                             if (playerMarker && map) {
                                 playerMarker.setPosition(playerPos);
                                 map.panTo(playerPos);
+                                applyIsometricCamera();
                             }
                             
                             checkNearbyPOI();
@@ -2371,12 +2366,7 @@
                 }
             } else {
                 // Désactiver le GPS
-                if (gpsWatchId) {
-                    navigator.geolocation.clearWatch(gpsWatchId);
-                    gpsWatchId = null;
-                }
-                gpsActive = false;
-                gpsBtn.classList.remove('active');
+                disableGPSTracking();
             }
         }
 
