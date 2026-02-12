@@ -721,6 +721,59 @@
             color: #1f2937;
         }
 
+        /* Bulle de dialogue */
+        .card-dialogue-bubble {
+            display: none;
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 10px;
+            background: white;
+            border: 3px solid #1f2937;
+            border-radius: 16px;
+            padding: 12px 16px;
+            max-width: 200px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 10;
+            animation: bubblePop 0.3s ease;
+        }
+
+        .card-dialogue-bubble.show {
+            display: block;
+        }
+
+        .card-dialogue-bubble::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid #1f2937;
+        }
+
+        .card-dialogue-text {
+            font-size: 13px;
+            color: #1f2937;
+            line-height: 1.4;
+            text-align: center;
+        }
+
+        @keyframes bubblePop {
+            0% {
+                opacity: 0;
+                transform: translateX(-50%) scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(-50%) scale(1);
+            }
+        }
+
         .card-eye-icon {
             position: absolute;
             right: 12px;
@@ -1383,7 +1436,10 @@
         <div class="card-detail-body">
             <!-- Card Display -->
             <div class="card-display">
-                <div class="card-frame">
+                <div class="card-frame" onclick="showCardDialogue()" style="cursor: pointer; position: relative;">
+                    <div class="card-dialogue-bubble" id="cardDialogueBubble">
+                        <div class="card-dialogue-text" id="cardDialogueText"></div>
+                    </div>
                     <div class="card-rarity-badge">🏅</div>
                     <div class="card-category-badge" id="cardCategory">Personnage</div>
                     <div class="card-title-box">
@@ -1527,7 +1583,7 @@
                         </div>
                     </div>
 
-                    <div class="journal-interaction">
+                    <div class="journal-interaction" id="journalInteractions">
                         <div style="font-size: 14px; font-weight: 600; color: #4F46E5; margin-bottom: 12px;">
                             Possibilités d'interaction
                         </div>
@@ -1668,7 +1724,7 @@
         // State
         let playerPos = { ...LYON_CENTER };
         let collectedCards = [];
-        let cardLevels = {}; // { cardId: { level: 1, experience: 0 } }
+        let cardLevels = {}; // { cardId: { level: 1, experience: 0, dustSpent: 0 } }
         let memorialDust = 0; // Quantité de poudre mémorielle
         let collectedDustPoints = []; // IDs des points de poudre collectés
         let map = null;
@@ -2066,7 +2122,7 @@
                 
                 // Initialiser le niveau de la carte
                 if (!cardLevels[card.id]) {
-                    cardLevels[card.id] = { level: 1, experience: 0 };
+                    cardLevels[card.id] = { level: 1, experience: 0, dustSpent: 0 };
                 }
                 
                 document.getElementById('popupCardName').textContent = card.name;
@@ -2204,7 +2260,7 @@
             
             // Initialiser le niveau si nécessaire
             if (!cardLevels[card.id]) {
-                cardLevels[card.id] = { level: 1, experience: 0 };
+                cardLevels[card.id] = { level: 1, experience: 0, dustSpent: 0 };
             }
             
             document.getElementById('cardDetailHeaderTitle').textContent = card.name;
@@ -2285,6 +2341,9 @@
             document.getElementById('dustCounter').textContent = memorialDust;
             document.getElementById('cardDetailDustCounter').textContent = memorialDust;
             
+            // Tracker les poudres dépensées
+            cardLevel.dustSpent = (cardLevel.dustSpent || 0) + DUST_INCREMENT;
+            
             // Ajouter l'expérience
             cardLevel.experience += DUST_INCREMENT;
             
@@ -2298,6 +2357,13 @@
                 
                 // Animation ou notification
                 console.log(`🎉 ${selectedCard.name} passe niveau ${cardLevel.level}!`);
+            }
+            
+            // Vérifier si on atteint 100 poudres dépensées
+            if (cardLevel.dustSpent === 100) {
+                setTimeout(() => {
+                    showCardDialogue(true); // true = phrase spéciale
+                }, 500);
             }
             
             updateCardLevelDisplay();
@@ -2355,11 +2421,53 @@
             
             document.getElementById('journalScreenCardName').textContent = selectedCard.name;
             document.getElementById('journalScreenCardType').textContent = selectedCard.type;
+            
+            // Masquer les interactions si la carte est niveau 1
+            const cardLevel = cardLevels[selectedCard.id] || { level: 1, experience: 0, dustSpent: 0 };
+            const interactionsSection = document.getElementById('journalInteractions');
+            
+            if (cardLevel.level >= 2) {
+                interactionsSection.style.display = 'block';
+            } else {
+                interactionsSection.style.display = 'none';
+            }
+            
             document.getElementById('journalScreen').classList.add('show');
         }
 
         function closeJournalScreen() {
             document.getElementById('journalScreen').classList.remove('show');
+        }
+
+        // Dialogues de carte
+        const CARD_DIALOGUES = {
+            random: [
+                "Phrase 1 : Bonjour, je suis ravi de te rencontrer !",
+                "Phrase 2 : As-tu exploré Lyon aujourd'hui ?",
+                "Phrase 3 : Continue comme ça, tu fais du bon travail !"
+            ],
+            milestone: "Phrase 4 : Merci d'avoir dépensé 100 poudres sur moi ! Tu es formidable !"
+        };
+
+        function showCardDialogue(isMilestone = false) {
+            const bubble = document.getElementById('cardDialogueBubble');
+            const text = document.getElementById('cardDialogueText');
+            
+            // Choisir le texte
+            if (isMilestone) {
+                text.textContent = CARD_DIALOGUES.milestone;
+            } else {
+                const randomIndex = Math.floor(Math.random() * CARD_DIALOGUES.random.length);
+                text.textContent = CARD_DIALOGUES.random[randomIndex];
+            }
+            
+            // Afficher la bulle
+            bubble.classList.add('show');
+            
+            // Masquer après 4 secondes
+            setTimeout(() => {
+                bubble.classList.remove('show');
+            }, 4000);
         }
 
         // GPS Functions
