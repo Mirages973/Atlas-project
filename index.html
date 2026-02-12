@@ -35,6 +35,21 @@
             overflow: hidden;
         }
 
+        /* Responsive pour mobile */
+        @media (max-width: 480px) {
+            body {
+                background: white;
+            }
+            
+            .app-container {
+                width: 100vw;
+                height: 100vh;
+                max-height: 100vh;
+                border-radius: 0;
+                box-shadow: none;
+            }
+        }
+
         /* Header */
         .header {
             background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
@@ -647,6 +662,52 @@
             transform: none;
         }
 
+        /* Gemmes de rareté */
+        .rarity-gem {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .gem-triangle {
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-bottom: 26px solid;
+        }
+
+        .gem-pentagon {
+            width: 20px;
+            height: 18px;
+            position: relative;
+            clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+        }
+
+        .gem-hexagon {
+            width: 24px;
+            height: 24px;
+            clip-path: polygon(30% 0%, 70% 0%, 100% 50%, 70% 100%, 30% 100%, 0% 50%);
+        }
+
+        .card-level-badge-display {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #1f2937;
+            border-radius: 8px;
+            padding: 4px 8px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #1f2937;
+        }
+
         .card-eye-icon {
             position: absolute;
             right: 12px;
@@ -1179,19 +1240,8 @@
     </style>
 </head>
 <body>
-    <!-- API Key Screen -->
-    <div id="apiScreen" class="api-screen">
-        <div class="api-card">
-            <h1 class="api-title">Lyon Cards</h1>
-            <p class="api-subtitle">Collectionnez les trésors de Lyon</p>
-            <label class="api-label">Clé API Google Maps</label>
-            <input type="text" id="apiKeyInput" class="api-input" placeholder="Entrez votre clé API">
-            <button onclick="startApp()" class="api-submit">Commencer</button>
-        </div>
-    </div>
-
     <!-- Main App -->
-    <div id="mainApp" class="app-container hidden">
+    <div id="mainApp" class="app-container">
         <!-- Header -->
         <div class="header">
             <div class="header-content">
@@ -1305,7 +1355,9 @@
                         <div class="card-title-text" id="cardDetailName">Marie Curie</div>
                     </div>
                     <div class="card-art-area">
+                        <div class="card-level-badge-display" id="cardArtLevel">Niv. 1</div>
                         <div class="card-art-placeholder">👤</div>
+                        <div class="rarity-gem" id="cardRarityGem"></div>
                     </div>
                     <div class="card-footer">
                         <div class="card-level-info">
@@ -1315,8 +1367,8 @@
                         <div class="card-exp-bar">
                             <div class="card-exp-fill" id="cardExpBar" style="width: 0%"></div>
                         </div>
-                        <button id="levelUpBtn" class="card-level-up-btn" onclick="levelUpCard()" disabled>
-                            💜 Utiliser la poudre (+1 niveau)
+                        <button id="addExpBtn" class="card-level-up-btn" onclick="addExperience()" disabled>
+                            💜 Ajouter 50 poudre (+EXP)
                         </button>
                     </div>
                     <div class="card-related-characters">
@@ -1491,11 +1543,11 @@
                 type: 'thématique',
                 description: 'Personnages historiques lyonnais',
                 cards: [
-                    { id: 'card1', name: 'Antoine de Saint-Exupéry', type: 'Personnage', poiId: 'bellecour' },
-                    { id: 'card2', name: 'Les Frères Lumière', type: 'Personnage', poiId: 'institut_lumiere' },
-                    { id: 'card3', name: 'Paul Bocuse', type: 'Personnage', poiId: 'halles_bocuse' },
-                    { id: 'card4', name: 'Guignol', type: 'Personnage', poiId: 'vieux_lyon' },
-                    { id: 'card5', name: 'Tony Garnier', type: 'Personnage', poiId: 'confluence' },
+                    { id: 'card1', name: 'Antoine de Saint-Exupéry', type: 'Personnage', poiId: 'bellecour', rarity: 'rare' },
+                    { id: 'card2', name: 'Les Frères Lumière', type: 'Personnage', poiId: 'institut_lumiere', rarity: 'legendary' },
+                    { id: 'card3', name: 'Paul Bocuse', type: 'Personnage', poiId: 'halles_bocuse', rarity: 'rare' },
+                    { id: 'card4', name: 'Guignol', type: 'Personnage', poiId: 'vieux_lyon', rarity: 'common' },
+                    { id: 'card5', name: 'Tony Garnier', type: 'Personnage', poiId: 'confluence', rarity: 'common' },
                 ]
             },
             presquile: {
@@ -1504,11 +1556,11 @@
                 type: 'locale',
                 description: 'Trésors de la Presqu\'île lyonnaise',
                 cards: [
-                    { id: 'card6', name: 'Place Bellecour', type: 'Lieu', poiId: 'bellecour' },
-                    { id: 'card7', name: 'Opéra de Lyon', type: 'Lieu', poiId: 'opera' },
-                    { id: 'card8', name: 'Hôtel de Ville', type: 'Lieu', poiId: 'hotel_ville' },
-                    { id: 'card9', name: 'Les Terreaux', type: 'Lieu', poiId: 'terreaux' },
-                    { id: 'card10', name: 'Fontaine Bartholdi', type: 'Objet', poiId: 'terreaux' },
+                    { id: 'card6', name: 'Place Bellecour', type: 'Lieu', poiId: 'bellecour', rarity: 'legendary' },
+                    { id: 'card7', name: 'Opéra de Lyon', type: 'Lieu', poiId: 'opera', rarity: 'rare' },
+                    { id: 'card8', name: 'Hôtel de Ville', type: 'Lieu', poiId: 'hotel_ville', rarity: 'common' },
+                    { id: 'card9', name: 'Les Terreaux', type: 'Lieu', poiId: 'terreaux', rarity: 'common' },
+                    { id: 'card10', name: 'Fontaine Bartholdi', type: 'Objet', poiId: 'terreaux', rarity: 'rare' },
                 ]
             },
             fourviere: {
@@ -1517,11 +1569,11 @@
                 type: 'locale',
                 description: 'Patrimoine de la colline et du Vieux-Lyon',
                 cards: [
-                    { id: 'card11', name: 'Basilique Notre-Dame', type: 'Lieu', poiId: 'fourviere' },
-                    { id: 'card12', name: 'Théâtre Romain', type: 'Lieu', poiId: 'theatre_romain' },
-                    { id: 'card13', name: 'Cathédrale Saint-Jean', type: 'Lieu', poiId: 'saint_jean' },
-                    { id: 'card14', name: 'Traboule Renaissance', type: 'Lieu', poiId: 'vieux_lyon' },
-                    { id: 'card15', name: 'Horloge Astronomique', type: 'Objet', poiId: 'saint_jean' },
+                    { id: 'card11', name: 'Basilique Notre-Dame', type: 'Lieu', poiId: 'fourviere', rarity: 'legendary' },
+                    { id: 'card12', name: 'Théâtre Romain', type: 'Lieu', poiId: 'theatre_romain', rarity: 'rare' },
+                    { id: 'card13', name: 'Cathédrale Saint-Jean', type: 'Lieu', poiId: 'saint_jean', rarity: 'rare' },
+                    { id: 'card14', name: 'Traboule Renaissance', type: 'Lieu', poiId: 'vieux_lyon', rarity: 'common' },
+                    { id: 'card15', name: 'Horloge Astronomique', type: 'Objet', poiId: 'saint_jean', rarity: 'common' },
                 ]
             }
         };
@@ -1597,11 +1649,35 @@
         let joystickDirection = { x: 0, y: 0 };
 
         const COLLECTION_RADIUS = 50;
-        const DUST_RADIUS = 30; // Rayon de collecte pour la poudre
+        const DUST_RADIUS = 30;
         const MOVE_SPEED = 0.000015;
-        const DUST_PER_LEVEL = 50; // Poudre nécessaire pour progresser une carte
-        const MIN_DUST_DROP = 25; // Minimum de poudre par collecte
-        const MAX_DUST_DROP = 75; // Maximum de poudre par collecte
+        const DUST_INCREMENT = 50; // Montant ajouté par clic sur le bouton
+        const MIN_DUST_DROP = 25;
+        const MAX_DUST_DROP = 75;
+        
+        // Système de rareté et d'expérience
+        const RARITY_CONFIG = {
+            common: {
+                name: 'Commune',
+                color: '#10B981',
+                shape: 'triangle',
+                exp: { 1: 150, 2: 500 } // Niveau 1→2 : 150, Niveau 2→3 : 500
+            },
+            rare: {
+                name: 'Rare',
+                color: '#3B82F6',
+                shape: 'pentagon',
+                exp: { 1: 250, 2: 750 }
+            },
+            legendary: {
+                name: 'Légendaire',
+                color: '#F97316',
+                shape: 'hexagon',
+                exp: { 1: 500, 2: 1500 }
+            }
+        };
+        
+        const MAX_LEVEL = 3;
 
         // Utility Functions
         function getDistance(lat1, lng1, lat2, lng2) {
@@ -1661,14 +1737,7 @@
 
         // App Initialization
         function startApp() {
-            const apiKey = document.getElementById('apiKeyInput').value.trim();
-            if (!apiKey) {
-                alert('Veuillez entrer votre clé API Google Maps');
-                return;
-            }
-
-            document.getElementById('apiScreen').classList.add('hidden');
-            document.getElementById('mainApp').classList.remove('hidden');
+            const apiKey = 'AIzaSyD1vGcHSX9bL0Y36Rx8bXmiB_Gc2BhPPic';
 
             const script = document.createElement('script');
             script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
@@ -1684,6 +1753,9 @@
                 teleportGrid.appendChild(btn);
             });
         }
+        
+        // Démarrer l'app automatiquement
+        window.addEventListener('load', startApp);
 
         function initMap() {
             map = new google.maps.Map(document.getElementById('map'), {
@@ -2013,41 +2085,86 @@
             document.getElementById('cardDetailView').classList.add('show');
         }
 
+        function getRarityGemHTML(rarity) {
+            const config = RARITY_CONFIG[rarity];
+            const shapeClass = `gem-${config.shape}`;
+            return `<div class="${shapeClass}" style="background: ${config.color};"></div>`;
+        }
+
+        function getExpNeeded(card, currentLevel) {
+            const rarity = card.rarity || 'common';
+            return RARITY_CONFIG[rarity].exp[currentLevel] || 0;
+        }
+
         function updateCardLevelDisplay() {
             if (!selectedCard) return;
             
             const cardLevel = cardLevels[selectedCard.id] || { level: 1, experience: 0 };
-            const expNeeded = DUST_PER_LEVEL;
-            const expPercent = (cardLevel.experience / expNeeded) * 100;
+            const currentLevel = cardLevel.level;
             
-            document.getElementById('cardLevelDisplay').textContent = `Niveau ${cardLevel.level}`;
-            document.getElementById('cardExpDisplay').textContent = `${cardLevel.experience}/${expNeeded} 💜`;
+            // Afficher le niveau sur la carte
+            document.getElementById('cardLevelDisplay').textContent = `Niveau ${currentLevel}`;
+            document.getElementById('cardArtLevel').textContent = `Niv. ${currentLevel}`;
+            
+            // Afficher la gemme de rareté
+            const rarityGem = document.getElementById('cardRarityGem');
+            rarityGem.innerHTML = getRarityGemHTML(selectedCard.rarity);
+            
+            // Calculer l'expérience nécessaire
+            if (currentLevel >= MAX_LEVEL) {
+                // Niveau maximum atteint
+                document.getElementById('cardExpDisplay').textContent = `MAX`;
+                document.getElementById('cardExpBar').style.width = `100%`;
+                document.getElementById('addExpBtn').disabled = true;
+                document.getElementById('addExpBtn').textContent = `✨ Niveau maximum atteint`;
+                return;
+            }
+            
+            const expNeeded = getExpNeeded(selectedCard, currentLevel);
+            const expCurrent = cardLevel.experience;
+            const expPercent = (expCurrent / expNeeded) * 100;
+            
+            document.getElementById('cardExpDisplay').textContent = `${expCurrent}/${expNeeded} 💜`;
             document.getElementById('cardExpBar').style.width = `${expPercent}%`;
             
-            const canLevelUp = memorialDust >= DUST_PER_LEVEL;
-            const levelUpBtn = document.getElementById('levelUpBtn');
-            levelUpBtn.disabled = !canLevelUp;
+            const canAddExp = memorialDust >= DUST_INCREMENT;
+            const addExpBtn = document.getElementById('addExpBtn');
+            addExpBtn.disabled = !canAddExp;
             
-            if (canLevelUp) {
-                levelUpBtn.textContent = `💜 Utiliser ${DUST_PER_LEVEL} poudre (+1 niveau)`;
+            if (canAddExp) {
+                addExpBtn.textContent = `💜 Ajouter ${DUST_INCREMENT} poudre (+EXP)`;
             } else {
-                levelUpBtn.textContent = `💜 Poudre insuffisante (${memorialDust}/${DUST_PER_LEVEL})`;
+                addExpBtn.textContent = `💜 Poudre insuffisante (${memorialDust}/${DUST_INCREMENT})`;
             }
         }
 
-        function levelUpCard() {
+        function addExperience() {
             if (!selectedCard) return;
+            if (memorialDust < DUST_INCREMENT) return;
             
             const cardLevel = cardLevels[selectedCard.id];
+            if (cardLevel.level >= MAX_LEVEL) return;
             
-            if (memorialDust >= DUST_PER_LEVEL) {
-                memorialDust -= DUST_PER_LEVEL;
+            // Retirer la poudre
+            memorialDust -= DUST_INCREMENT;
+            document.getElementById('dustCounter').textContent = memorialDust;
+            
+            // Ajouter l'expérience
+            cardLevel.experience += DUST_INCREMENT;
+            
+            // Vérifier si on peut monter de niveau
+            const expNeeded = getExpNeeded(selectedCard, cardLevel.level);
+            
+            if (cardLevel.experience >= expNeeded) {
+                // Level up !
                 cardLevel.level += 1;
-                cardLevel.experience = 0;
+                cardLevel.experience = Math.max(0, cardLevel.experience - expNeeded);
                 
-                document.getElementById('dustCounter').textContent = memorialDust;
-                updateCardLevelDisplay();
+                // Animation ou notification
+                console.log(`🎉 ${selectedCard.name} passe niveau ${cardLevel.level}!`);
             }
+            
+            updateCardLevelDisplay();
         }
 
         function switchTabProgrammatically(tabName) {
