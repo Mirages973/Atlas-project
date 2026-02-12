@@ -95,8 +95,8 @@
         }
 
         #map.isometric-fallback {
-            transform: perspective(1200px) rotateX(40deg) scale(1.25);
-            transform-origin: center 30%;
+            transform: perspective(1000px) rotateX(42deg) scale(1.28);
+            transform-origin: center 25%;
         }
 
         /* Controls */
@@ -161,45 +161,6 @@
 
         .collect-btn:hover {
             background: #059669;
-        }
-
-        .teleport-section {
-            padding-top: 12px;
-            border-top: 1px solid #e5e7eb;
-            display: none; /* Masquer la téléportation par boutons */
-        }
-
-        .teleport-label {
-            font-size: 12px;
-            color: #6b7280;
-            margin-bottom: 8px;
-        }
-
-        .teleport-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            max-height: 120px;
-            overflow-y: auto;
-        }
-
-        .teleport-btn {
-            background: #EEF2FF;
-            color: #4F46E5;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 13px;
-            cursor: pointer;
-            text-align: left;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            transition: background 0.2s;
-        }
-
-        .teleport-btn:hover {
-            background: #E0E7FF;
         }
 
         /* Card Popup */
@@ -1369,11 +1330,6 @@
                 </div>
                 <button onclick="collectDust()" class="collect-btn" style="background: #A855F7;">Collecter la poudre</button>
             </div>
-
-            <div class="teleport-section">
-                <div class="teleport-label">Téléportation rapide:</div>
-                <div class="teleport-grid" id="teleportGrid"></div>
-            </div>
         </div>
 
         <!-- Card Popup -->
@@ -1829,15 +1785,6 @@
             script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
             script.onload = initMap;
             document.head.appendChild(script);
-
-            const teleportGrid = document.getElementById('teleportGrid');
-            POIS.slice(0, 8).forEach(poi => {
-                const btn = document.createElement('button');
-                btn.className = 'teleport-btn';
-                btn.textContent = `⚡ ${poi.name}`;
-                btn.onclick = () => teleportTo(poi);
-                teleportGrid.appendChild(btn);
-            });
         }
         
         // Démarrer l'app automatiquement
@@ -1939,6 +1886,12 @@
 
                 // Événement de clic sur le marqueur POI pour activer le mode téléportation
                 marker.addListener('click', () => {
+                    // Téléportation disponible UNIQUEMENT si GPS désactivé
+                    if (gpsActive) {
+                        alert('⚠️ Désactivez le GPS pour utiliser la téléportation !');
+                        return;
+                    }
+                    
                     teleportMode = true;
                     selectedTeleportPOI = poi;
                     
@@ -2566,7 +2519,16 @@
 
         // Initialiser le joystick au chargement de la carte
         window.addEventListener('load', () => {
-            setTimeout(initJoystick, 1000);
+            setTimeout(() => {
+                initJoystick();
+                
+                // Activer automatiquement le GPS sur mobile
+                if (isMobileDevice && 'geolocation' in navigator) {
+                    setTimeout(() => {
+                        toggleGPS(); // Active le GPS automatiquement
+                    }, 500);
+                }
+            }, 1000);
         });
     </script>
 </body>
