@@ -52,11 +52,16 @@
 
         /* Header */
         .header {
-            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, rgba(79,70,229,0.92) 0%, rgba(124,58,237,0.92) 100%);
             color: white;
             padding: 16px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            z-index: 10;
+            z-index: 30;
+            backdrop-filter: blur(4px);
         }
 
         .header-content {
@@ -90,6 +95,8 @@
 
         /* Map */
         #map {
+            position: absolute;
+            inset: 0;
             flex: 1;
             position: relative;
             transition: transform 0.3s ease;
@@ -162,44 +169,6 @@
 
         .collect-btn:hover {
             background: #059669;
-        }
-
-        .teleport-section {
-            padding-top: 12px;
-            border-top: 1px solid #e5e7eb;
-        }
-
-        .teleport-label {
-            font-size: 12px;
-            color: #6b7280;
-            margin-bottom: 8px;
-        }
-
-        .teleport-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            max-height: 120px;
-            overflow-y: auto;
-        }
-
-        .teleport-btn {
-            background: #EEF2FF;
-            color: #4F46E5;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 13px;
-            cursor: pointer;
-            text-align: left;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            transition: background 0.2s;
-        }
-
-        .teleport-btn:hover {
-            background: #E0E7FF;
         }
 
         /* Card Popup */
@@ -1348,7 +1317,7 @@
 
         <!-- Controls -->
         <div class="controls">
-            <div class="controls-hint">Utilisez les flèches ← ↑ → ↓ pour vous déplacer</div>
+            <div class="controls-hint">Utilisez les flèches ← ↑ → ↓ ou touchez la carte pour vous téléporter</div>
             
             <div id="nearbyPOI" class="nearby-poi hidden">
                 <div class="nearby-poi-header">
@@ -1370,10 +1339,6 @@
                 <button onclick="collectDust()" class="collect-btn" style="background: #A855F7;">Collecter la poudre</button>
             </div>
 
-            <div class="teleport-section">
-                <div class="teleport-label">Téléportation rapide:</div>
-                <div class="teleport-grid" id="teleportGrid"></div>
-            </div>
         </div>
 
         <!-- Card Popup -->
@@ -1734,7 +1699,7 @@
         const DUST_RADIUS = 30;
         const MOVE_SPEED = 0.000015;
         const ISOMETRIC_TILT = 67.5;
-        const ISOMETRIC_HEADING = 25;
+        const ISOMETRIC_HEADING = 20;
         const DUST_INCREMENT = 50; // Montant ajouté par clic sur le bouton
         const MIN_DUST_DROP = 25;
         const MAX_DUST_DROP = 75;
@@ -1827,15 +1792,6 @@
             script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
             script.onload = initMap;
             document.head.appendChild(script);
-
-            const teleportGrid = document.getElementById('teleportGrid');
-            POIS.slice(0, 8).forEach(poi => {
-                const btn = document.createElement('button');
-                btn.className = 'teleport-btn';
-                btn.textContent = `⚡ ${poi.name}`;
-                btn.onclick = () => teleportTo(poi);
-                teleportGrid.appendChild(btn);
-            });
         }
         
         // Démarrer l'app automatiquement
@@ -1855,7 +1811,7 @@
                 map.moveCamera({
                     tilt: ISOMETRIC_TILT,
                     heading: ISOMETRIC_HEADING,
-                    zoom: 18.5
+                    zoom: 17.2
                 });
             } else {
                 if (typeof map.setTilt === 'function') {
@@ -1864,8 +1820,8 @@
                 if (typeof map.setHeading === 'function') {
                     map.setHeading(ISOMETRIC_HEADING);
                 }
-                if (typeof map.setZoom === 'function' && map.getZoom() < 18) {
-                    map.setZoom(18);
+                if (typeof map.setZoom === 'function' && map.getZoom() < 17) {
+                    map.setZoom(17);
                 }
             }
 
@@ -1877,7 +1833,7 @@
         function createMap() {
             map = new google.maps.Map(document.getElementById('map'), {
                 center: playerPos,
-                zoom: 18.5,
+                zoom: 17.2,
                 tilt: ISOMETRIC_TILT,
                 heading: ISOMETRIC_HEADING,
                 mapTypeId: 'roadmap',
@@ -1972,6 +1928,17 @@
             });
 
             updateDustVisibility();
+
+            map.addListener('click', (event) => {
+                if (gpsActive) return;
+                if (document.getElementById('collectionsPanel').classList.contains('show') ||
+                    document.getElementById('cardPopup').classList.contains('show') ||
+                    document.getElementById('cardDetailView').classList.contains('show')) {
+                    return;
+                }
+
+                teleportToLatLng(event.latLng);
+            });
         }
 
         function updateDustVisibility() {
@@ -2032,8 +1999,12 @@
             checkNearbyPOI();
         });
 
-        function teleportTo(poi) {
-            playerPos = { lat: poi.lat, lng: poi.lng };
+        function teleportToLatLng(latLng) {
+            playerPos = {
+                lat: latLng.lat(),
+                lng: latLng.lng()
+            };
+
             if (playerMarker && map) {
                 playerMarker.setPosition(playerPos);
                 map.panTo(playerPos);
