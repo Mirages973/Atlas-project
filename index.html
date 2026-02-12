@@ -97,6 +97,12 @@
         #map {
             position: absolute;
             inset: 0;
+            overflow: hidden;
+        }
+
+        #map.isometric-fallback .gm-style {
+            transform: perspective(1200px) rotateX(32deg) scale(1.08);
+            transform-origin: center 72%;
             flex: 1;
             position: relative;
             transition: transform 0.3s ease;
@@ -2325,6 +2331,16 @@
         }
 
         // GPS Functions
+        function disableGPSTracking() {
+            const gpsBtn = document.getElementById('gpsBtn');
+            if (gpsWatchId) {
+                navigator.geolocation.clearWatch(gpsWatchId);
+                gpsWatchId = null;
+            }
+            gpsActive = false;
+            gpsBtn.classList.remove('active');
+        }
+
         function toggleGPS() {
             const gpsBtn = document.getElementById('gpsBtn');
 
@@ -2371,12 +2387,7 @@
                 }
             } else {
                 // Désactiver le GPS
-                if (gpsWatchId) {
-                    navigator.geolocation.clearWatch(gpsWatchId);
-                    gpsWatchId = null;
-                }
-                gpsActive = false;
-                gpsBtn.classList.remove('active');
+                disableGPSTracking();
             }
         }
 
