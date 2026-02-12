@@ -15,49 +15,34 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             overflow: hidden;
             height: 100vh;
-            background: #1f2937;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: white;
             margin: 0;
         }
 
         .app-container {
-            width: 390px;
-            height: 844px;
+            width: 100vw;
+            height: 100vh;
             max-height: 100vh;
-            margin: 0 auto;
+            margin: 0;
             background: white;
             display: flex;
             flex-direction: column;
             position: relative;
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
-            border-radius: 20px;
             overflow: hidden;
-        }
-
-        /* Responsive pour mobile */
-        @media (max-width: 480px) {
-            body {
-                background: white;
-            }
-
-            .app-container {
-                width: 100vw;
-                height: 100vh;
-                max-height: 100vh;
-                border-radius: 0;
-                box-shadow: none;
-            }
         }
 
         /* Header */
         .header {
-            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, rgba(79,70,229,0.92) 0%, rgba(124,58,237,0.92) 100%);
             color: white;
             padding: 16px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             z-index: 30;
+            backdrop-filter: blur(4px);
         }
 
         .header-content {
@@ -91,14 +76,22 @@
 
         /* Map */
         #map {
-            flex: 1;
-            position: relative;
-            min-height: 0;
+            position: absolute;
+            inset: 0;
             overflow: hidden;
         }
 
         #map.isometric-fallback .gm-style {
-            transform: none;
+            transform: perspective(1200px) rotateX(32deg) scale(1.08);
+            transform-origin: center 72%;
+            flex: 1;
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        #map.isometric-fallback {
+            transform: perspective(1200px) rotateX(38deg) scale(1.18);
+            transform-origin: center 70%;
         }
 
         /* Controls */
@@ -1311,7 +1304,7 @@
 
         <!-- Controls -->
         <div class="controls">
-            <div class="controls-hint">Téléportation: touchez la carte. Bouton 📍 = GPS temps réel (si actif, un tap carte le coupe puis vous téléporte).</div>
+            <div class="controls-hint">Utilisez les flèches ← ↑ → ↓ ou touchez la carte pour vous téléporter</div>
             
             <div id="nearbyPOI" class="nearby-poi hidden">
                 <div class="nearby-poi-header">
@@ -1798,18 +1791,14 @@
             createMap();
         }
 
-        function applyIsometricCamera(options = {}) {
+        function applyIsometricCamera() {
             if (!map) return;
-
-            const keepCurrentZoom = options.keepCurrentZoom !== false;
-            const currentZoom = typeof map.getZoom === 'function' ? map.getZoom() : null;
-            const targetZoom = keepCurrentZoom && currentZoom ? currentZoom : 17.2;
 
             if (typeof map.moveCamera === 'function') {
                 map.moveCamera({
                     tilt: ISOMETRIC_TILT,
                     heading: ISOMETRIC_HEADING,
-                    zoom: targetZoom
+                    zoom: 17.2
                 });
             } else {
                 if (typeof map.setTilt === 'function') {
@@ -1818,8 +1807,8 @@
                 if (typeof map.setHeading === 'function') {
                     map.setHeading(ISOMETRIC_HEADING);
                 }
-                if (typeof map.setZoom === 'function' && !keepCurrentZoom) {
-                    map.setZoom(targetZoom);
+                if (typeof map.setZoom === 'function' && map.getZoom() < 17) {
+                    map.setZoom(17);
                 }
             }
 
@@ -1846,8 +1835,8 @@
                 ]
             });
 
-            applyIsometricCamera({ keepCurrentZoom: false });
-            google.maps.event.addListenerOnce(map, 'idle', () => applyIsometricCamera({ keepCurrentZoom: true }));
+            applyIsometricCamera();
+            google.maps.event.addListenerOnce(map, 'idle', applyIsometricCamera);
 
             playerMarker = new google.maps.Marker({
                 position: playerPos,
@@ -1927,23 +1916,16 @@
 
             updateDustVisibility();
 
-            const teleportFromMapEvent = (event) => {
-                if (!event || !event.latLng) return;
+            map.addListener('click', (event) => {
+                if (gpsActive) return;
                 if (document.getElementById('collectionsPanel').classList.contains('show') ||
                     document.getElementById('cardPopup').classList.contains('show') ||
                     document.getElementById('cardDetailView').classList.contains('show')) {
                     return;
                 }
 
-                if (gpsActive) {
-                    disableGPSTracking();
-                }
-
                 teleportToLatLng(event.latLng);
-            };
-
-            map.addListener('click', teleportFromMapEvent);
-            map.addListener('mouseup', teleportFromMapEvent);
+            });
         }
 
         function updateDustVisibility() {
