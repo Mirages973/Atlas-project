@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -589,16 +590,42 @@
             border-radius: 12px;
             min-height: 280px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             margin-bottom: 16px;
             position: relative;
+            padding: 16px;
         }
 
         @media (max-width: 480px) {
             .card-art-area {
                 min-height: 200px;
                 margin-bottom: 12px;
+            }
+        }
+
+        .card-art-title {
+            position: absolute;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            border: 3px solid #1f2937;
+            border-radius: 12px;
+            padding: 8px 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #1f2937;
+            text-align: center;
+            max-width: calc(100% - 32px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        @media (max-width: 480px) {
+            .card-art-title {
+                font-size: 15px;
+                padding: 6px 16px;
             }
         }
 
@@ -1491,12 +1518,10 @@
                     </div>
                     <div class="card-rarity-badge">🏅</div>
                     <div class="card-category-badge" id="cardCategory">Personnage</div>
-                    <div class="card-title-box">
-                        <div class="card-title-text" id="cardDetailName">Marie Curie</div>
-                    </div>
                     <div class="card-art-area">
                         <div class="card-level-badge-display" id="cardArtLevel">Niv. 1</div>
                         <div class="card-art-placeholder">👤</div>
+                        <div class="card-art-title" id="cardDetailName">Marie Curie</div>
                         <div class="rarity-gem" id="cardRarityGem"></div>
                     </div>
                     <div class="card-footer">
@@ -2433,8 +2458,15 @@
             const overlay = document.getElementById('journalLevelOverlay');
             if (!overlay) return;
             
-            // Calculer le pourcentage : niveau 1 = 33%, niveau 2 = 66%, niveau 3 = 100%
-            const percentage = (level / 3) * 100;
+            // Colorier par tiers : niveau 1 = 33.33%, niveau 2 = 66.66%, niveau 3 = 100%
+            let percentage = 0;
+            if (level === 1) {
+                percentage = 33.33;
+            } else if (level === 2) {
+                percentage = 66.66;
+            } else if (level === 3) {
+                percentage = 100;
+            }
             
             setTimeout(() => {
                 overlay.style.height = `${percentage}%`;
@@ -2504,10 +2536,17 @@
                 interactionsSection.style.display = 'none';
             }
             
-            // Mettre à jour l'overlay du niveau
+            // Mettre à jour l'overlay du niveau (par tiers)
             const overlay = document.getElementById('journalLevelOverlay');
             if (overlay) {
-                const percentage = (cardLevel.level / 3) * 100;
+                let percentage = 0;
+                if (cardLevel.level === 1) {
+                    percentage = 33.33;
+                } else if (cardLevel.level === 2) {
+                    percentage = 66.66;
+                } else if (cardLevel.level === 3) {
+                    percentage = 100;
+                }
                 overlay.style.height = `${percentage}%`;
             }
             
