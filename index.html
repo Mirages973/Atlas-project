@@ -515,11 +515,13 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            min-height: 480px; /* Hauteur minimale pour prendre plus d'espace */
         }
 
         @media (max-width: 480px) {
             .card-display {
                 padding: 16px;
+                min-height: 380px; /* Ajusté pour mobile */
             }
         }
 
@@ -531,6 +533,7 @@
             max-width: 280px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             position: relative;
+            min-height: 420px; 
         }
 
         @media (max-width: 480px) {
@@ -538,6 +541,7 @@
                 max-width: 220px;
                 padding: 12px;
                 border-radius: 12px;
+                min-height: 300px;
             }
         }
 
@@ -587,20 +591,22 @@
         .card-art-area {
             background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%);
             border-radius: 12px;
-            min-height: 280px;
+            min-height: 390px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start; /* Contenu commence en haut */
             margin-bottom: 16px;
             position: relative;
             padding: 16px;
+            padding-top: 90px; /* ← Espace réservé pour le titre en absolute */
         }
 
         @media (max-width: 480px) {
             .card-art-area {
-                min-height: 200px;
+                min-height: 300px; /* Ajusté pour mobile */
                 margin-bottom: 12px;
+                padding-top: 75px; /* Ajusté pour mobile */
             }
         }
 
@@ -639,8 +645,9 @@
         }
 
         .card-footer {
+            margin-top: auto; /* Pousse le footer tout en bas */
             text-align: center;
-            padding: 12px;
+            padding: 8px;
             background: #f9fafb;
             border-radius: 8px;
             position: relative;
@@ -704,8 +711,9 @@
         /* Gemmes de rareté */
         .rarity-gem {
             position: absolute;
-            bottom: 8px;
-            right: 8px;
+            top: -15px; /*Negative pour l'avoir au dessus du footer */
+            left: 50%; 
+            transform: translateX(-50%); 
             width: 30px;
             height: 30px;
             display: flex;
@@ -734,24 +742,11 @@
             clip-path: polygon(30% 0%, 70% 0%, 100% 50%, 70% 100%, 30% 100%, 0% 50%);
         }
 
-        .card-level-badge-display {
-            position: absolute;
-            top: 8px;
-            left: 8px;
-            background: rgba(255, 255, 255, 0.95);
-            border: 2px solid #1f2937;
-            border-radius: 8px;
-            padding: 4px 8px;
-            font-size: 12px;
-            font-weight: bold;
-            color: #1f2937;
-        }
-
         /* Bulle de dialogue */
         .card-dialogue-bubble {
             display: none;
             position: absolute;
-            top: calc(100% + 10px);
+            top: calc(50% + 10px);
             left: 50%;
             transform: translateX(-50%);
             background: white;
@@ -814,17 +809,6 @@
             margin-bottom: 4px;
         }
 
-        .card-level-badge {
-            display: inline-block;
-            background: white;
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 4px 12px;
-            font-size: 11px;
-            color: #6b7280;
-            margin-top: 4px;
-        }
-
         .card-related-characters {
             display: flex;
             justify-content: center;
@@ -885,9 +869,9 @@
             flex: 1;
             background: none;
             border: none;
-            padding: 12px 4px;
-            font-size: 11px;
-            font-weight: 600;
+            padding: 12px 4px;;
+            font-size: 14px;
+            font-weight: bold;
             color: #6b7280;
             cursor: pointer;
             border-bottom: 3px solid transparent;
@@ -1066,7 +1050,7 @@
             width: 80px;
             height: 80px;
             border-radius: 8px;
-            background: #D1D5DB;
+            background: transparent;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1114,6 +1098,67 @@
             transform: scale(1.1);
         }
 
+        #journalLevelOverlay1 {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 0%;
+            max-height: 33.33%;
+            background: linear-gradient(to bottom, #10B981 0%, #059669 100%); /* Vert */
+            opacity: 0.5;
+            transition: height 1.5s ease-out;
+            pointer-events: none;
+            z-index: 1;
+            border-radius: 10px 10px 0 0;
+        }
+
+        #journalLevelOverlay2 {
+            position: absolute;
+            top: 33.33%;
+            left: 0;
+            right: 0;
+            height: 0%;
+            max-height: 33.33%;
+            background: linear-gradient(to bottom, #3B82F6 0%, #2563EB 100%); /* Bleu */
+            opacity: 0.5;
+            transition: height 1.5s ease-out;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        #journalLevelOverlay3 {
+            position: absolute;
+            top: 66.66%;
+            left: 0;
+            right: 0;
+            height: 0%;
+            max-height: 33.33%;
+            background: linear-gradient(to bottom, #F59E0B 0%, #D97706 100%); /* Orange */
+            opacity: 0.5;
+            transition: height 1.5s ease-out;
+            pointer-events: none;
+            z-index: 1;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .journal-interaction-btn {
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) scale(1);
+            }
+        }
+
+        
+        
         .interaction-button.locked {
             background: #f3f4f6;
             opacity: 0.5;
@@ -1511,29 +1556,28 @@
         <div class="card-detail-body">
             <!-- Card Display -->
             <div class="card-display" onclick="closeCardDetail()" style="cursor: pointer;">
-                <div class="card-frame" onclick="event.stopPropagation(); showCardDialogue()" style="cursor: pointer; position: relative;">
+                <div class="card-frame" onclick="event.stopPropagation()" style="cursor: pointer; position: relative;">
                     <div class="card-dialogue-bubble" id="cardDialogueBubble">
                         <div class="card-dialogue-text" id="cardDialogueText"></div>
                     </div>
                     <div class="card-rarity-badge">🏅</div>
                     <div class="card-category-badge" id="cardCategory">Personnage</div>
                     <div class="card-art-area">
-                        <div class="card-level-badge-display" id="cardArtLevel">Niv. 1</div>
-                        <div class="card-art-placeholder">👤</div>
+                        <div class="card-art-placeholder" onclick="showCardDialogue()">👤</div>
                         <div class="card-art-title" id="cardDetailName">Marie Curie</div>
-                        <div class="rarity-gem" id="cardRarityGem"></div>
-                    </div>
-                    <div class="card-footer">
-                        <div class="card-level-info">
-                            <span class="card-level-label" id="cardLevelDisplay">Niveau 1</span>
-                            <span class="card-level-label" id="cardExpDisplay">0/10 💜</span>
-                        </div>
-                        <div class="card-exp-bar">
-                            <div class="card-exp-fill" id="cardExpBar" style="width: 0%"></div>
-                        </div>
-                        <button id="addExpBtn" class="card-level-up-btn" onclick="addExperience()" disabled>
+                        <div class="card-footer">
+                            <div class="rarity-gem" id="cardRarityGem"></div>
+                            <div class="card-level-info">
+                                <span class="card-level-label" id="cardLevelDisplay">Niveau 1</span>
+                                <span class="card-level-label" id="cardExpDisplay">0/10 💜</span>
+                            </div>
+                            <div class="card-exp-bar">
+                                <div class="card-exp-fill" id="cardExpBar" style="width: 0%"></div>
+                            </div>
+                            <button id="addExpBtn" class="card-level-up-btn" onclick="addExperience()" disabled>
                             💜 Ajouter 50 poudre (+EXP)
-                        </button>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1542,7 +1586,7 @@
             <div class="card-tabs">
                 <button class="card-tab active" onclick="switchTab('general')">Général</button>
                 <button class="card-tab" onclick="switchTab('skins')">Skins</button>
-                <button class="card-tab" onclick="switchTab('competences')">Compétences</button>
+                <button class="card-tab" onclick="switchTab('competences')">Skills</button>
                 <button class="card-tab journal-tab" onclick="openJournalScreen()" id="journalTabBtn">
                     📖 Carnet
                     <span class="notification-badge hidden" id="journalNotification">!</span>
@@ -1625,7 +1669,10 @@
             <div class="journal-screen-content">
                 <!-- Carnet de bord -->
                 <div class="journal-notebook">
-                    <div class="journal-level-overlay" id="journalLevelOverlay" style="height: 0%;"></div>
+                    <div class="journal-level-overlay" id="journalLevelOverlay1" style="height: 0%;"></div>
+                    <div class="journal-level-overlay" id="journalLevelOverlay2" style="height: 0%;"></div>
+                    <div class="journal-level-overlay" id="journalLevelOverlay3" style="height: 0%;"></div>
+    
                     <div class="journal-quote">
                         "J'ai appris la voie du progrès n'était ni rapide, ni facile..."
                     </div>
@@ -1653,30 +1700,19 @@
                             <div class="journal-text">Découverte du radium</div>
                         </div>
                     </div>
+                    <!-- Bouton niveau 1 : Audio -->
+                    <div class="journal-interaction-btn" id="journalBtn1" style="position: absolute; top: 16.66%; left: 50%; transform: translateX(-50%); z-index: 10; display: none;">
+                        <div class="interaction-button">🎵</div>
+                    </div>
 
-                    <div class="journal-interaction" id="journalInteractions">
-                        <div style="font-size: 14px; font-weight: 600; color: #4F46E5; margin-bottom: 12px;">
-                            Possibilités d'interaction
-                        </div>
-                        <div class="journal-item" style="margin-bottom: 12px;">
-                            <div class="interaction-button">🎵</div>
-                            <div class="journal-text" style="color: #4F46E5;">Audio explicatif</div>
-                        </div>
-                        <div class="journal-item" style="margin-bottom: 12px;">
-                            <div class="interaction-button locked">🔒</div>
-                            <div class="journal-text" style="color: #6b7280;">Cadenas à défaire (mini-jeu)</div>
-                        </div>
-                        <div class="journal-item" style="margin-bottom: 12px;">
-                            <div class="interaction-button locked">🔧</div>
-                            <div class="journal-text" style="color: #6b7280;">Outil à récupérer</div>
-                        </div>
-                        <div class="journal-item">
-                            <div class="journal-image" style="width: 100px; height: 100px;">👤</div>
-                            <div>
-                                <div class="journal-date">1934</div>
-                                <div class="journal-text">Frédéric Joliot, radiochimiste</div>
-                            </div>
-                        </div>
+                    <!-- Bouton niveau 2 : Cadenas -->
+                    <div class="journal-interaction-btn" id="journalBtn2" style="position: absolute; top: 50%; left: 50%; transform: translateX(-50%); z-index: 10; display: none;">
+                        <div class="interaction-button">🔒</div>
+                    </div>
+
+                    <!-- Bouton niveau 3 : Outil -->
+                    <div class="journal-interaction-btn" id="journalBtn3" style="position: absolute; top: 83.33%; left: 50%; transform: translateX(-50%); z-index: 10; display: none;">
+                        <div class="interaction-button">🔧</div>
                     </div>
                 </div>
             </div>
@@ -2370,7 +2406,7 @@
             
             // Afficher le niveau sur la carte
             document.getElementById('cardLevelDisplay').textContent = `Niveau ${currentLevel}`;
-            document.getElementById('cardArtLevel').textContent = `Niv. ${currentLevel}`;
+            /* document.getElementById('cardArtLevel').textContent = `Niv. ${currentLevel}`; */
             
             // Afficher la gemme de rareté
             const rarityGem = document.getElementById('cardRarityGem');
@@ -2458,30 +2494,102 @@
         }
 
         function animateJournalLevel(level) {
-            const overlay = document.getElementById('journalLevelOverlay');
-            if (!overlay) {
-                console.error('Overlay non trouvé!');
-                return;
+            console.log(`🎨 Animation du carnet - Niveau ${level}`);
+            
+            const overlay1 = document.getElementById('journalLevelOverlay1');
+            const overlay2 = document.getElementById('journalLevelOverlay2');
+            const overlay3 = document.getElementById('journalLevelOverlay3');
+            
+            const overlay1Filled = overlay1 && overlay1.style.height === '33.33%';
+            
+            if (overlay1 && !overlay1Filled) {
+                overlay1.style.height = '0%';
+                setTimeout(() => {
+                    overlay1.style.height = '33.33%';
+                    console.log(`✅ Niveau 1 : Vert rempli`);
+                    
+                    // Afficher le bouton niveau 1 et notifier
+                    const btn1 = document.getElementById('journalBtn1');
+                    if (btn1) {
+                        btn1.style.display = 'block';
+                        document.getElementById('journalNotification').classList.remove('hidden');
+                    }
+                    
+                    if (level >= 2 && overlay2) {
+                        overlay2.style.height = '0%';
+                        setTimeout(() => {
+                            overlay2.style.height = '33.33%';
+                            console.log(`✅ Niveau 2 : Bleu rempli`);
+                            
+                            // Afficher le bouton niveau 2 et notifier
+                            const btn2 = document.getElementById('journalBtn2');
+                            if (btn2) {
+                                btn2.style.display = 'block';
+                                document.getElementById('journalNotification').classList.remove('hidden');
+                            }
+                            
+                            if (level >= 3 && overlay3) {
+                                overlay3.style.height = '0%';
+                                setTimeout(() => {
+                                    overlay3.style.height = '33.33%';
+                                    console.log(`✅ Niveau 3 : Orange rempli`);
+                                    
+                                    // Afficher le bouton niveau 3 et notifier
+                                    const btn3 = document.getElementById('journalBtn3');
+                                    if (btn3) {
+                                        btn3.style.display = 'block';
+                                        document.getElementById('journalNotification').classList.remove('hidden');
+                                    }
+                                }, 100);
+                            }
+                        }, 1600);
+                    }
+                }, 100);
+            } else if (level >= 2) {
+                const overlay2Filled = overlay2 && overlay2.style.height === '33.33%';
+                
+                if (overlay2 && !overlay2Filled) {
+                    overlay2.style.height = '0%';
+                    setTimeout(() => {
+                        overlay2.style.height = '33.33%';
+                        console.log(`✅ Niveau 2 : Bleu rempli`);
+                        
+                        const btn2 = document.getElementById('journalBtn2');
+                        if (btn2) {
+                            btn2.style.display = 'block';
+                            document.getElementById('journalNotification').classList.remove('hidden');
+                        }
+                        
+                        if (level >= 3 && overlay3) {
+                            overlay3.style.height = '0%';
+                            setTimeout(() => {
+                                overlay3.style.height = '33.33%';
+                                console.log(`✅ Niveau 3 : Orange rempli`);
+                                
+                                const btn3 = document.getElementById('journalBtn3');
+                                if (btn3) {
+                                    btn3.style.display = 'block';
+                                    document.getElementById('journalNotification').classList.remove('hidden');
+                                }
+                            }, 1600);
+                        }
+                    }, 100);
+                } else if (level >= 3) {
+                    if (overlay3) {
+                        overlay3.style.height = '0%';
+                        setTimeout(() => {
+                            overlay3.style.height = '33.33%';
+                            console.log(`✅ Niveau 3 : Orange rempli`);
+                            
+                            const btn3 = document.getElementById('journalBtn3');
+                            if (btn3) {
+                                btn3.style.display = 'block';
+                                document.getElementById('journalNotification').classList.remove('hidden');
+                            }
+                        }, 100);
+                    }
+                }
             }
-            
-            // Colorier par tiers : niveau 1 = 33.33%, niveau 2 = 66.66%, niveau 3 = 100%
-            let percentage = 0;
-            if (level === 1) {
-                percentage = 33.33;
-            } else if (level === 2) {
-                percentage = 66.66;
-            } else if (level === 3) {
-                percentage = 100;
-            }
-            
-            console.log(`🎨 Animation du carnet - Niveau ${level} → ${percentage}%`);
-            
-            // Forcer l'affichage immédiat puis animer
-            overlay.style.height = '0%';
-            setTimeout(() => {
-                overlay.style.height = `${percentage}%`;
-                console.log(`✅ Overlay height set to ${percentage}%`);
-            }, 100);
         }
 
         function switchTabProgrammatically(tabName) {
@@ -2538,14 +2646,6 @@
             document.getElementById('journalScreenCardType').textContent = selectedCard.type;
             
             // Masquer les interactions si la carte est niveau 0 ou 1
-            const cardLevel = cardLevels[selectedCard.id] || { level: 0, experience: 0, dustSpent: 0 };
-            const interactionsSection = document.getElementById('journalInteractions');
-            
-            if (cardLevel.level >= 2) {
-                interactionsSection.style.display = 'block';
-            } else {
-                interactionsSection.style.display = 'none';
-            }
             
             // Mettre à jour l'overlay du niveau (par tiers)
             const overlay = document.getElementById('journalLevelOverlay');
