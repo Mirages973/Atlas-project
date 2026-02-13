@@ -1308,16 +1308,16 @@
             left: 0;
             right: 0;
             background: linear-gradient(135deg, #A855F7 0%, #7C3AED 100%);
-            opacity: 0.4;
+            opacity: 0.5;
             transition: height 1.5s ease-out;
             pointer-events: none;
-            z-index: 0;
-            border-radius: 0 0 12px 12px;
+            z-index: 1;
+            border-radius: 0 0 10px 10px;
         }
 
         .journal-notebook > * {
             position: relative;
-            z-index: 1;
+            z-index: 2;
         }
 
         .journal-screen-footer {
@@ -1796,7 +1796,7 @@
         let playerPos = { ...LYON_CENTER };
         let collectedCards = [];
         let cardLevels = {}; // { cardId: { level: 1, experience: 0, dustSpent: 0 } }
-        let memorialDust = 0; // Quantité de poudre mémorielle
+        let memorialDust = 1000; // Quantité de poudre mémorielle (1000 pour tester rapidement)
         let collectedDustPoints = []; // IDs des points de poudre collectés
         let map = null;
         let playerMarker = null;
@@ -1921,6 +1921,10 @@
             // Point de départ : Lyon sur web et mobile.
             // Sur mobile, l'utilisateur peut ensuite activer le GPS via le bouton 📍.
             playerPos = { ...LYON_CENTER };
+            
+            // Afficher les 1000 poudres initiales
+            document.getElementById('dustCounter').textContent = memorialDust;
+            
             createMap();
         }
 
@@ -2455,7 +2459,10 @@
 
         function animateJournalLevel(level) {
             const overlay = document.getElementById('journalLevelOverlay');
-            if (!overlay) return;
+            if (!overlay) {
+                console.error('Overlay non trouvé!');
+                return;
+            }
             
             // Colorier par tiers : niveau 1 = 33.33%, niveau 2 = 66.66%, niveau 3 = 100%
             let percentage = 0;
@@ -2467,9 +2474,14 @@
                 percentage = 100;
             }
             
+            console.log(`🎨 Animation du carnet - Niveau ${level} → ${percentage}%`);
+            
+            // Forcer l'affichage immédiat puis animer
+            overlay.style.height = '0%';
             setTimeout(() => {
                 overlay.style.height = `${percentage}%`;
-            }, 300);
+                console.log(`✅ Overlay height set to ${percentage}%`);
+            }, 100);
         }
 
         function switchTabProgrammatically(tabName) {
