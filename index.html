@@ -587,7 +587,7 @@
         .card-art-area {
             background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%);
             border-radius: 12px;
-            min-height: 200px;
+            min-height: 280px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -597,7 +597,7 @@
 
         @media (max-width: 480px) {
             .card-art-area {
-                min-height: 140px;
+                min-height: 200px;
                 margin-bottom: 12px;
             }
         }
@@ -725,8 +725,8 @@
         .card-dialogue-bubble {
             display: none;
             position: absolute;
-            bottom: 35%;
-            left: 75%;
+            bottom: 100%;
+            left: 50%;
             transform: translateX(-50%);
             margin-bottom: 10px;
             background: white;
@@ -746,7 +746,7 @@
         .card-dialogue-bubble::after {
             content: '';
             position: absolute;
-            top : 100%; 
+            top: 100%;
             left: 50%;
             transform: translateX(-50%);
             width: 0;
@@ -876,6 +876,38 @@
             color: white;
             border-radius: 8px 8px 0 0;
             margin: 0 2px;
+            position: relative;
+        }
+
+        .card-tab.journal-tab .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #EF4444;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes levelUpPulse {
+            0% { transform: scale(1); }
+            50% { 
+                transform: scale(1.05);
+                box-shadow: 0 0 30px rgba(168, 85, 247, 0.8);
+            }
+            100% { transform: scale(1); }
         }
 
         .card-tab.journal-tab:hover {
@@ -1242,6 +1274,24 @@
                     #F59E0B 31px
                 );
             margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .journal-level-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #A855F7 0%, #7C3AED 100%);
+            opacity: 0.3;
+            transition: height 1.5s ease-out;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .journal-notebook > * {
+            position: relative;
+            z-index: 1;
         }
 
         .journal-screen-footer {
@@ -1424,7 +1474,6 @@
         <!-- Card Detail View -->
         <div id="cardDetailView" class="card-detail-view">
         <div class="card-detail-header">
-            <button onclick="closeCardDetail()" class="card-detail-back">←</button>
             <div class="card-detail-title-section">
                 <h2 class="collections-title" id="cardDetailHeaderTitle"></h2>
                 <div class="card-detail-dust-display">
@@ -1435,8 +1484,8 @@
         </div>
         <div class="card-detail-body">
             <!-- Card Display -->
-            <div class="card-display">
-                <div class="card-frame" onclick="showCardDialogue()" style="cursor: pointer; position: relative;">
+            <div class="card-display" onclick="closeCardDetail()" style="cursor: pointer;">
+                <div class="card-frame" onclick="event.stopPropagation(); showCardDialogue()" style="cursor: pointer; position: relative;">
                     <div class="card-dialogue-bubble" id="cardDialogueBubble">
                         <div class="card-dialogue-text" id="cardDialogueText"></div>
                     </div>
@@ -1462,12 +1511,6 @@
                             💜 Ajouter 50 poudre (+EXP)
                         </button>
                     </div>
-                    <div class="card-related-characters">
-                        <div class="related-char">👤</div>
-                        <div class="related-char green">👤</div>
-                        <div class="related-char orange">👤</div>
-                        <div class="related-char purple">👤</div>
-                    </div>
                 </div>
             </div>
 
@@ -1476,7 +1519,10 @@
                 <button class="card-tab active" onclick="switchTab('general')">Général</button>
                 <button class="card-tab" onclick="switchTab('skins')">Skins</button>
                 <button class="card-tab" onclick="switchTab('competences')">Compétences</button>
-                <button class="card-tab journal-tab" onclick="openJournalScreen()">📖 Carnet</button>
+                <button class="card-tab journal-tab" onclick="openJournalScreen()" id="journalTabBtn">
+                    📖 Carnet
+                    <span class="notification-badge hidden" id="journalNotification">!</span>
+                </button>
             </div>
 
             <!-- Tab Contents -->
@@ -1555,6 +1601,7 @@
             <div class="journal-screen-content">
                 <!-- Carnet de bord -->
                 <div class="journal-notebook">
+                    <div class="journal-level-overlay" id="journalLevelOverlay" style="height: 0%;"></div>
                     <div class="journal-quote">
                         "J'ai appris la voie du progrès n'était ni rapide, ni facile..."
                     </div>
@@ -1753,25 +1800,25 @@
         const MIN_DUST_DROP = 25;
         const MAX_DUST_DROP = 75;
         
-        // Système de rareté et d'expérience
+        // Système de rareté et d'expérience (niveau 0 → 1 → 2 → 3)
         const RARITY_CONFIG = {
             common: {
                 name: 'Commune',
                 color: '#10B981',
                 shape: 'triangle',
-                exp: { 1: 150, 2: 500 } // Niveau 1→2 : 150, Niveau 2→3 : 500
+                exp: { 0: 50, 1: 150, 2: 300 } // Niveau 0→1 : 50, 1→2 : 150, 2→3 : 300
             },
             rare: {
                 name: 'Rare',
                 color: '#3B82F6',
                 shape: 'pentagon',
-                exp: { 1: 250, 2: 750 }
+                exp: { 0: 100, 1: 250, 2: 500 }
             },
             legendary: {
                 name: 'Légendaire',
                 color: '#F97316',
                 shape: 'hexagon',
-                exp: { 1: 500, 2: 1500 }
+                exp: { 0: 150, 1: 400, 2: 800 }
             }
         };
         
@@ -2122,7 +2169,7 @@
                 
                 // Initialiser le niveau de la carte
                 if (!cardLevels[card.id]) {
-                    cardLevels[card.id] = { level: 1, experience: 0, dustSpent: 0 };
+                    cardLevels[card.id] = { level: 0, experience: 0, dustSpent: 0 };
                 }
                 
                 document.getElementById('popupCardName').textContent = card.name;
@@ -2260,7 +2307,7 @@
             
             // Initialiser le niveau si nécessaire
             if (!cardLevels[card.id]) {
-                cardLevels[card.id] = { level: 1, experience: 0, dustSpent: 0 };
+                cardLevels[card.id] = { level: 0, experience: 0, dustSpent: 0 };
             }
             
             document.getElementById('cardDetailHeaderTitle').textContent = card.name;
@@ -2352,21 +2399,46 @@
             
             if (cardLevel.experience >= expNeeded) {
                 // Level up !
+                const oldLevel = cardLevel.level;
                 cardLevel.level += 1;
                 cardLevel.experience = Math.max(0, cardLevel.experience - expNeeded);
                 
-                // Animation ou notification
-                console.log(`🎉 ${selectedCard.name} passe niveau ${cardLevel.level}!`);
+                // Animation de level up sur la carte
+                const cardFrame = document.querySelector('.card-frame');
+                cardFrame.style.animation = 'levelUpPulse 0.6s ease';
+                
+                setTimeout(() => {
+                    cardFrame.style.animation = '';
+                    // Ouvrir automatiquement le carnet de bord après l'animation
+                    openJournalScreen();
+                    // Animer le coloriage du carnet
+                    animateJournalLevel(cardLevel.level);
+                }, 600);
             }
             
             // Vérifier si on atteint 100 poudres dépensées
             if (cardLevel.dustSpent === 100) {
+                // Afficher la notification sur le bouton carnet
+                document.getElementById('journalNotification').classList.remove('hidden');
+                
                 setTimeout(() => {
                     showCardDialogue(true); // true = phrase spéciale
                 }, 500);
             }
             
             updateCardLevelDisplay();
+        }
+
+        function animateJournalLevel(level) {
+            const overlay = document.getElementById('journalLevelOverlay');
+            if (!overlay) return;
+            
+            // Calculer le pourcentage : niveau 1 = 33%, niveau 2 = 66%, niveau 3 = 100%
+            const percentage = (level / 3) * 100;
+            
+            setTimeout(() => {
+                overlay.style.height = `${percentage}%`;
+            }, 300);
         }
 
         function switchTabProgrammatically(tabName) {
@@ -2422,8 +2494,8 @@
             document.getElementById('journalScreenCardName').textContent = selectedCard.name;
             document.getElementById('journalScreenCardType').textContent = selectedCard.type;
             
-            // Masquer les interactions si la carte est niveau 1
-            const cardLevel = cardLevels[selectedCard.id] || { level: 1, experience: 0, dustSpent: 0 };
+            // Masquer les interactions si la carte est niveau 0 ou 1
+            const cardLevel = cardLevels[selectedCard.id] || { level: 0, experience: 0, dustSpent: 0 };
             const interactionsSection = document.getElementById('journalInteractions');
             
             if (cardLevel.level >= 2) {
@@ -2431,6 +2503,16 @@
             } else {
                 interactionsSection.style.display = 'none';
             }
+            
+            // Mettre à jour l'overlay du niveau
+            const overlay = document.getElementById('journalLevelOverlay');
+            if (overlay) {
+                const percentage = (cardLevel.level / 3) * 100;
+                overlay.style.height = `${percentage}%`;
+            }
+            
+            // Masquer la notification
+            document.getElementById('journalNotification').classList.add('hidden');
             
             document.getElementById('journalScreen').classList.add('show');
         }
