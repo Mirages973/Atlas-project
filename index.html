@@ -1,0 +1,3922 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://unpkg.com/maplibre-gl@4.4.1/dist/maplibre-gl.css" rel="stylesheet">
+    <script src="https://unpkg.com/maplibre-gl@4.4.1/dist/maplibre-gl.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Lyon Cards - Prototype</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            background: #1f2937;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .app-container {
+            width: 390px;
+            height: 844px;
+            max-height: 100vh;
+            margin: 0 auto;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            border-radius: 20px;
+            overflow: hidden;
+            /* HUD overlaid on map - no header bar */
+        }
+
+        @media (max-width: 480px) {
+            body { background: white; }
+            .app-container {
+                width: 100vw;
+                height: 100vh;
+                max-height: 100vh;
+                border-radius: 0;
+                box-shadow: none;
+            }
+        }
+
+        /* ---- MAP HUD OVERLAY ---- */
+        .map-hud {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            z-index: 30;
+            pointer-events: none;
+            padding: 14px 14px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .map-hud > * { pointer-events: all; }
+
+        /* Avatar button */
+        .hud-avatar-wrap { position: relative; }
+
+        .hud-avatar-btn {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            border: 3px solid white;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            transition: transform 0.15s;
+        }
+
+        .hud-avatar-btn:active { transform: scale(0.93); }
+
+        /* Dropdown menu */
+        .avatar-menu {
+            position: absolute;
+            top: 58px;
+            left: 0;
+            background: white;
+            border-radius: 14px;
+            box-shadow: 0 8px 28px rgba(0,0,0,0.18);
+            overflow: hidden;
+            min-width: 190px;
+            animation: menuPop 0.18s cubic-bezier(0.34,1.56,0.64,1);
+        }
+
+        @keyframes menuPop {
+            from { opacity: 0; transform: scale(0.85) translateY(-8px); transform-origin: top left; }
+            to   { opacity: 1; transform: scale(1)    translateY(0);      transform-origin: top left; }
+        }
+
+        .avatar-menu-name {
+            padding: 12px 16px 8px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #9ca3af;
+        }
+
+        .avatar-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            background: none;
+            border: none;
+            padding: 11px 16px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #1f2937;
+            cursor: pointer;
+            text-align: left;
+            transition: background 0.15s;
+        }
+
+        .avatar-menu-item:hover { background: #f3f4f6; }
+        .avatar-menu-item:last-child { margin-bottom: 6px; }
+
+        .avatar-menu-item--disabled {
+            opacity: 0.45;
+            cursor: default;
+        }
+
+        .avatar-menu-item--disabled:hover { background: none; }
+
+        .soon-badge {
+            margin-left: auto;
+            background: #EEF2FF;
+            color: #4F46E5;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 20px;
+        }
+
+        /* Dust counter top-right */
+        .hud-dust {
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(6px);
+            border-radius: 20px;
+            padding: 7px 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 15px;
+            font-weight: 700;
+            color: #1f2937;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+        }
+
+        /* Keep old class stubs to avoid JS errors if referenced */
+        .collections-btn { display: none; }
+
+        #map {
+            flex: 1;
+            position: relative;
+            /* Map fills full space since HUD is overlaid */
+        }
+
+        /* isometric-fallback CSS removed — tilt handled natively by Google Maps API */
+
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 16px;
+            right: 16px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            padding: 16px;
+            z-index: 20;
+        }
+
+        .controls-hint {
+            text-align: center;
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 12px;
+        }
+
+        .nearby-poi {
+            background: #ECFDF5;
+            border: 2px solid #10B981;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .nearby-poi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+
+        .nearby-poi-name { font-weight: bold; color: #047857; font-size: 16px; }
+        .nearby-poi-distance { font-size: 14px; color: #059669; margin-top: 4px; }
+
+        .collect-btn {
+            width: 100%;
+            background: #10B981;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.2s;
+        }
+
+        .collect-btn:hover { background: #059669; }
+
+        /* Success toast (replaces old popup overlay) */
+        .card-success-toast {
+            display: none;
+            position: absolute;
+            bottom: 160px;
+            left: 16px;
+            right: 16px;
+            z-index: 200;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            animation: toastSlideUp 0.45s cubic-bezier(0.34,1.56,0.64,1);
+        }
+
+        @keyframes toastSlideUp {
+            from { opacity: 0; transform: translateY(30px) scale(0.92); }
+            to   { opacity: 1; transform: translateY(0)    scale(1); }
+        }
+
+        .card-success-toast.show { display: block; }
+
+        .toast-glow {
+            position: absolute;
+            inset: 0;
+            opacity: 0.18;
+        }
+
+        .toast-inner {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 10px 14px 14px;
+            background: rgba(15, 10, 30, 0.92);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.12);
+        }
+
+        .toast-icon {
+            font-size: 36px;
+            flex-shrink: 0;
+            animation: toastIconPop 0.5s 0.2s cubic-bezier(0.34,1.56,0.64,1) both;
+        }
+
+        @keyframes toastIconPop {
+            from { transform: scale(0); }
+            to   { transform: scale(1); }
+        }
+
+        .toast-text { flex: 1; }
+        .toast-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.5); margin-bottom: 3px; }
+        .toast-name  { font-size: 17px; font-weight: 800; color: white; }
+        .toast-type  { font-size: 12px; color: rgba(255,255,255,0.55); margin-top: 2px; }
+
+        .toast-close {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: rgba(255,255,255,0.6);
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            font-size: 14px;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: background 0.2s;
+        }
+
+        .toast-close:hover { background: rgba(255,255,255,0.2); }
+
+        .toast-clickable {
+            display: flex; align-items: center; gap: 14px;
+            flex: 1; cursor: pointer;
+            padding: 2px 0;
+        }
+        .toast-clickable:hover .toast-name { text-decoration: underline; text-decoration-color: rgba(255,255,255,0.4); }
+
+        .toast-tap-hint {
+            font-size: 9px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 4px;
+            padding: 1px 5px;
+            margin-left: 6px;
+            letter-spacing: 0.3px;
+            vertical-align: middle;
+        }
+
+        .toast-arrow {
+            font-size: 22px;
+            color: rgba(255,255,255,0.4);
+            flex-shrink: 0;
+            margin-right: 4px;
+        }
+
+        /* Keep old class stubs if any JS references them */
+        .popup-overlay { display: none !important; }
+        .popup-content { }
+        .popup-icon { }
+        .popup-title { }
+        .popup-card-info { }
+
+        .popup-card-name { font-size: 18px; font-weight: bold; color: #312E81; }
+        .popup-card-type { font-size: 14px; color: #4F46E5; margin-top: 4px; }
+
+        .popup-close-btn {
+            width: 100%;
+            background: #4F46E5;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.2s;
+        }
+
+        .popup-close-btn:hover { background: #4338CA; }
+
+        .collections-panel {
+            display: none;
+            position: absolute;
+            inset: 0;
+            background: white;
+            z-index: 200;
+            flex-direction: column;
+        }
+
+        .collections-panel.show { display: flex; }
+
+        .collections-header {
+            background: #4F46E5;
+            color: white;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .collections-title { font-size: 20px; font-weight: bold; }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .collections-content { flex: 1; overflow-y: auto; padding: 16px; }
+
+        .collection-item {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .collection-item:hover { border-color: #818CF8; }
+
+        .collection-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 8px;
+        }
+
+        .collection-item-title { font-size: 18px; font-weight: bold; color: #1f2937; }
+        .collection-item-desc { font-size: 14px; color: #6b7280; margin-bottom: 12px; }
+
+        .collection-badge {
+            background: #EEF2FF;
+            color: #4F46E5;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill { height: 100%; background: #4F46E5; transition: width 0.3s; }
+
+        .empty-state { text-align: center; padding: 48px 24px; color: #6b7280; }
+        .empty-icon { font-size: 64px; opacity: 0.5; margin-bottom: 16px; }
+
+        /* Collection tabs (Cartes / Échos) */
+        .col-tabs {
+            display: flex;
+            background: #f3f4f6;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .col-tab {
+            flex: 1;
+            background: none;
+            border: none;
+            padding: 12px 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #6b7280;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .col-tab.active {
+            color: #4F46E5;
+            border-bottom-color: #4F46E5;
+            background: white;
+        }
+
+        .col-tab:hover { background: #f9fafb; }
+
+        /* Echo cards in the panel */
+        .echo-type-section {
+            margin-bottom: 20px;
+        }
+
+        .echo-type-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            color: white;
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .echo-type-count {
+            background: rgba(255,255,255,0.25);
+            border-radius: 20px;
+            padding: 2px 10px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-left: auto;
+        }
+
+        .echo-compatible-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-left: 8px;
+        }
+
+        .echo-compatible-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 10px 14px;
+            cursor: pointer;
+            transition: border-color 0.2s, transform 0.15s;
+        }
+
+        .echo-compatible-card:hover {
+            border-color: #818CF8;
+            transform: translateX(4px);
+        }
+
+        .echo-compatible-card.not-collected {
+            opacity: 0.5;
+            cursor: default;
+        }
+
+        .echo-compatible-card.not-collected:hover {
+            border-color: #e5e7eb;
+            transform: none;
+        }
+
+        .echo-card-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+            color: white;
+        }
+
+        .echo-card-info { flex: 1; }
+        .echo-card-name { font-size: 14px; font-weight: 600; color: #1f2937; }
+        .echo-card-meta { font-size: 12px; color: #6b7280; margin-top: 2px; }
+
+        .echo-card-status {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 20px;
+            flex-shrink: 0;
+        }
+
+        .echo-card-status.collected {
+            background: #ECFDF5;
+            color: #059669;
+        }
+
+        .echo-card-status.locked {
+            background: #f3f4f6;
+            color: #9ca3af;
+        }
+
+        .echo-empty {
+            text-align: center;
+            padding: 32px 16px;
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        .collection-detail { display: none; }
+        .collection-detail.show { display: block; }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: #4F46E5;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 16px;
+            padding: 8px 0;
+        }
+
+        .collection-detail-header { margin-bottom: 24px; }
+        .collection-detail-title { font-size: 24px; font-weight: bold; color: #1f2937; margin-bottom: 8px; }
+        .collection-detail-desc { color: #6b7280; margin-bottom: 12px; }
+
+        .cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+        .card-item {
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .card-item:hover { transform: scale(1.05); }
+        .card-item.collected { background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%); color: white; }
+        .card-item.locked { background: #f3f4f6; color: #9ca3af; cursor: not-allowed; }
+        .card-item.locked:hover { transform: none; }
+
+        .card-icon {
+            aspect-ratio: 1;
+            background: rgba(255,255,255,0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            margin-bottom: 8px;
+        }
+
+        .card-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+        .card-type { font-size: 12px; opacity: 0.8; }
+
+        .card-detail-view {
+            display: none;
+            position: absolute;
+            inset: 0;
+            background: white;
+            z-index: 300;
+            flex-direction: column;
+        }
+
+        .card-detail-view.show { display: flex; }
+
+        .card-detail-header {
+            background: #4F46E5;
+            color: white;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .card-detail-title-section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-detail-dust-display {
+            background: rgba(255,255,255,0.2);
+            padding: 6px 12px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .card-detail-back {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .card-detail-body { flex: 1; overflow-y: auto; display: flex; flex-direction: column; padding-bottom: max(0px, env(safe-area-inset-bottom)); }
+
+        .card-display {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 480px;
+        }
+
+        @media (max-width: 480px) {
+            .card-display { padding: 16px; min-height: 380px; }
+        }
+
+        .card-frame {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            width: 100%;
+            max-width: 280px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: relative;
+            min-height: 420px;
+        }
+
+        @media (max-width: 480px) {
+            .card-frame { max-width: 220px; padding: 12px; border-radius: 12px; min-height: 300px; }
+        }
+
+        .card-rarity-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #F59E0B;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .card-category-badge {
+            background: #FEF3C7;
+            border: 2px solid #F59E0B;
+            color: #92400E;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+
+        .card-art-area {
+            background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%);
+            border-radius: 12px;
+            min-height: 390px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            margin-bottom: 16px;
+            position: relative;
+            padding: 16px;
+            padding-top: 90px;
+        }
+
+        @media (max-width: 480px) {
+            .card-art-area { min-height: 300px; margin-bottom: 12px; padding-top: 75px; }
+        }
+
+        .card-art-title {
+            position: absolute;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            border: 3px solid #1f2937;
+            border-radius: 12px;
+            padding: 8px 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #1f2937;
+            text-align: center;
+            max-width: calc(100% - 32px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        @media (max-width: 480px) {
+            .card-art-title { font-size: 15px; padding: 6px 16px; }
+        }
+
+        .card-art-placeholder { font-size: 80px; }
+
+        @media (max-width: 480px) {
+            .card-art-placeholder { font-size: 60px; }
+        }
+
+        .card-footer {
+            margin-top: auto;
+            text-align: center;
+            padding: 8px;
+            background: #f9fafb;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .card-level-info { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+        .card-level-label { font-size: 14px; font-weight: 600; color: #1f2937; }
+
+        .card-exp-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .card-exp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #A855F7 0%, #7C3AED 100%);
+            transition: width 0.3s ease;
+        }
+
+        .card-level-up-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #A855F7 0%, #7C3AED 100%);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: transform 0.2s;
+        }
+
+        .card-level-up-btn:hover { transform: scale(1.05); }
+        .card-level-up-btn:disabled { background: #d1d5db; cursor: not-allowed; transform: none; }
+
+        .rarity-gem {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .gem-triangle { width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-bottom: 26px solid; }
+        .gem-pentagon { width: 20px; height: 18px; position: relative; clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); }
+        .gem-hexagon { width: 24px; height: 24px; clip-path: polygon(30% 0%, 70% 0%, 100% 50%, 70% 100%, 30% 100%, 0% 50%); }
+
+        .card-dialogue-bubble {
+            display: none;
+            position: absolute;
+            top: calc(50% + 10px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border: 3px solid #1f2937;
+            border-radius: 16px;
+            padding: 12px 16px;
+            max-width: 200px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 10;
+            animation: bubblePop 0.3s ease;
+        }
+
+        .card-dialogue-bubble.show { display: block; }
+
+        .card-dialogue-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 10px solid #1f2937;
+        }
+
+        .card-dialogue-text { font-size: 13px; color: #1f2937; line-height: 1.4; text-align: center; }
+
+        @keyframes bubblePop {
+            0% { opacity: 0; transform: translateX(-50%) scale(0.8); }
+            100% { opacity: 1; transform: translateX(-50%) scale(1); }
+        }
+
+        .card-supertype-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border: 3px solid white;
+        }
+
+        .card-tabs {
+            display: flex;
+            background: #f3f4f6;
+            border-bottom: 2px solid #e5e7eb;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .card-tab {
+            flex: 1;
+            background: none;
+            border: none;
+            padding: 12px 4px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #6b7280;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+            min-width: 70px;
+        }
+
+        .card-tab.journal-tab {
+            background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            color: white;
+            border-radius: 8px 8px 0 0;
+            margin: 0 2px;
+            position: relative;
+        }
+
+        .card-tab.journal-tab .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #EF4444;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes levelUpPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); box-shadow: 0 0 30px rgba(168, 85, 247, 0.8); }
+            100% { transform: scale(1); }
+        }
+
+        .card-tab.journal-tab:hover { background: linear-gradient(135deg, #D97706 0%, #B45309 100%); }
+
+        .card-tab.studio-tab {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+            border-radius: 8px 8px 0 0;
+            margin: 0 2px;
+        }
+
+        .card-tab.studio-tab:hover { background: linear-gradient(135deg, #059669 0%, #047857 100%); }
+
+        .card-tab.studio-tab.active {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+            border-bottom-color: transparent;
+        }
+
+        .card-tab.active { color: #4F46E5; border-bottom-color: #4F46E5; background: white; font-size: 12px; }
+
+        .card-tab.journal-tab.active {
+            background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            color: white;
+            border-bottom-color: transparent;
+        }
+
+        .card-tab:hover { background: #f9fafb; }
+
+        .tab-content { display: none; padding: 20px; flex: 1; overflow-y: auto; }
+        .tab-content.active { display: block; }
+        .tab-content p { color: #6b7280; line-height: 1.6; margin-bottom: 12px; }
+
+        .info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #e5e7eb; }
+        .info-label { font-weight: 600; color: #374151; }
+        .info-value { color: #6b7280; }
+
+        .journal-screen {
+            display: none;
+            position: absolute;
+            inset: 0;
+            background: white;
+            z-index: 400;
+            flex-direction: column;
+        }
+
+        .journal-screen.show { display: flex; }
+
+        .journal-screen-header {
+            background: #4F46E5;
+            color: white;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .journal-screen-back {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .journal-screen-card-mini { display: flex; align-items: center; gap: 12px; flex: 1; }
+
+        .journal-screen-card-image {
+            width: 50px;
+            height: 70px;
+            background: linear-gradient(135deg, #818CF8 0%, #6366F1 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .journal-screen-card-info h3 { font-size: 16px; font-weight: bold; margin: 0; }
+        .journal-screen-card-info p { font-size: 13px; margin: 2px 0 0 0; opacity: 0.9; }
+
+        .journal-screen-body { flex: 1; overflow-y: auto; background: #f9fafb; }
+        .journal-screen-content { padding: 16px; }
+
+        .journal-notebook {
+            background: #FEF3C7;
+            border: 2px solid #F59E0B;
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 400px;
+            position: relative;
+            background-image: repeating-linear-gradient(transparent, transparent 30px, #F59E0B 30px, #F59E0B 31px);
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .journal-level-overlay {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 0%;
+            overflow: hidden;
+            opacity: 0.45;
+            transition: height 1.3s cubic-bezier(0.22, 1, 0.36, 1);
+            pointer-events: none;
+            z-index: 3;
+        }
+        #journalLevelOverlay1 { top: 0%;      border-radius: 10px 10px 0 0; }
+        #journalLevelOverlay2 { top: 33.33%;  border-radius: 0; }
+        #journalLevelOverlay3 { top: 66.66%;  border-radius: 0 0 10px 10px; }
+
+        .journal-notebook > *:not(.journal-level-overlay) { position: relative; z-index: 2; }
+
+        .journal-screen-footer {
+            background: white;
+            border-top: 2px solid #e5e7eb;
+            padding: 16px;
+        }
+
+        .journal-inventory-title { font-size: 14px; font-weight: 600; color: #1f2937; margin-bottom: 12px; text-align: center; }
+
+        .joystick-container {
+            position: absolute;
+            bottom: 180px;
+            left: 20px;
+            width: 120px;
+            height: 120px;
+            z-index: 15;
+        }
+
+        .joystick-base {
+            width: 120px;
+            height: 120px;
+            background: rgba(79, 70, 229, 0.3);
+            border: 3px solid rgba(79, 70, 229, 0.5);
+            border-radius: 50%;
+            position: relative;
+            touch-action: none;
+        }
+
+        .joystick-stick {
+            width: 50px;
+            height: 50px;
+            background: #4F46E5;
+            border: 3px solid white;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            touch-action: none;
+        }
+
+        .gps-toggle {
+            position: absolute;
+            bottom: 180px;
+            right: 20px;
+            z-index: 15;
+        }
+
+        .gps-btn {
+            width: 56px;
+            height: 56px;
+            background: white;
+            border: 2px solid #4F46E5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: all 0.2s;
+        }
+
+        .gps-btn.active { background: #4F46E5; color: white; }
+        .gps-btn:active { transform: scale(0.95); }
+
+        /* Studio button on map */
+        .studio-map-btn-container {
+            position: absolute;
+            bottom: 250px;
+            right: 20px;
+            z-index: 15;
+        }
+
+        .studio-map-btn {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            border: 2px solid white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(16,185,129,0.4);
+            transition: all 0.2s;
+        }
+
+        .studio-map-btn:active { transform: scale(0.95); }
+
+        .echo-orb {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            border: 3px solid white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            cursor: grab;
+            transition: transform 0.2s;
+            position: relative;
+        }
+
+        .echo-orb:hover { transform: scale(1.1); }
+        .echo-orb.dragging { opacity: 0.5; cursor: grabbing; }
+
+        .supertype-histoire { background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%); }
+        .supertype-nature { background: linear-gradient(135deg, #10B981 0%, #059669 100%); }
+        .supertype-science { background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%); }
+        .supertype-arts { background: linear-gradient(135deg, #EC4899 0%, #BE185D 100%); }
+        .supertype-societe { background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); }
+
+        .card-supertype-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border: 3px solid white;
+        }
+
+        .echo-slot {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px dashed #9ca3af;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.5);
+            position: relative;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+
+        .echo-slot.filled { border-style: solid; border-width: 3px; }
+        .echo-slot.drag-over { border-color: #4F46E5; background: rgba(79, 70, 229, 0.1); transform: scale(1.1); }
+
+        .echo-slot-content {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .unlocked-content {
+            background: rgba(147, 197, 253, 0.2);
+            border: 2px solid #3B82F6;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+            animation: unlockFade 0.6s ease;
+        }
+
+        .unlocked-content-text { font-size: 13px; color: #1e40af; font-family: 'Courier New', monospace; font-style: italic; }
+
+        @keyframes unlockFade {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .journal-item-with-slot { display: flex; gap: 12px; margin-bottom: 16px; align-items: flex-start; position: relative; }
+        .journal-content-wrapper { flex: 1; }
+
+        .echo-inventory {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 8px;
+            flex-wrap: wrap;
+            min-height: 80px;
+        }
+
+        .echo-inventory-item { position: relative; }
+
+        .echo-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #EF4444;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+        }
+
+        .journal-quote {
+            font-family: 'Courier New', monospace;
+            font-style: italic;
+            color: #78350F;
+            margin-bottom: 20px;
+            padding: 12px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 8px;
+        }
+
+        .journal-item { display: flex; gap: 12px; margin-bottom: 16px; align-items: center; }
+
+        .journal-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            flex-shrink: 0;
+        }
+
+        .journal-date { font-size: 12px; font-weight: 600; color: #92400E; margin-bottom: 4px; }
+        .journal-text { font-size: 14px; color: #78350F; font-family: 'Courier New', monospace; }
+
+        .journal-interaction-btn { animation: fadeIn 0.6s ease; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-50%) scale(0.8); }
+            to { opacity: 1; transform: translateX(-50%) scale(1); }
+        }
+
+        .interaction-button {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .interaction-button:hover { border-color: #4F46E5; transform: scale(1.1); }
+        .interaction-button.locked { background: #f3f4f6; opacity: 0.5; cursor: not-allowed; }
+        .interaction-button.locked:hover { transform: none; border-color: #e5e7eb; }
+
+        /* ==================== MISE AU POINT ==================== */
+
+        .mapoint-screen {
+            display: none;
+            position: absolute;
+            inset: 0;
+            z-index: 500;
+            background: black;
+            overflow: hidden;
+        }
+
+        .mapoint-screen.active { display: block; }
+
+        #mapointCanvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+        }
+
+        .mapoint-ui {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            padding-bottom: 60px;
+            gap: 20px;
+        }
+
+        .mapoint-hint {
+            font-size: 14px;
+            color: rgba(255,255,255,0.7);
+            text-align: center;
+            padding: 8px 20px;
+            background: rgba(0,0,0,0.35);
+            border-radius: 20px;
+            letter-spacing: 0.3px;
+            transition: opacity 0.5s;
+        }
+
+        .mapoint-progress-ring {
+            width: 80px;
+            height: 80px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .mapoint-progress-ring.visible { opacity: 1; }
+
+        #mapointRing {
+            transition: stroke-dashoffset 0.05s linear, stroke 0.3s;
+        }
+
+        .hidden { display: none !important; }
+
+        /* ==================== STUDIO ==================== */
+
+        /* ==================== STUDIO ==================== */
+        .studio-screen {
+            display: none; position: absolute; inset: 0;
+            background: #1a0f2e; z-index: 400; flex-direction: column;
+        }
+        .studio-screen.show { display: flex; }
+
+        .studio-header {
+            background: linear-gradient(135deg, #2d1040 0%, #1a0f2e 100%);
+            border-bottom: 1px solid rgba(255,200,80,0.2);
+            color: white; padding: 12px 16px;
+            display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+        }
+        .studio-back { background: none; border: none; color: rgba(255,200,80,0.9); font-size: 22px; cursor: pointer; padding: 0; line-height: 1; }
+        .studio-header-info { flex: 1; display: flex; flex-direction: column; }
+        .studio-title { font-size: 15px; font-weight: 800; letter-spacing: 0.5px; color: rgba(255,220,120,0.95); }
+        .studio-card-name { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 1px; }
+        .studio-dust-display {
+            background: rgba(255,200,80,0.15); border: 1px solid rgba(255,200,80,0.3);
+            padding: 5px 10px; border-radius: 20px;
+            display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 700; color: #ffd050;
+        }
+
+        .studio-body { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+
+        .studio-room-wrapper {
+            flex: 1; min-height: 0;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden; position: relative;
+            background: radial-gradient(ellipse at 50% 25%, #1a1035 0%, #0d0820 60%, #060412 100%);
+        }
+        .studio-scene {
+            transform-origin: top center;
+        }
+        @media (max-height: 700px) {
+            .studio-scene { transform: scale(0.82); }
+        }
+        @media (max-height: 600px) {
+            .studio-scene { transform: scale(0.68); }
+        }
+
+        /* Ambient light orb */
+        .studio-room-wrapper::before {
+            content: ''; position: absolute;
+            width: 200px; height: 200px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,180,40,0.12) 0%, transparent 70%);
+            top: 10%; left: 50%; transform: translateX(-50%);
+            pointer-events: none;
+        }
+
+        .studio-scene {
+            position: relative; width: 400px; height: 370px;
+        }
+
+        /* ---- TOOLTIP ---- */
+        .studio-tooltip {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: linear-gradient(135deg, #1e1035 0%, #120828 100%);
+            border-top: 2px solid rgba(255,180,40,0.5);
+            padding: 14px 16px; display: flex; align-items: center; gap: 12px;
+            z-index: 50; animation: slideUp 0.25s ease;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to   { transform: translateY(0);    opacity: 1; }
+        }
+        .tooltip-icon { font-size: 30px; flex-shrink: 0; }
+        .tooltip-content { flex: 1; }
+        .tooltip-name { font-size: 14px; font-weight: 700; color: #ffd050; margin-bottom: 3px; }
+        .tooltip-desc { font-size: 12px; color: rgba(255,255,255,0.6); line-height: 1.4; }
+        .tooltip-close {
+            background: rgba(255,200,80,0.1); border: 1px solid rgba(255,200,80,0.2);
+            color: #ffd050; width: 28px; height: 28px;
+            border-radius: 50%; cursor: pointer; font-size: 14px; flex-shrink: 0;
+        }
+
+        /* Studio items — SVG-based, positioned absolutely */
+        .studio-item {
+            position: absolute; cursor: pointer;
+            transition: filter 0.2s, transform 0.2s;
+            filter: drop-shadow(0 6px 12px rgba(0,0,0,0.7));
+        }
+        .studio-item:hover { filter: drop-shadow(0 8px 16px rgba(0,0,0,0.8)) brightness(1.15); transform: translateY(-3px); }
+        .studio-item svg { display: block; }
+
+        /* Glow outline for interactive items (bookshelf, arch) */
+        #item-bookshelf polygon, #item-arch ellipse { transition: stroke 0.2s, stroke-width 0.2s; }
+        #item-bookshelf:hover polygon { stroke: rgba(255,220,80,0.0); }  
+
+        /* SVG group hover glow via outline stroke */
+        .studio-nav-item { cursor: pointer; }
+        .studio-nav-item .nav-glow-ring { 
+            opacity: 0; 
+            transition: opacity 0.25s ease;
+        }
+        .studio-nav-item:hover .nav-glow-ring { opacity: 1; }
+
+        /* Glow animations */
+        .lamp-glow-anim { animation: lampFlicker 3s ease-in-out infinite; }
+        .window-glow-anim { animation: windowPulse 4s ease-in-out infinite; }
+        @keyframes lampFlicker {
+            0%,100% { opacity: 0.8; } 40% { opacity: 1; } 60% { opacity: 0.7; }
+        }
+        @keyframes windowPulse {
+            0%,100% { opacity: 0.6; } 50% { opacity: 1; }
+        }
+
+        /* ---- SHOP BAR ---- */
+        /* ---- SHOP BAR ---- */
+        .studio-shop {
+            background: rgba(5,2,15,0.92);
+            border-top: 2px solid rgba(255,200,80,0.25);
+            padding: 10px 12px;
+            padding-bottom: max(14px, env(safe-area-inset-bottom, 14px));
+            flex-shrink: 0;
+            position: relative;
+            z-index: 20;
+        }
+
+        .studio-shop-title {
+            font-size: 10px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .studio-shop-items {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .studio-shop-items::-webkit-scrollbar { height: 3px; }
+        .studio-shop-items::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+        .studio-shop-items::-webkit-scrollbar-thumb { background: rgba(255,200,80,0.3); border-radius: 2px; }
+
+        .shop-item {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 10px;
+            padding: 8px 10px;
+            text-align: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: background 0.2s, border-color 0.2s;
+            min-width: 64px;
+        }
+
+        .shop-item:hover {
+            background: rgba(16,185,129,0.2);
+            border-color: #10B981;
+        }
+
+        .shop-item.owned {
+            background: rgba(16,185,129,0.15);
+            border-color: #10B981;
+            cursor: default;
+        }
+
+        .shop-item-icon { font-size: 24px; margin-bottom: 3px; }
+        .shop-item-name { font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 600; margin-bottom: 2px; }
+        .shop-item-price { font-size: 10px; color: #A78BFA; font-weight: 700; }
+        .shop-item.owned .shop-item-price { color: #10B981; }
+    </style>
+</head>
+<body>
+    <div id="mainApp" class="app-container">
+        <!-- Top HUD overlay (no header bar, overlaid on map) -->
+        <div class="map-hud">
+            <!-- Avatar button (top-left) -->
+            <div class="hud-avatar-wrap">
+                <button class="hud-avatar-btn" onclick="toggleAvatarMenu()" id="avatarBtn">
+                    <span class="avatar-emoji">🧙</span>
+                </button>
+                <!-- Dropdown menu -->
+                <div class="avatar-menu hidden" id="avatarMenu">
+                    <div class="avatar-menu-name">Lyon Cards</div>
+                    <button class="avatar-menu-item" onclick="closeAvatarMenu(); openCollections()">
+                        <span>📦</span> Collections
+                    </button>
+                    <button class="avatar-menu-item" onclick="closeAvatarMenu(); openStudioFromMap()">
+                        <span>🏠</span> Studio
+                    </button>
+                    <button class="avatar-menu-item avatar-menu-item--disabled">
+                        <span>🛒</span> Magasin <span class="soon-badge">Bientôt</span>
+                    </button>
+                </div>
+            </div>
+            <!-- Dust counter (top-right) -->
+            <div class="hud-dust">
+                <span>💜</span>
+                <span id="dustCounter">0</span>
+            </div>
+        </div>
+
+        <!-- Map -->
+        <div id="map"></div>
+
+        <!-- Joystick -->
+        <div class="joystick-container">
+            <div class="joystick-base" id="joystickBase">
+                <div class="joystick-stick" id="joystickStick"></div>
+            </div>
+        </div>
+
+        <!-- GPS Toggle -->
+        <div class="gps-toggle">
+            <button class="gps-btn" id="gpsBtn" onclick="toggleGPS()">📍</button>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <div class="controls-hint">Utilisez les flèches ← ↑ → ↓ pour vous déplacer</div>
+
+            <div id="nearbyPOI" class="nearby-poi hidden">
+                <div class="nearby-poi-header">
+                    <div>
+                        <div class="nearby-poi-name" id="poiName"></div>
+                        <div class="nearby-poi-distance">À portée de collecte!</div>
+                    </div>
+                </div>
+                <button onclick="collectCard()" class="collect-btn">Collecter la carte</button>
+            </div>
+
+            <div id="nearbyDust" class="nearby-poi hidden" style="background: #F3E8FF; border-color: #A855F7;">
+                <div class="nearby-poi-header">
+                    <div>
+                        <div class="nearby-poi-name" style="color: #7C3AED;">💜 Poudre mémorielle</div>
+                        <div class="nearby-poi-distance" style="color: #9333EA;">À portée de collecte!</div>
+                    </div>
+                </div>
+                <button onclick="collectDust()" class="collect-btn" style="background: #A855F7;">Collecter la poudre</button>
+            </div>
+
+            <div id="nearbyEcho" class="nearby-poi hidden" style="background: #F3E8FF; border-color: #A855F7;">
+                <div class="nearby-poi-header">
+                    <div>
+                        <div class="nearby-poi-name" style="color: #7C3AED;" id="echoName">✨ Écho</div>
+                        <div class="nearby-poi-distance" style="color: #9333EA;">À portée de collecte!</div>
+                    </div>
+                </div>
+                <button onclick="collectEcho()" class="collect-btn" style="background: #A855F7;">Collecter l'écho</button>
+            </div>
+        </div>
+
+        <!-- Mise au Point Screen -->
+        <div id="miseAuPointScreen" class="mapoint-screen">
+            <canvas id="mapointCanvas"></canvas>
+            <div class="mapoint-ui">
+                <div class="mapoint-hint" id="mapointHint">Déplacez doucement votre doigt pour accorder</div>
+                <div class="mapoint-progress-ring">
+                    <svg viewBox="0 0 80 80" id="mapointRingSvg">
+                        <circle cx="40" cy="40" r="34" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="4"/>
+                        <circle cx="40" cy="40" r="34" fill="none" stroke="white" stroke-width="4"
+                            stroke-dasharray="213.6" stroke-dashoffset="213.6"
+                            stroke-linecap="round" id="mapointRing"
+                            transform="rotate(-90 40 40)"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card Popup -->
+        <div id="cardPopup" class="card-success-toast">
+            <div class="toast-glow" id="toastGlow"></div>
+            <div class="toast-inner">
+                <div class="toast-clickable" onclick="openRevealedCard()">
+                    <div class="toast-icon">🎴</div>
+                    <div class="toast-text">
+                        <div class="toast-label">Carte révélée ✦ <span class="toast-tap-hint">Appuyer pour voir</span></div>
+                        <div class="toast-name" id="popupCardName"></div>
+                        <div class="toast-type" id="popupCardType"></div>
+                    </div>
+                    <div class="toast-arrow">›</div>
+                </div>
+                <button class="toast-close" onclick="closeCardPopup()">✕</button>
+            </div>
+        </div>
+
+        <!-- Collections Panel -->
+        <div id="collectionsPanel" class="collections-panel">
+            <div class="collections-header">
+                <h2 class="collections-title">Mes Collections</h2>
+                <button onclick="closeCollections()" class="close-btn">✕</button>
+            </div>
+            <!-- Tabs -->
+            <div class="col-tabs">
+                <button class="col-tab active" id="colTabCollections" onclick="switchColTab('collections')">🎴 Cartes</button>
+                <button class="col-tab" id="colTabEchoes" onclick="switchColTab('echoes')">✨ Échos</button>
+            </div>
+            <div class="collections-content">
+                <!-- COLLECTIONS TAB -->
+                <div id="colPaneCollections">
+                    <div id="collectionsList"></div>
+                    <div id="collectionDetail" class="collection-detail">
+                        <button onclick="backToCollections()" class="back-btn">← Retour</button>
+                        <div class="collection-detail-header">
+                            <h3 class="collection-detail-title" id="detailTitle"></h3>
+                            <p class="collection-detail-desc" id="detailDesc"></p>
+                            <span class="collection-badge" id="detailBadge"></span>
+                        </div>
+                        <div class="cards-grid" id="cardsGrid"></div>
+                    </div>
+                </div>
+                <!-- ECHOES TAB -->
+                <div id="colPaneEchoes" class="hidden">
+                    <div id="echoesPanel"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card Detail View -->
+        <div id="cardDetailView" class="card-detail-view">
+            <div class="card-detail-header">
+                <div class="card-detail-title-section">
+                    <h2 class="collections-title" id="cardDetailHeaderTitle"></h2>
+                    <div class="card-detail-dust-display">
+                        <span>💜</span>
+                        <span id="cardDetailDustCounter">0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-detail-body">
+                <div class="card-display" onclick="closeCardDetail()" style="cursor: pointer;">
+                    <div class="card-frame" onclick="event.stopPropagation()" style="cursor: pointer; position: relative;">
+                        <div class="card-dialogue-bubble" id="cardDialogueBubble">
+                            <div class="card-dialogue-text" id="cardDialogueText"></div>
+                        </div>
+                        <div class="card-supertype-badge" id="cardSupertypeBadge">🏛️</div>
+                        <div class="card-category-badge" id="cardCategory">Personnage</div>
+                        <div class="card-art-area">
+                            <div class="card-art-placeholder" onclick="showCardDialogue()">👤</div>
+                            <div class="card-art-title" id="cardDetailName">Marie Curie</div>
+                            <div class="card-footer">
+                                <div class="rarity-gem" id="cardRarityGem"></div>
+                                <div class="card-level-info">
+                                    <span class="card-level-label" id="cardLevelDisplay">Niveau 1</span>
+                                    <span class="card-level-label" id="cardExpDisplay">0/10 💜</span>
+                                </div>
+                                <div class="card-exp-bar">
+                                    <div class="card-exp-fill" id="cardExpBar" style="width: 0%"></div>
+                                </div>
+                                <button id="addExpBtn" class="card-level-up-btn" onclick="addExperience()" disabled>
+                                    💜 Ajouter 50 poudre (+EXP)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-tabs">
+                    <button class="card-tab active" onclick="switchTab('general', event)">Général</button>
+                    <button class="card-tab" onclick="switchTab('skins', event)">Skins</button>
+                    <button class="card-tab" onclick="switchTab('competences', event)">Skills</button>
+                    <button class="card-tab journal-tab" onclick="openJournalScreen()" id="journalTabBtn">
+                        📖 Carnet
+                        <span class="notification-badge hidden" id="journalNotification">!</span>
+                    </button>
+                </div>
+
+                <div id="generalTab" class="tab-content active">
+                    <div class="info-row"><span class="info-label">Naissance</span><span class="info-value">7 novembre 1867</span></div>
+                    <div class="info-row"><span class="info-label">Décès</span><span class="info-value">4 juillet 1934</span></div>
+                    <div class="info-row"><span class="info-label">Nationalité</span><span class="info-value">Polonaise, Française</span></div>
+                    <div class="info-row"><span class="info-label">Conjoint</span><span class="info-value">Pierre Curie</span></div>
+                    <p style="margin-top: 20px;">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                </div>
+
+                <div id="skinsTab" class="tab-content">
+                    <h3 style="margin-bottom: 16px; color: #1f2937;">Apparences disponibles</h3>
+                    <div class="info-row"><span class="info-label">Skin 1</span><span class="info-value">Tenue de laboratoire</span></div>
+                    <div class="info-row"><span class="info-label">Skin 2</span><span class="info-value">Tenue de cérémonie</span></div>
+                    <p style="margin-top: 20px;">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                </div>
+
+                <div id="competencesTab" class="tab-content">
+                    <h3 style="margin-bottom: 16px; color: #1f2937;">Compétences à débloquer</h3>
+                    <div class="info-row"><span class="info-label">Radioactivité</span><span class="info-value">À définir</span></div>
+                    <div class="info-row"><span class="info-label">Physique</span><span class="info-value">À définir</span></div>
+                    <div class="info-row"><span class="info-label">Chimie</span><span class="info-value">À définir</span></div>
+                    <p style="margin-top: 20px;">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Studio Screen -->
+        <div id="studioScreen" class="studio-screen">
+            <div class="studio-header">
+                <button onclick="closeStudioScreen()" class="studio-back">←</button>
+                <div class="studio-header-info">
+                    <span class="studio-title">🏠 Mon Studio</span>
+                    <span class="studio-card-name" id="studioCardName"></span>
+                </div>
+                <div class="studio-dust-display">
+                    <span>💜</span>
+                    <span id="studioDustCounter">0</span>
+                </div>
+            </div>
+
+            <div class="studio-body">
+                <div class="studio-room-wrapper">
+                    <div class="studio-scene">
+
+                        <!-- ===== SVG ISOMETRIC ROOM ===== -->
+                        <svg id="studioSvg" width="400" height="370" viewBox="0 0 400 370" style="position:absolute;top:0;left:0;overflow:visible">
+  <defs>
+    <!-- Wood plank pattern for walls -->
+    <pattern id="woodPlanksLeft" x="0" y="0" width="20" height="60" patternUnits="userSpaceOnUse" patternTransform="skewY(-27) scaleX(0.5)">
+      <rect width="20" height="60" fill="#5a3010"/>
+      <rect x="1" width="18" height="58" fill="#7a4520"/>
+      <rect x="2" y="1" width="16" height="2" fill="rgba(255,200,100,0.08)"/>
+      <line x1="0" y1="0" x2="20" y2="0" stroke="rgba(0,0,0,0.3)" stroke-width="2"/>
+    </pattern>
+    <pattern id="woodPlanksRight" x="0" y="0" width="20" height="60" patternUnits="userSpaceOnUse" patternTransform="skewY(27) scaleX(0.5)">
+      <rect width="20" height="60" fill="#3d2008"/>
+      <rect x="1" width="18" height="58" fill="#5a3010"/>
+      <rect x="2" y="1" width="16" height="2" fill="rgba(255,200,100,0.05)"/>
+      <line x1="0" y1="0" x2="20" y2="0" stroke="rgba(0,0,0,0.35)" stroke-width="2"/>
+    </pattern>
+    <!-- Floor wood -->
+    <pattern id="floorWood" x="0" y="0" width="40" height="20" patternUnits="userSpaceOnUse" patternTransform="rotate(-27) scaleY(0.5)">
+      <rect width="40" height="20" fill="#3a6020"/>
+      <rect y="1" width="40" height="18" fill="#486828"/>
+      <line x1="0" y1="0" x2="40" y2="0" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
+    </pattern>
+    <!-- Wall lamp glow -->
+    <radialGradient id="lampGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffcc44" stop-opacity="0.8"/>
+      <stop offset="60%" stop-color="#ff8800" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#ff4400" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Arch glow -->
+    <radialGradient id="archGlow" cx="50%" cy="60%" r="50%">
+      <stop offset="0%" stop-color="#00ffcc" stop-opacity="0.9"/>
+      <stop offset="50%" stop-color="#00aaff" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#0044ff" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Drop shadow filter -->
+    <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="rgba(0,0,0,0.6)"/>
+    </filter>
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="rgba(0,0,0,0.5)"/>
+    </filter>
+    <!-- Arch inner glow blur -->
+    <filter id="glowBlur">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <!-- Ceiling beam clip -->
+    <clipPath id="leftWallClip">
+      <polygon points="200,10 60,100 60,230 200,140"/>
+    </clipPath>
+    <clipPath id="rightWallClip">
+      <polygon points="200,10 340,100 340,230 200,140"/>
+    </clipPath>
+  </defs>
+
+  <!-- ═══════════════════════════════════════════
+       ROOM SHELL — three faces of a box
+       back=(200,110) left=(60,200) front=(200,290) right=(340,200)
+       wall height=100px
+  ════════════════════════════════════════════ -->
+
+  <!-- CEILING / TOP EDGE (thin) -->
+  <polygon points="200,10 60,100 200,140 340,100" fill="#2a1800" opacity="0.6"/>
+
+  <!-- LEFT WALL (north-west face) — darker wood -->
+  <polygon points="200,10 60,100 60,230 200,140" fill="#5a3010"/>
+  <!-- Wood planks on left wall (vertical lines) -->
+  <line x1="107" y1="78" x2="107" y2="208" stroke="rgba(0,0,0,0.25)" stroke-width="1.5"/>
+  <line x1="130" y1="65" x2="130" y2="195" stroke="rgba(0,0,0,0.2)" stroke-width="1.5"/>
+  <line x1="153" y1="52" x2="153" y2="182" stroke="rgba(0,0,0,0.2)" stroke-width="1.5"/>
+  <line x1="176" y1="39" x2="176" y2="169" stroke="rgba(0,0,0,0.2)" stroke-width="1.5"/>
+  <line x1="84" y1="91" x2="84" y2="221" stroke="rgba(0,0,0,0.2)" stroke-width="1.5"/>
+  <!-- Highlight top edge left wall -->
+  <line x1="200" y1="10" x2="60" y2="100" stroke="rgba(255,200,80,0.25)" stroke-width="1.5"/>
+  <!-- Left wall ambient from arch -->
+  <polygon points="200,10 60,100 60,230 200,140" fill="#00cc88" opacity="0.04"/>
+
+  <!-- RIGHT WALL (north-east face) — slightly darker -->
+  <polygon points="200,10 340,100 340,230 200,140" fill="#3d2008"/>
+  <!-- Wood planks right wall -->
+  <line x1="247" y1="52" x2="247" y2="182" stroke="rgba(0,0,0,0.2)" stroke-width="1.5"/>
+  <line x1="270" y1="65" x2="270" y2="195" stroke="rgba(0,0,0,0.2)" stroke-width="1.5"/>
+  <line x1="293" y1="78" x2="293" y2="208" stroke="rgba(0,0,0,0.25)" stroke-width="1.5"/>
+  <line x1="316" y1="91" x2="316" y2="221" stroke="rgba(0,0,0,0.2)" stroke-width="1.5"/>
+  <line x1="224" y1="39" x2="224" y2="169" stroke="rgba(0,0,0,0.2)" stroke-width="1.5"/>
+  <!-- Highlight top edge right wall -->
+  <line x1="200" y1="10" x2="340" y2="100" stroke="rgba(255,200,80,0.18)" stroke-width="1.5"/>
+  <!-- Lamp warm light on right wall -->
+  <ellipse cx="310" cy="130" rx="60" ry="50" fill="url(#lampGlow)" opacity="0.35"/>
+
+  <!-- FLOOR (top face of box) — warm green wood -->
+  <polygon points="200,140 60,230 200,320 340,230" fill="#4a6818"/>
+  <!-- Floor plank lines (going front-left to front-right direction) -->
+  <line x1="60" y1="230" x2="200" y2="140" stroke="rgba(0,0,0,0.15)" stroke-width="1"/>
+  <line x1="90" y1="245" x2="230" y2="155" stroke="rgba(0,0,0,0.1)" stroke-width="1"/>
+  <line x1="120" y1="260" x2="260" y2="170" stroke="rgba(0,0,0,0.1)" stroke-width="1"/>
+  <line x1="150" y1="275" x2="290" y2="185" stroke="rgba(0,0,0,0.1)" stroke-width="1"/>
+  <line x1="180" y1="290" x2="320" y2="200" stroke="rgba(0,0,0,0.1)" stroke-width="1"/>
+  <line x1="200" y1="320" x2="340" y2="230" stroke="rgba(0,0,0,0.15)" stroke-width="1"/>
+  <!-- Cross planks -->
+  <line x1="60" y1="230" x2="200" y2="320" stroke="rgba(0,0,0,0.08)" stroke-width="1"/>
+  <line x1="107" y1="203" x2="247" y2="293" stroke="rgba(0,0,0,0.07)" stroke-width="1"/>
+  <line x1="154" y1="176" x2="294" y2="266" stroke="rgba(0,0,0,0.07)" stroke-width="1"/>
+  <!-- Floor highlight near arch (glow spill) -->
+  <ellipse cx="100" cy="220" rx="50" ry="25" fill="#00ffcc" opacity="0.06"/>
+  <!-- Rug -->
+  <polygon points="140,200 200,165 260,200 200,235" fill="#6a1f5a" opacity="0.6"/>
+  <polygon points="148,200 200,170 252,200 200,230" fill="none" stroke="rgba(220,130,200,0.5)" stroke-width="1.5"/>
+  <circle cx="200" cy="165" r="3" fill="rgba(220,130,200,0.6)"/>
+  <circle cx="140" cy="200" r="3" fill="rgba(220,130,200,0.6)"/>
+  <circle cx="260" cy="200" r="3" fill="rgba(220,130,200,0.6)"/>
+  <circle cx="200" cy="235" r="3" fill="rgba(220,130,200,0.6)"/>
+
+  <!-- Wall/floor join edges -->
+  <line x1="60" y1="100" x2="60" y2="230" stroke="rgba(0,0,0,0.5)" stroke-width="2"/>
+  <line x1="340" y1="100" x2="340" y2="230" stroke="rgba(0,0,0,0.5)" stroke-width="2"/>
+  <line x1="60" y1="230" x2="200" y2="140" stroke="rgba(255,200,80,0.15)" stroke-width="1"/>
+  <line x1="340" y1="230" x2="200" y2="140" stroke="rgba(255,200,80,0.12)" stroke-width="1"/>
+
+  <!-- Ceiling beams -->
+  <line x1="130" y1="55" x2="130" y2="170" stroke="rgba(30,15,0,0.6)" stroke-width="8" stroke-linecap="round"/>
+  <line x1="270" y1="55" x2="270" y2="170" stroke="rgba(30,15,0,0.5)" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- ═══════════════════════════════════════════
+       MAGIC ARCH (left wall, back corner) — replaces globe → back to map
+  ════════════════════════════════════════════ -->
+  <g id="item-arch" class="studio-nav-item" onclick="studioItemClick('arch')" style="cursor:pointer" filter="url(#dropShadow)">
+    <!-- Stone frame outer -->
+    <ellipse cx="100" cy="165" rx="34" ry="46" fill="#3a3040" stroke="#504858" stroke-width="3"/>
+    <!-- Stone bricks around arch -->
+    <path d="M66,165 Q66,120 100,119 Q134,120 134,165" fill="none" stroke="#605068" stroke-width="6" stroke-dasharray="10,4"/>
+    <!-- Stone frame inner -->
+    <ellipse cx="100" cy="165" rx="26" ry="37" fill="#1a1028"/>
+    <!-- Portal glow layers -->
+    <ellipse cx="100" cy="165" rx="22" ry="33" class="window-glow-anim" fill="url(#archGlow)" opacity="0.9" filter="url(#glowBlur)"/>
+    <ellipse cx="100" cy="165" rx="16" ry="26" fill="#00ffcc" opacity="0.3">
+      <animate attributeName="opacity" values="0.3;0.7;0.3" dur="2s" repeatCount="indefinite"/>
+    </ellipse>
+    <!-- Rune carvings -->
+    <text x="77" y="138" font-size="9" fill="rgba(0,255,200,0.6)" font-family="serif">ᚱ</text>
+    <text x="100" y="126" font-size="9" fill="rgba(0,255,200,0.5)" font-family="serif">ᚷ</text>
+    <text x="121" y="138" font-size="9" fill="rgba(0,255,200,0.6)" font-family="serif">ᚦ</text>
+    <!-- Ground glow spill -->
+    <ellipse cx="100" cy="200" rx="30" ry="10" fill="#00ffcc" opacity="0.15">
+      <animate attributeName="opacity" values="0.15;0.3;0.15" dur="2s" repeatCount="indefinite"/>
+    </ellipse>
+    <!-- Hover glow ring around arch -->
+    <ellipse cx="100" cy="165" rx="38" ry="52" fill="none"
+             stroke="rgba(0,255,200,0.9)" stroke-width="3"
+             class="nav-glow-ring" filter="url(#glowBlur)"/>
+    <!-- Label -->
+    <text x="100" y="220" font-size="8" fill="rgba(0,255,200,0.8)" text-anchor="middle" font-family="sans-serif">← Carte</text>
+  </g>
+
+  <!-- ═══════════════════════════════════════════
+       BOOKSHELF (left wall)
+  ════════════════════════════════════════════ -->
+  <g id="item-bookshelf" class="studio-nav-item" onclick="studioItemClick('bookshelf')" style="cursor:pointer">
+    <!-- Bookshelf against RIGHT wall, upper area, well above armchair -->
+    <!-- Back face against wall (hidden): (230,42)→(265,64)→(265,124)→(230,102) -->
+    <!-- Left face (visible, faces viewer): (230,42)→(216,49)→(216,109)→(230,102) -->
+    <!-- Top face: (216,49)→(230,42)→(265,64)→(251,71) -->
+
+    <!-- Back panel -->
+    <polygon points="230,42 265,64 265,124 230,102" fill="#1e0e04"/>
+    <!-- Left face — main visible surface with book spines -->
+    <polygon points="230,42 216,49 216,109 230,102" fill="#5a3018" id="shelf-face"/>
+    <!-- Top panel -->
+    <polygon points="216,49 230,42 265,64 251,71" fill="#7a4a20"/>
+
+    <!-- Shelf boards on left face (horizontal dividers) -->
+    <line x1="230" y1="68" x2="216" y2="75" stroke="#3d2010" stroke-width="2"/>
+    <line x1="230" y1="87" x2="216" y2="94" stroke="#3d2010" stroke-width="2"/>
+
+    <!-- Books row 1 (top shelf, y 44-66) — spines on left face -->
+    <polygon points="230,44 224,47 224,66 230,63" fill="#c0392b"/>
+    <polygon points="224,47 219,50 219,69 224,66" fill="#2980b9"/>
+    <polygon points="219,50 216,51 216,70 219,69" fill="#27ae60"/>
+
+    <!-- Books row 2 (mid shelf, y 70-85) -->
+    <polygon points="230,70 224,73 224,85 230,82" fill="#f39c12"/>
+    <polygon points="224,73 219,76 219,88 224,85" fill="#8e44ad"/>
+    <polygon points="219,76 216,77 216,89 219,88" fill="#e74c3c"/>
+
+    <!-- Books row 3 (bottom shelf, y 89-107) -->
+    <polygon points="230,89 224,92 224,105 230,102" fill="#16a085"/>
+    <polygon points="224,92 218,95 218,108 224,105" fill="#c0392b"/>
+    <polygon points="218,95 216,96 216,109 218,108" fill="#2980b9"/>
+
+    <!-- Hover glow outline (shown via CSS filter on hover) -->
+    <polygon points="230,42 216,49 216,109 230,102" fill="none" stroke="rgba(255,220,80,0)" stroke-width="2" class="item-hover-glow"/>
+    <polygon points="216,49 230,42 265,64 251,71" fill="none" stroke="rgba(255,220,80,0)" stroke-width="2" class="item-hover-glow"/>
+
+    <!-- Hover glow ring -->
+    <polygon points="229,40 214,48 214,111 229,104 266,126 266,62" fill="none" 
+             stroke="rgba(255,220,60,0.9)" stroke-width="2.5" stroke-linejoin="round"
+             class="nav-glow-ring" filter="url(#glowBlur)"/>
+    <text x="232" y="118" font-size="8" fill="rgba(255,220,120,0.85)" text-anchor="middle" font-family="sans-serif">Collections →</text>
+  </g>
+
+  </g>
+
+  <!-- ═══════════════════════════════════════════
+       LAMP (right wall, hanging/wall sconce)
+  ════════════════════════════════════════════ -->
+  <g id="item-lamp" onclick="studioItemClick('lamp')" style="cursor:pointer">
+    <!-- Warm glow bloom on wall -->
+    <ellipse cx="308" cy="148" rx="55" ry="45" fill="url(#lampGlow)" opacity="0.5" class="lamp-glow-anim"/>
+    <!-- Bracket arm -->
+    <line x1="325" y1="130" x2="308" y2="118" stroke="#8c6020" stroke-width="4" stroke-linecap="round"/>
+    <!-- Lamp shade top -->
+    <polygon points="296,104 322,110 316,118 290,112" fill="#d4900a"/>
+    <polygon points="290,112 316,118 312,130 286,124" fill="#c07808"/>
+    <!-- Flame -->
+    <ellipse cx="303" cy="122" rx="5" ry="7" fill="#ffdd44">
+      <animate attributeName="ry" values="7;9;7" dur="1.2s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="303" cy="120" rx="3" ry="5" fill="#ff8800">
+      <animate attributeName="ry" values="5;7;5" dur="1.2s" repeatCount="indefinite"/>
+    </ellipse>
+    <!-- Label -->
+    <text x="305" y="148" font-size="8" fill="rgba(255,220,120,0.7)" text-anchor="middle" font-family="sans-serif">Lampe</text>
+  </g>
+
+  <!-- ═══════════════════════════════════════════
+       ARMCHAIR (right side, mid)
+  ════════════════════════════════════════════ -->
+  <g id="item-armchair" onclick="studioItemClick('armchair')" style="cursor:pointer" filter="url(#softShadow)">
+    <!-- Floor shadow -->
+    <ellipse cx="282" cy="228" rx="38" ry="13" fill="rgba(0,0,0,0.45)"/>
+    <!-- Back legs -->
+    <polygon points="250,216 258,212 258,228 250,232" fill="#3d1f08"/>
+    <polygon points="310,200 318,196 318,212 310,216" fill="#3d1f08"/>
+    <!-- Chair back right face -->
+    <polygon points="310,180 322,174 322,200 310,206" fill="#7a3a10"/>
+    <!-- Chair back top face -->
+    <polygon points="248,178 310,148 322,154 260,184" fill="#c87030"/>
+    <!-- Chair back left face -->
+    <polygon points="248,178 260,184 260,204 248,210" fill="#a05020"/>
+    <!-- Chair back main -->
+    <polygon points="260,184 322,154 322,174 260,204" fill="#b86028"/>
+    <!-- Seat top -->
+    <polygon points="248,204 310,174 322,180 260,210" fill="#d4782e"/>
+    <!-- Seat right face -->
+    <polygon points="310,174 322,180 322,198 310,192" fill="#8c4518"/>
+    <!-- Seat left face -->
+    <polygon points="248,204 260,210 260,228 248,222" fill="#a05020"/>
+    <!-- Right armrest top -->
+    <polygon points="310,168 324,162 322,174 308,180" fill="#c87030"/>
+    <!-- Left armrest -->
+    <polygon points="248,196 262,190 260,204 246,210" fill="#c87030"/>
+    <!-- Cushion detail -->
+    <circle cx="284" cy="185" r="4" fill="#8c4518"/>
+    <!-- Label -->
+    <text x="284" y="244" font-size="8" fill="rgba(255,220,120,0.85)" text-anchor="middle" font-family="sans-serif">Fauteuil</text>
+  </g>
+
+  <!-- ═══════════════════════════════════════════
+       CHEST (center-right)
+  ════════════════════════════════════════════ -->
+  <g id="item-chest" onclick="studioItemClick('chest')" style="cursor:pointer" filter="url(#softShadow)">
+    <!-- Floor shadow -->
+    <ellipse cx="230" cy="220" rx="30" ry="10" fill="rgba(0,0,0,0.4)"/>
+    <!-- Chest right face -->
+    <polygon points="248,192 278,176 278,210 248,226" fill="#3d1f08"/>
+    <!-- Chest front/left face -->
+    <polygon points="200,210 248,226 248,192 200,176" fill="#7a3a10"/>
+    <!-- Lid top -->
+    <polygon points="200,176 248,192 278,176 230,160" fill="#c87030"/>
+    <!-- Body top -->
+    <polygon points="200,188 248,204 278,188 230,172" fill="#a05020"/>
+    <!-- Metal band lid -->
+    <polygon points="200,176 248,192 278,176 230,160" fill="none" stroke="#d4a010" stroke-width="2.5"/>
+    <!-- Metal band body -->
+    <polygon points="200,200 248,216 278,200 230,184" fill="none" stroke="#d4a010" stroke-width="1.5" opacity="0.7"/>
+    <!-- Lock -->
+    <circle cx="233" cy="192" r="5" fill="#d4a010"/>
+    <rect x="230" y="186" width="6" height="5" rx="2" fill="none" stroke="#d4a010" stroke-width="2"/>
+    <!-- Corner rivets -->
+    <circle cx="202" cy="177" r="3" fill="#b88000"/>
+    <circle cx="276" cy="177" r="3" fill="#b88000"/>
+    <!-- Label -->
+    <text x="235" y="232" font-size="8" fill="rgba(255,220,120,0.85)" text-anchor="middle" font-family="sans-serif">Coffre</text>
+  </g>
+
+  <!-- ═══════════════════════════════════════════
+       SMALL TABLE with potion bottles (center, foreground)  
+  ════════════════════════════════════════════ -->
+  <g id="item-desk" onclick="studioItemClick('desk')" style="cursor:pointer" filter="url(#softShadow)">
+    <!-- Floor shadow -->
+    <ellipse cx="185" cy="264" rx="30" ry="10" fill="rgba(0,0,0,0.45)"/>
+    <!-- Table legs -->
+    <rect x="158" y="250" width="5" height="18" fill="#3d1f08" rx="2" transform="rotate(-15 160 250)"/>
+    <rect x="205" y="244" width="5" height="18" fill="#3d1f08" rx="2" transform="rotate(10 207 244)"/>
+    <!-- Table right face -->
+    <polygon points="210,240 228,231 228,244 210,253" fill="#5a3010"/>
+    <!-- Table top -->
+    <polygon points="155,244 210,220 228,231 173,255" fill="#8c5422"/>
+    <!-- Table left face -->
+    <polygon points="155,244 173,255 173,264 155,253" fill="#6a3d18"/>
+    <!-- Potion 1 (green) -->
+    <ellipse cx="175" cy="236" rx="7" ry="4" fill="#2d6010"/>
+    <rect x="170" y="218" width="10" height="18" fill="#3a8018" rx="2"/>
+    <rect x="173" y="213" width="4" height="7" fill="#5a9020" rx="1"/>
+    <ellipse cx="175" cy="218" rx="5" ry="2.5" fill="#4a9820" opacity="0.7"/>
+    <!-- Potion 2 (orange) -->
+    <ellipse cx="195" cy="229" rx="6" ry="3" fill="#8c3010"/>
+    <rect x="190" y="213" width="9" height="16" fill="#c04818" rx="2"/>
+    <rect x="193" y="209" width="3" height="6" fill="#d05820" rx="1"/>
+    <ellipse cx="195" cy="213" rx="4.5" ry="2" fill="#e06828" opacity="0.7"/>
+    <!-- Label -->
+    <text x="185" y="274" font-size="8" fill="rgba(255,220,120,0.85)" text-anchor="middle" font-family="sans-serif">Bureau</text>
+  </g>
+
+  <!-- ═══════════════════════════════════════════
+       MAGIC PARTICLES
+  ════════════════════════════════════════════ -->
+  <circle cx="180" cy="260" r="2" fill="rgba(255,200,80,0.7)">
+    <animate attributeName="opacity" values="0.7;0.1;0.7" dur="2.1s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="260;255;260" dur="2.1s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="240" cy="240" r="1.5" fill="rgba(0,255,200,0.6)">
+    <animate attributeName="opacity" values="0.6;0.1;0.6" dur="3.2s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="240;235;240" dur="3.2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="155" cy="245" r="1.5" fill="rgba(200,100,255,0.6)">
+    <animate attributeName="opacity" values="0.5;0.1;0.5" dur="1.9s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="110" cy="210" r="2" fill="rgba(0,255,200,0.5)">
+    <animate attributeName="opacity" values="0.5;0.9;0.5" dur="1.5s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="210;205;210" dur="1.5s" repeatCount="indefinite"/>
+  </circle>
+
+</svg>
+                    </div>
+                </div>
+
+                <!-- Tooltip popup -->
+                <div class="studio-tooltip hidden" id="studioTooltip">
+                    <div class="tooltip-icon" id="tooltipIcon"></div>
+                    <div class="tooltip-content">
+                        <div class="tooltip-name" id="tooltipName"></div>
+                        <div class="tooltip-desc" id="tooltipDesc"></div>
+                    </div>
+                    <button class="tooltip-close" onclick="closeStudioTooltip()">✕</button>
+                </div>
+
+                <!-- Bottom bar: unlockable items -->
+                <div class="studio-shop">
+                    <div class="studio-shop-title">Objets disponibles</div>
+                    <div class="studio-shop-items">
+                        <div class="shop-item" onclick="buyStudioItem('mirror', 200)">
+                            <div class="shop-item-icon">🔮</div>
+                            <div class="shop-item-name">Miroir magique</div>
+                            <div class="shop-item-price">200 💜</div>
+                        </div>
+                        <div class="shop-item owned" onclick="buyStudioItem('globe', 300)">
+                            <div class="shop-item-icon">🌍</div>
+                            <div class="shop-item-name">Globe</div>
+                            <div class="shop-item-price">Possédé ✓</div>
+                        </div>
+                        <div class="shop-item" onclick="buyStudioItem('harp', 500)">
+                            <div class="shop-item-icon">🎵</div>
+                            <div class="shop-item-name">Harpe lyonnaise</div>
+                            <div class="shop-item-price">500 💜</div>
+                        </div>
+                        <div class="shop-item" onclick="buyStudioItem('cauldron', 400)">
+                            <div class="shop-item-icon">🫙</div>
+                            <div class="shop-item-name">Chaudron</div>
+                            <div class="shop-item-price">400 💜</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Journal Screen -->
+        <div id="journalScreen" class="journal-screen">
+            <div class="journal-screen-header">
+                <button onclick="closeJournalScreen()" class="journal-screen-back">←</button>
+                <div class="journal-screen-card-mini">
+                    <div class="journal-screen-card-image">🎴</div>
+                    <div class="journal-screen-card-info">
+                        <h3 id="journalScreenCardName">Marie Curie</h3>
+                        <p id="journalScreenCardType">Personnage</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="journal-screen-body">
+                <div class="journal-screen-content">
+                    <div class="journal-notebook">
+                        <div class="journal-level-overlay" id="journalLevelOverlay1"></div>
+                        <div class="journal-level-overlay" id="journalLevelOverlay2"></div>
+                        <div class="journal-level-overlay" id="journalLevelOverlay3"></div>
+
+                        <div class="journal-quote">
+                            "J'ai appris que la voie du progrès n'était ni rapide, ni facile..."
+                        </div>
+
+                        <div class="journal-item-with-slot">
+                            <div class="echo-slot" id="echoSlot1" data-slot-id="slot1" ondragover="allowDrop(event)" ondrop="dropEcho(event)">
+                                <div class="echo-slot-content"></div>
+                            </div>
+                            <div class="journal-content-wrapper">
+                                <div class="journal-item" style="margin: 0;">
+                                    <div class="journal-image">🏅</div>
+                                    <div>
+                                        <div class="journal-date">1903</div>
+                                        <div class="journal-text">Prix Nobel de Physique</div>
+                                    </div>
+                                </div>
+                                <div id="unlockedContent1" class="unlocked-content hidden">
+                                    <div class="unlocked-content-text"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="journal-item-with-slot">
+                            <div class="echo-slot" id="echoSlot2" data-slot-id="slot2" ondragover="allowDrop(event)" ondrop="dropEcho(event)">
+                                <div class="echo-slot-content"></div>
+                            </div>
+                            <div class="journal-content-wrapper">
+                                <div class="journal-item" style="margin: 0;">
+                                    <div class="journal-image">🏛️</div>
+                                    <div>
+                                        <div class="journal-date">1891</div>
+                                        <div class="journal-text">Arrive à Paris pour étudier</div>
+                                    </div>
+                                </div>
+                                <div id="unlockedContent2" class="unlocked-content hidden">
+                                    <div class="unlocked-content-text"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="journal-item-with-slot">
+                            <div class="echo-slot" id="echoSlot3" data-slot-id="slot3" ondragover="allowDrop(event)" ondrop="dropEcho(event)">
+                                <div class="echo-slot-content"></div>
+                            </div>
+                            <div class="journal-content-wrapper">
+                                <div class="journal-item" style="margin: 0;">
+                                    <div class="journal-image">🧪</div>
+                                    <div>
+                                        <div class="journal-date">1898</div>
+                                        <div class="journal-text">Découverte du radium</div>
+                                    </div>
+                                </div>
+                                <div id="unlockedContent3" class="unlocked-content hidden">
+                                    <div class="unlocked-content-text"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="journal-interaction-btn" id="journalBtn1" style="position: absolute; top: 16.66%; left: 50%; transform: translateX(-50%); z-index: 10; display: none;">
+                            <div class="interaction-button">🎵</div>
+                        </div>
+                        <div class="journal-interaction-btn" id="journalBtn2" style="position: absolute; top: 50%; left: 50%; transform: translateX(-50%); z-index: 10; display: none;">
+                            <div class="interaction-button">🔒</div>
+                        </div>
+                        <div class="journal-interaction-btn" id="journalBtn3" style="position: absolute; top: 83.33%; left: 50%; transform: translateX(-50%); z-index: 10; display: none;">
+                            <div class="interaction-button">🔧</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="journal-screen-footer" style="padding-bottom: max(16px, env(safe-area-inset-bottom));">
+                    <div class="journal-inventory-title">Échos collectés</div>
+                    <div class="echo-inventory" id="echoInventory"></div>
+                </div>
+            </div>
+        </div>
+    </div><!-- fin mainApp -->
+
+    <script>
+        // ==================== DATA ====================
+
+        const COLLECTIONS = {
+            lumieres: {
+                id: 'lumieres',
+                name: 'Lumières de Lyon',
+                type: 'thématique',
+                description: 'Personnages historiques lyonnais',
+                cards: [
+                    { id: 'card1', name: 'Antoine de Saint-Exupéry', type: 'Personnage', poiId: 'bellecour', rarity: 'rare', supertype: 'arts' },
+                    { id: 'card2', name: 'Les Frères Lumière', type: 'Personnage', poiId: 'institut_lumiere', rarity: 'legendary', supertype: 'science' },
+                    { id: 'card3', name: 'Paul Bocuse', type: 'Personnage', poiId: 'halles_bocuse', rarity: 'rare', supertype: 'societe' },
+                    { id: 'card4', name: 'Guignol', type: 'Personnage', poiId: 'vieux_lyon', rarity: 'common', supertype: 'arts' },
+                    { id: 'card5', name: 'Tony Garnier', type: 'Personnage', poiId: 'confluence', rarity: 'common', supertype: 'histoire' },
+                ]
+            },
+            presquile: {
+                id: 'presquile',
+                name: 'Presqu\'île',
+                type: 'locale',
+                description: 'Trésors de la Presqu\'île lyonnaise',
+                cards: [
+                    { id: 'card6', name: 'Place Bellecour', type: 'Lieu', poiId: 'bellecour', rarity: 'legendary', supertype: 'histoire' },
+                    { id: 'card7', name: 'Opéra de Lyon', type: 'Lieu', poiId: 'opera', rarity: 'rare', supertype: 'arts' },
+                    { id: 'card8', name: 'Hôtel de Ville', type: 'Lieu', poiId: 'hotel_ville', rarity: 'common', supertype: 'societe' },
+                    { id: 'card9', name: 'Les Terreaux', type: 'Lieu', poiId: 'terreaux', rarity: 'common', supertype: 'histoire' },
+                    { id: 'card10', name: 'Fontaine Bartholdi', type: 'Objet', poiId: 'terreaux', rarity: 'rare', supertype: 'arts' },
+                ]
+            },
+            fourviere: {
+                id: 'fourviere',
+                name: 'Fourvière & Vieux-Lyon',
+                type: 'locale',
+                description: 'Patrimoine de la colline et du Vieux-Lyon',
+                cards: [
+                    { id: 'card11', name: 'Basilique Notre-Dame', type: 'Lieu', poiId: 'fourviere', rarity: 'legendary', supertype: 'histoire' },
+                    { id: 'card12', name: 'Théâtre Romain', type: 'Lieu', poiId: 'theatre_romain', rarity: 'rare', supertype: 'histoire' },
+                    { id: 'card13', name: 'Cathédrale Saint-Jean', type: 'Lieu', poiId: 'saint_jean', rarity: 'rare', supertype: 'histoire' },
+                    { id: 'card14', name: 'Traboule Renaissance', type: 'Lieu', poiId: 'vieux_lyon', rarity: 'common', supertype: 'societe' },
+                    { id: 'card15', name: 'Horloge Astronomique', type: 'Objet', poiId: 'saint_jean', rarity: 'common', supertype: 'science' },
+                ]
+            }
+        };
+
+        const POIS = [
+            { id: 'fourviere', name: 'Basilique de Fourvière', lat: 45.7624, lng: 4.8227 },
+            { id: 'bellecour', name: 'Place Bellecour', lat: 45.7578, lng: 4.8320 },
+            { id: 'vieux_lyon', name: 'Vieux-Lyon', lat: 45.7640, lng: 4.8270 },
+            { id: 'parc_tete_or', name: 'Parc de la Tête d\'Or', lat: 45.7772, lng: 4.8542 },
+            { id: 'confluence', name: 'Musée des Confluences', lat: 45.7326, lng: 4.8181 },
+            { id: 'terreaux', name: 'Place des Terreaux', lat: 45.7675, lng: 4.8336 },
+            { id: 'opera', name: 'Opéra de Lyon', lat: 45.7673, lng: 4.8361 },
+            { id: 'hotel_ville', name: 'Hôtel de Ville', lat: 45.7674, lng: 4.8348 },
+            { id: 'theatre_romain', name: 'Théâtre Romain', lat: 45.7605, lng: 4.8205 },
+            { id: 'saint_jean', name: 'Cathédrale Saint-Jean', lat: 45.7606, lng: 4.8268 },
+            { id: 'institut_lumiere', name: 'Institut Lumière', lat: 45.7432, lng: 4.8687 },
+            { id: 'halles_bocuse', name: 'Halles Paul Bocuse', lat: 45.7638, lng: 4.8542 },
+        ];
+
+        const DUST_POINTS = [
+            { id: 'dust1', lat: 45.7590, lng: 4.8290 },{ id: 'dust2', lat: 45.7610, lng: 4.8310 },
+            { id: 'dust3', lat: 45.7630, lng: 4.8330 },{ id: 'dust4', lat: 45.7650, lng: 4.8300 },
+            { id: 'dust5', lat: 45.7620, lng: 4.8250 },{ id: 'dust6', lat: 45.7600, lng: 4.8230 },
+            { id: 'dust7', lat: 45.7660, lng: 4.8320 },{ id: 'dust8', lat: 45.7640, lng: 4.8380 },
+            { id: 'dust9', lat: 45.7680, lng: 4.8360 },{ id: 'dust10', lat: 45.7700, lng: 4.8340 },
+            { id: 'dust11', lat: 45.7720, lng: 4.8380 },{ id: 'dust12', lat: 45.7740, lng: 4.8420 },
+            { id: 'dust13', lat: 45.7760, lng: 4.8460 },{ id: 'dust14', lat: 45.7780, lng: 4.8500 },
+            { id: 'dust15', lat: 45.7650, lng: 4.8420 },{ id: 'dust16', lat: 45.7580, lng: 4.8380 },
+            { id: 'dust17', lat: 45.7560, lng: 4.8340 },{ id: 'dust18', lat: 45.7540, lng: 4.8280 },
+            { id: 'dust19', lat: 45.7520, lng: 4.8240 },{ id: 'dust20', lat: 45.7500, lng: 4.8200 },
+            { id: 'dust21', lat: 45.7480, lng: 4.8260 },{ id: 'dust22', lat: 45.7460, lng: 4.8300 },
+            { id: 'dust23', lat: 45.7440, lng: 4.8340 },{ id: 'dust24', lat: 45.7420, lng: 4.8380 },
+            { id: 'dust25', lat: 45.7400, lng: 4.8420 },{ id: 'dust26', lat: 45.7380, lng: 4.8280 },
+            { id: 'dust27', lat: 45.7360, lng: 4.8240 },{ id: 'dust28', lat: 45.7340, lng: 4.8200 },
+            { id: 'dust29', lat: 45.7600, lng: 4.8460 },{ id: 'dust30', lat: 45.7620, lng: 4.8500 },
+        ];
+
+        const SUPERTYPES = {
+            histoire: { name: 'Histoire', color: '#8B5CF6', symbol: '📜' },
+            nature:   { name: 'Nature',   color: '#10B981', symbol: '🌿' },
+            science:  { name: 'Science',  color: '#3B82F6', symbol: '⚗️'  },
+            arts:     { name: 'Arts',     color: '#EC4899', symbol: '🎨' },
+            societe:  { name: 'Société',  color: '#F59E0B', symbol: '🏛️' }
+        };
+
+        const ECHO_POINTS = [
+            { id: 'echo1',  supertype: 'histoire', lat: 45.7592, lng: 4.8292 },
+            { id: 'echo2',  supertype: 'nature',   lat: 45.7612, lng: 4.8312 },
+            { id: 'echo3',  supertype: 'science',  lat: 45.7632, lng: 4.8332 },
+            { id: 'echo4',  supertype: 'arts',     lat: 45.7652, lng: 4.8302 },
+            { id: 'echo5',  supertype: 'societe',  lat: 45.7622, lng: 4.8252 },
+            { id: 'echo6',  supertype: 'histoire', lat: 45.7602, lng: 4.8232 },
+            { id: 'echo7',  supertype: 'nature',   lat: 45.7662, lng: 4.8322 },
+            { id: 'echo8',  supertype: 'science',  lat: 45.7642, lng: 4.8382 },
+            { id: 'echo9',  supertype: 'arts',     lat: 45.7682, lng: 4.8362 },
+            { id: 'echo10', supertype: 'societe',  lat: 45.7702, lng: 4.8342 },
+        ];
+
+        const ECHO_UNLOCKS = {
+            slot1: "Cette découverte marqua un tournant dans l'histoire des sciences. Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+            slot2: "Une rencontre qui changea le cours des événements. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+            slot3: "L'innovation qui révolutionna le domaine. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris."
+        };
+
+        const LYON_CENTER = { lat: 45.7640, lng: 4.8357 };
+        const isMobileDevice = window.matchMedia('(max-width: 768px)').matches ||
+            /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        const COLLECTION_RADIUS = 50;
+        const DUST_RADIUS = 30;
+        const ECHO_RADIUS = 30;
+        const MOVE_SPEED = 0.000015;
+        // Tilt offset: shift camera center north so player appears in lower third of screen
+        const TILT_OFFSET_LAT = 0.0018;
+        const ISOMETRIC_TILT = 67.5;
+        const ISOMETRIC_HEADING = 0;  // keep north-up like Waze default
+        const DUST_INCREMENT = 50;
+        const MIN_DUST_DROP = 25;
+        const MAX_DUST_DROP = 75;
+        const MAX_LEVEL = 3;
+
+        const RARITY_CONFIG = {
+            common:    { name: 'Commune',   color: '#10B981', shape: 'triangle', exp: { 0: 50,  1: 150, 2: 300  } },
+            rare:      { name: 'Rare',      color: '#3B82F6', shape: 'pentagon', exp: { 0: 100, 1: 250, 2: 500  } },
+            legendary: { name: 'Légendaire',color: '#F97316', shape: 'hexagon',  exp: { 0: 150, 1: 400, 2: 800  } }
+        };
+
+        const CARD_DIALOGUES = {
+            random: [
+                "Bonjour, je suis ravi de te rencontrer !",
+                "As-tu exploré Lyon aujourd'hui ?",
+                "Continue comme ça, tu fais du bon travail !"
+            ],
+            milestone: "Merci d'avoir dépensé 100 poudres sur moi ! Tu es formidable !"
+        };
+
+        // ==================== STATE ====================
+
+        let playerPos = { ...LYON_CENTER };
+        let collectedCards = [];
+        let cardLevels = {};
+        let memorialDust = 1000;
+        let collectedEchoes = [];
+        let echoInventory = {};
+        let placedEchoes = {}; // kept for compat
+        let cardJournals = {}; // { cardId: { slot1: supertype, slot2: ..., slot3: ... } }
+        let collectedDustPoints = [];
+
+        let map = null;
+        let playerMarker = null;
+        let poiMarkers = [];
+        let dustMarkers = [];
+        let echoMarkers = [];
+
+        let currentNearbyPOI = null;
+        let currentNearbyDust = null;
+        let currentNearbyEcho = null;
+
+        let selectedCollectionId = null;
+        let currentTab = 'general';
+        let selectedCard = null;
+
+        let gpsWatchId = null;
+        let gpsActive = false;
+
+        let joystickActive = false;
+        let joystickInterval = null;
+        let joystickDirection = { x: 0, y: 0 };
+
+        let teleportMode = false;
+        let selectedTeleportPOI = null;
+
+        // Init echo inventory
+        Object.keys(SUPERTYPES).forEach(type => { echoInventory[type] = 0; });
+
+        // ==================== INIT ====================
+
+        function startApp() {
+            initMap();
+        }
+
+        window.addEventListener('load', () => {
+            startApp();
+            setTimeout(() => {
+                initJoystick();
+                if (isMobileDevice && 'geolocation' in navigator) {
+                    setTimeout(toggleGPS, 500);
+                }
+            }, 1500);
+        });
+
+        function initMap() {
+            playerPos = { ...LYON_CENTER };
+            document.getElementById('dustCounter').textContent = memorialDust;
+            createMap();
+        }
+
+        // Mapbox uses pixel offset in flyTo/easeTo - no lat offset needed
+        function getCameraCenter(pos) {
+            return pos; // kept for compatibility, Mapbox handles offset natively
+        }
+
+        function applyIsometricCamera() {
+            // Mapbox pitch is set at creation and after moves - nothing to do here
+        }
+
+        function createMap() {
+            // no token needed for MapLibre+OpenFreeMap
+            // maplibregl is free and open source = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M29iazA2Z28yMzJoMGoxaWNhbzAifQ.az9JUrQP7klCgD3W-ueILQ';
+
+            map = new maplibregl.Map({
+                container: 'map',
+                style: 'https://tiles.openfreemap.org/styles/bright',
+                center: [playerPos.lng, playerPos.lat],
+                zoom: 17,
+                pitch: ISOMETRIC_TILT,
+                bearing: ISOMETRIC_HEADING,
+                attributionControl: false
+            });
+
+            map.addControl(new maplibregl.AttributionControl({ compact: true }));
+
+            // Disable default interactions we don't want
+            // Keep double-click zoom disabled (conflicts with teleport click)
+            map.doubleClickZoom.disable();
+
+            // ---- Player marker (HTML element) ----
+            const playerEl = document.createElement('div');
+            playerEl.style.cssText = `
+                width: 22px; height: 22px; border-radius: 50%;
+                background: #4F46E5; border: 3px solid white;
+                box-shadow: 0 2px 8px rgba(79,70,229,0.6);
+                cursor: default;
+            `;
+            playerMarker = new maplibregl.Marker({ element: playerEl, anchor: 'center' })
+                .setLngLat([playerPos.lng, playerPos.lat])
+                .addTo(map);
+
+            // ---- POI markers (card icon + capture radius circle) ----
+            // Add GeoJSON source + layer inside load event
+            map.on('load', () => {
+            map.addSource('poi-circles', {
+                type: 'geojson',
+                data: {
+                    type: 'FeatureCollection',
+                    features: POIS.map(poi => ({
+                        type: 'Feature',
+                        properties: { id: poi.id },
+                        geometry: { type: 'Point', coordinates: [poi.lng, poi.lat] }
+                    }))
+                }
+            });
+            // Circle layer (approximate radius in pixels; real radius set via circle-radius in meters via zoom)
+            map.addLayer({
+                id: 'poi-capture-circles',
+                type: 'circle',
+                source: 'poi-circles',
+                paint: {
+                    'circle-radius': [
+                        'interpolate', ['exponential', 2], ['zoom'],
+                        13, 4,
+                        17, 30,
+                        18, 50,
+                        19, 90
+                    ],
+                    'circle-color': '#EF4444',
+                    'circle-opacity': 0.10,
+                    'circle-stroke-color': '#EF4444',
+                    'circle-stroke-width': 1.5,
+                    'circle-stroke-opacity': 0.35
+                }
+            });
+                // Hide POI icon labels (metro, restaurants, etc.)
+                const style = map.getStyle();
+                if (style && style.layers) {
+                    style.layers.forEach(layer => {
+                        const id = layer.id.toLowerCase();
+                        if (layer.type === 'symbol') {
+                            const keep = id.includes('road') || id.includes('street') ||
+                                         id.includes('place') || id.includes('city') ||
+                                         id.includes('town') || id.includes('village') ||
+                                         id.includes('state') || id.includes('country') ||
+                                         id.includes('water') || id.includes('label');
+                            if (!keep) {
+                                try { map.setLayoutProperty(layer.id, 'visibility', 'none'); } catch(e) {}
+                            }
+                        }
+                    });
+                }
+            }); // end map.on('load')
+
+            POIS.forEach(poi => {
+                // Single centered element: card icon centered in its own space
+                // The GeoJSON circle renders separately underneath via MapLibre layer
+                const el = document.createElement('div');
+                el.style.cssText = `
+                    width: 36px; height: 36px;
+                    display: flex; align-items: center; justify-content: center;
+                    font-size: 22px;
+                    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+                    cursor: pointer;
+                    transition: transform 0.15s;
+                `;
+                el.textContent = '🎴';
+                el.title = poi.name;
+
+                const marker = new maplibregl.Marker({ element: el, anchor: 'center' })
+                    .setLngLat([poi.lng, poi.lat])
+                    .addTo(map);
+
+                el.addEventListener('click', () => {
+                    if (gpsActive) { alert('⚠️ Désactivez le GPS pour utiliser la téléportation !'); return; }
+                    teleportMode = true;
+                    selectedTeleportPOI = poi;
+                    el.style.transform = 'scale(1.25)';
+                    alert(`📍 ${poi.name} sélectionné ! Cliquez sur la carte pour vous téléporter.`);
+                });
+
+                poiMarkers.push({ marker, el, poi });
+            });
+
+            // Click on map to teleport
+            map.on('click', (e) => {
+                if (teleportMode && selectedTeleportPOI) {
+                    playerPos = { lat: e.lngLat.lat, lng: e.lngLat.lng };
+                    updatePlayerOnMap();
+                    teleportMode = false;
+                    poiMarkers.forEach(({ el }) => {
+                        if (el) el.style.transform = '';
+                    });
+                    selectedTeleportPOI = null;
+                    checkNearbyPOI();
+                }
+            });
+
+            // ---- Dust markers ----
+            DUST_POINTS.forEach(dust => {
+                const el = document.createElement('div');
+                el.style.cssText = `
+                    width: 14px; height: 14px;
+                    background: #A855F7; border: 2px solid white;
+                    transform: rotate(45deg);
+                    box-shadow: 0 2px 6px rgba(168,85,247,0.4);
+                    cursor: default;
+                `;
+                const marker = new maplibregl.Marker({ element: el, anchor: 'center' })
+                    .setLngLat([dust.lng, dust.lat])
+                    .addTo(map);
+                dustMarkers.push({ marker, el, dust });
+            });
+
+            // ---- Echo markers ----
+            ECHO_POINTS.forEach(echo => {
+                const info = SUPERTYPES[echo.supertype];
+                const el = document.createElement('div');
+                el.style.cssText = `
+                    width: 16px; height: 16px; border-radius: 50%;
+                    background: ${info.color}; border: 2px solid white;
+                    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                    cursor: default;
+                `;
+                el.title = `Écho ${info.name}`;
+                const marker = new maplibregl.Marker({ element: el, anchor: 'center' })
+                    .setLngLat([echo.lng, echo.lat])
+                    .addTo(map);
+                echoMarkers.push({ marker, el, echo });
+            });
+
+            updatePOIVisibility();
+            updateDustVisibility();
+            updateEchoVisibility();
+            checkNearbyPOI();
+
+            // Hide all POI icons and labels to keep the map clean
+
+        }
+
+        // Move player marker and pan camera
+        // We shift the camera center slightly north so the player appears in the lower third.
+        // Geographic offset doesn't affect marker positions (unlike pixel padding/offset).
+        const CAM_LAT_OFFSET = 0.0012; // degrees north (~130m) — adjust if needed
+        function updatePlayerOnMap() {
+            if (!map || !playerMarker) return;
+            playerMarker.setLngLat([playerPos.lng, playerPos.lat]);
+            map.easeTo({
+                center: [playerPos.lng, playerPos.lat + CAM_LAT_OFFSET],
+                pitch: ISOMETRIC_TILT,
+                bearing: ISOMETRIC_HEADING,
+                duration: 80
+            });
+        }
+
+
+        // ==================== MOVEMENT ====================
+
+        document.addEventListener('keydown', (e) => {
+            if (document.getElementById('collectionsPanel').classList.contains('show') ||
+                document.getElementById('cardPopup').classList.contains('show') ||
+                document.getElementById('cardDetailView').classList.contains('show')) return;
+
+            let newLat = playerPos.lat;
+            let newLng = playerPos.lng;
+
+            switch (e.key) {
+                case 'ArrowUp':    newLat += MOVE_SPEED; break;
+                case 'ArrowDown':  newLat -= MOVE_SPEED; break;
+                case 'ArrowLeft':  newLng -= MOVE_SPEED; break;
+                case 'ArrowRight': newLng += MOVE_SPEED; break;
+                default: return;
+            }
+
+            e.preventDefault();
+            playerPos = { lat: newLat, lng: newLng };
+            if (playerMarker && map) {
+                updatePlayerOnMap();
+            }
+            checkNearbyPOI();
+        });
+
+        function initJoystick() {
+            const base = document.getElementById('joystickBase');
+            const stick = document.getElementById('joystickStick');
+            if (!base || !stick) return;
+
+            let isDragging = false;
+            let centerX = 0, centerY = 0;
+
+            function isUIOpen() {
+                return document.getElementById('collectionsPanel').classList.contains('show') ||
+                       document.getElementById('cardPopup').classList.contains('show') ||
+                       document.getElementById('cardDetailView').classList.contains('show') ||
+                       document.getElementById('journalScreen').classList.contains('show');
+            }
+
+            function handleStart(e) {
+                if (isUIOpen()) return;
+                isDragging = true;
+                const rect = base.getBoundingClientRect();
+                centerX = rect.left + rect.width / 2;
+                centerY = rect.top + rect.height / 2;
+                handleMove(e);
+            }
+
+            function handleMove(e) {
+                if (!isDragging) return;
+                e.preventDefault();
+                const touch = e.touches ? e.touches[0] : e;
+                let dx = touch.clientX - centerX;
+                let dy = touch.clientY - centerY;
+                const maxDist = 35;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist > maxDist) { dx = (dx / dist) * maxDist; dy = (dy / dist) * maxDist; }
+                stick.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+                joystickDirection.x = dx / maxDist;
+                joystickDirection.y = -dy / maxDist;
+                if (!joystickActive) {
+                    joystickActive = true;
+                    startJoystickMovement();
+                }
+            }
+
+            function handleEnd() {
+                isDragging = false;
+                stick.style.transform = 'translate(-50%, -50%)';
+                joystickDirection = { x: 0, y: 0 };
+                joystickActive = false;
+                if (joystickInterval) { clearInterval(joystickInterval); joystickInterval = null; }
+            }
+
+            base.addEventListener('touchstart', handleStart, { passive: false });
+            document.addEventListener('touchmove', handleMove, { passive: false });
+            document.addEventListener('touchend', handleEnd);
+            base.addEventListener('mousedown', handleStart);
+            document.addEventListener('mousemove', handleMove);
+            document.addEventListener('mouseup', handleEnd);
+        }
+
+        function startJoystickMovement() {
+            joystickInterval = setInterval(() => {
+                if (!joystickActive || gpsActive) return;
+                const speed = MOVE_SPEED * 2;
+                playerPos = {
+                    lat: playerPos.lat + joystickDirection.y * speed,
+                    lng: playerPos.lng + joystickDirection.x * speed
+                };
+                if (playerMarker && map) {
+                    updatePlayerOnMap();
+                }
+                checkNearbyPOI();
+            }, 50);
+        }
+
+        // ==================== NEARBY CHECKS ====================
+
+        function getDistance(lat1, lng1, lat2, lng2) {
+            const R = 6371e3;
+            const φ1 = lat1 * Math.PI / 180, φ2 = lat2 * Math.PI / 180;
+            const Δφ = (lat2 - lat1) * Math.PI / 180, Δλ = (lng2 - lng1) * Math.PI / 180;
+            const a = Math.sin(Δφ/2)**2 + Math.cos(φ1)*Math.cos(φ2)*Math.sin(Δλ/2)**2;
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        }
+
+        function checkNearbyPOI() {
+            // POI
+            const nearby = POIS.find(poi => {
+                const dist = getDistance(playerPos.lat, playerPos.lng, poi.lat, poi.lng);
+                if (dist > COLLECTION_RADIUS) return false;
+                const allCards = Object.values(COLLECTIONS).flatMap(c => c.cards);
+                return allCards.some(card => card.poiId === poi.id && !collectedCards.includes(card.id));
+            });
+            currentNearbyPOI = nearby;
+            const nearbyDiv = document.getElementById('nearbyPOI');
+            if (nearby) { document.getElementById('poiName').textContent = nearby.name; nearbyDiv.classList.remove('hidden'); }
+            else { nearbyDiv.classList.add('hidden'); }
+
+            // Dust
+            const nearbyDust = DUST_POINTS.find(d =>
+                !collectedDustPoints.includes(d.id) &&
+                getDistance(playerPos.lat, playerPos.lng, d.lat, d.lng) <= DUST_RADIUS
+            );
+            currentNearbyDust = nearbyDust;
+            const nearbyDustDiv = document.getElementById('nearbyDust');
+            if (nearbyDust) nearbyDustDiv.classList.remove('hidden');
+            else nearbyDustDiv.classList.add('hidden');
+
+            // Echo
+            const nearbyEcho = ECHO_POINTS.find(e =>
+                !collectedEchoes.includes(e.id) &&
+                getDistance(playerPos.lat, playerPos.lng, e.lat, e.lng) <= ECHO_RADIUS
+            );
+            currentNearbyEcho = nearbyEcho;
+            const nearbyEchoDiv = document.getElementById('nearbyEcho');
+            if (nearbyEcho) {
+                const info = SUPERTYPES[nearbyEcho.supertype];
+                document.getElementById('echoName').textContent = `${info.symbol} Écho ${info.name}`;
+                nearbyEchoDiv.classList.remove('hidden');
+            } else {
+                nearbyEchoDiv.classList.add('hidden');
+            }
+        }
+
+        // ==================== VISIBILITY ====================
+
+        function updatePOIVisibility() {
+            const allCards = Object.values(COLLECTIONS).flatMap(c => c.cards);
+            const visiblePOIIds = [];
+            poiMarkers.forEach(({ marker, el, poi }) => {
+                const hasCards = allCards.some(card => card.poiId === poi.id && !collectedCards.includes(card.id));
+                el.style.display = hasCards ? 'flex' : 'none';
+                if (hasCards) visiblePOIIds.push(poi.id);
+            });
+            // Update the GeoJSON circle source to only show uncollected POIs
+            if (map.getSource('poi-circles')) {
+                map.getSource('poi-circles').setData({
+                    type: 'FeatureCollection',
+                    features: POIS
+                        .filter(poi => visiblePOIIds.includes(poi.id))
+                        .map(poi => ({
+                            type: 'Feature',
+                            properties: { id: poi.id },
+                            geometry: { type: 'Point', coordinates: [poi.lng, poi.lat] }
+                        }))
+                });
+            }
+        }
+
+        function updateDustVisibility() {
+            dustMarkers.forEach(({ marker, el, dust }) => {
+                el.style.display = !collectedDustPoints.includes(dust.id) ? 'block' : 'none';
+            });
+        }
+
+        function updateEchoVisibility() {
+            echoMarkers.forEach(({ marker, el, echo }) => {
+                el.style.display = !collectedEchoes.includes(echo.id) ? 'block' : 'none';
+            });
+        }
+
+        // ==================== COLLECTION ====================
+
+        // ==================== MISE AU POINT ====================
+
+        let mapointCard = null;
+        let lastRevealedCard = null;
+        let mapointAnimId = null;
+        let mapointState = {};
+
+        function openMiseAuPoint(card) {
+            mapointCard = card;
+            const screen = document.getElementById('miseAuPointScreen');
+            screen.classList.add('active');
+            initMapointCanvas(card);
+        }
+
+        function closeMiseAuPoint() {
+            const screen = document.getElementById('miseAuPointScreen');
+            screen.classList.remove('active');
+            if (mapointAnimId) { cancelAnimationFrame(mapointAnimId); mapointAnimId = null; }
+            mapointCard = null;
+        }
+
+        function initMapointCanvas(card) {
+            const canvas = document.getElementById('mapointCanvas');
+            const ctx = canvas.getContext('2d');
+            const W = canvas.width  = canvas.offsetWidth;
+            const H = canvas.height = canvas.offsetHeight;
+
+            const supertype = card.supertype || 'histoire';
+            const info = SUPERTYPES[supertype];
+            const color = info.color;
+
+            const hexToRgb = h => {
+                const r = parseInt(h.slice(1,3),16), g = parseInt(h.slice(3,5),16), b = parseInt(h.slice(5,7),16);
+                return `${r},${g},${b}`;
+            };
+            const rgb = hexToRgb(color);
+
+            const accordX = W * 0.3 + Math.random() * W * 0.4;
+            const accordY = H * 0.25 + Math.random() * H * 0.35;
+            const accordR = 55;
+
+            const NUM_FRAGMENTS = 14;
+            const fragments = Array.from({length: NUM_FRAGMENTS}, (_, i) => ({
+                angle: (i / NUM_FRAGMENTS) * Math.PI * 2,
+                radius: 90 + Math.random() * 50,
+                speed: (0.003 + Math.random() * 0.004) * (Math.random() > 0.5 ? 1 : -1),
+                size:  4 + Math.random() * 7,
+                opacity: 0.4 + Math.random() * 0.6,
+                phase: Math.random() * Math.PI * 2,
+            }));
+
+            let pointer = { x: W / 2, y: H / 2, active: false };
+            let focusX = W / 2, focusY = H / 2;
+            let inAccordZone = false;
+            let accordStart = null;
+            let revealed = false;
+            let revealProgress = 0;
+            let done = false;
+            const ACCORD_DURATION = 1500;
+
+            const hint = document.getElementById('mapointHint');
+            const ring = document.querySelector('.mapoint-progress-ring');
+            const ringEl = document.getElementById('mapointRing');
+            const RING_LEN = 213.6;
+            hint.style.opacity = '1';
+            hint.textContent = 'Déplacez doucement votre doigt pour accorder';
+            ring.classList.remove('visible');
+            ringEl.style.strokeDashoffset = RING_LEN;
+
+            const canvas2 = document.getElementById('mapointCanvas');
+            function getPos(e) {
+                const rect = canvas2.getBoundingClientRect();
+                const src = e.touches ? e.touches[0] : e;
+                return { x: src.clientX - rect.left, y: src.clientY - rect.top };
+            }
+            function onMove(e) {
+                e.preventDefault();
+                if (done) return;
+                const p = getPos(e);
+                pointer = { x: p.x, y: p.y, active: true };
+            }
+            function onEnd() { pointer.active = false; }
+            canvas2.addEventListener('touchmove', onMove, { passive: false });
+            canvas2.addEventListener('touchstart', onMove, { passive: false });
+            canvas2.addEventListener('touchend', onEnd);
+            canvas2.addEventListener('mousemove', onMove);
+            canvas2.addEventListener('mousedown', onMove);
+            canvas2.addEventListener('mouseup', onEnd);
+            mapointState.cleanup = () => {
+                canvas2.removeEventListener('touchmove', onMove);
+                canvas2.removeEventListener('touchstart', onMove);
+                canvas2.removeEventListener('touchend', onEnd);
+                canvas2.removeEventListener('mousemove', onMove);
+                canvas2.removeEventListener('mousedown', onMove);
+                canvas2.removeEventListener('mouseup', onEnd);
+            };
+
+            let lastTime = null;
+
+            function draw(ts) {
+                if (!lastTime) lastTime = ts;
+                const dt = Math.min(ts - lastTime, 50);
+                lastTime = ts;
+
+                ctx.clearRect(0, 0, W, H);
+
+                const dx = pointer.x - accordX, dy = pointer.y - accordY;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                inAccordZone = pointer.active && dist < accordR && !revealed;
+
+                if (inAccordZone) {
+                    if (!accordStart) accordStart = ts;
+                    const elapsed = ts - accordStart;
+                    ring.classList.add('visible');
+                    const progress = Math.min(elapsed / ACCORD_DURATION, 1);
+                    ringEl.style.strokeDashoffset = RING_LEN * (1 - progress);
+                    ringEl.style.stroke = `rgba(${rgb},${0.7 + progress * 0.3})`;
+                    if (elapsed >= ACCORD_DURATION && !revealed) {
+                        revealed = true;
+                        hint.textContent = '✦ Accord établi ✦';
+                        ring.classList.remove('visible');
+                    }
+                } else {
+                    accordStart = null;
+                    ring.classList.remove('visible');
+                    ringEl.style.strokeDashoffset = RING_LEN;
+                }
+
+                if (pointer.active) {
+                    focusX += (pointer.x - focusX) * 0.08;
+                    focusY += (pointer.y - focusY) * 0.08;
+                }
+
+                const cx = W / 2, cy = H * 0.42;
+                const fdx = focusX - cx, fdy = focusY - cy;
+                const focusDist = Math.sqrt(fdx*fdx + fdy*fdy);
+                const maxFocus = Math.sqrt(W*W + H*H) / 2;
+                const rawClarity = Math.max(0, 1 - focusDist / (maxFocus * 0.6));
+                const clarity = revealed ? Math.min(revealProgress, 1) : rawClarity;
+                if (revealed && revealProgress < 1) revealProgress += dt / 1200;
+
+                // Background
+                ctx.fillStyle = '#080612';
+                ctx.fillRect(0, 0, W, H);
+                const bgGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(W, H) * 0.85);
+                bgGrad.addColorStop(0,   `rgba(${rgb},${0.18 + clarity * 0.15})`);
+                bgGrad.addColorStop(0.5, `rgba(${rgb},0.06)`);
+                bgGrad.addColorStop(1,   'rgba(0,0,0,0)');
+                ctx.fillStyle = bgGrad;
+                ctx.fillRect(0, 0, W, H);
+                const t = ts * 0.0003;
+                const nx = cx + Math.sin(t * 0.7) * 40, ny = cy + Math.cos(t * 0.5) * 30;
+                const ng = ctx.createRadialGradient(nx, ny, 0, nx, ny, 180);
+                ng.addColorStop(0,   `rgba(${rgb},0.10)`);
+                ng.addColorStop(1,   'rgba(0,0,0,0)');
+                ctx.fillStyle = ng;
+                ctx.fillRect(0, 0, W, H);
+
+                // Fragments
+                fragments.forEach(f => {
+                    f.angle += f.speed * (revealed ? 0.15 : (1 - clarity * 0.6));
+                    const fx = cx + Math.cos(f.angle) * f.radius * (1 - clarity * 0.75);
+                    const fy = cy + Math.sin(f.angle) * f.radius * (1 - clarity * 0.75);
+                    const pulse = 0.6 + 0.4 * Math.sin(ts * 0.002 + f.phase);
+                    const alpha = f.opacity * pulse * (1 - clarity * 0.85);
+                    if (alpha < 0.02) return;
+                    const fg = ctx.createRadialGradient(fx, fy, 0, fx, fy, f.size * 3);
+                    fg.addColorStop(0, `rgba(${rgb},${alpha})`);
+                    fg.addColorStop(1, 'rgba(0,0,0,0)');
+                    ctx.fillStyle = fg;
+                    ctx.fillRect(fx - f.size*3, fy - f.size*3, f.size*6, f.size*6);
+                    ctx.beginPath();
+                    ctx.arc(fx, fy, f.size, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(${rgb},${alpha})`;
+                    ctx.fill();
+                });
+
+                // Silhouette
+                const silW = 90 + clarity * 20;
+                const silH = 140 + clarity * 30;
+                const blur = Math.max(0, (1 - clarity) * 16);
+                ctx.save();
+                ctx.filter = blur > 0.5 ? `blur(${blur}px)` : 'none';
+                ctx.globalAlpha = 0.15 + clarity * 0.75;
+                const sg = ctx.createRadialGradient(cx, cy, 0, cx, cy, silW * 1.8);
+                sg.addColorStop(0,   `rgba(${rgb},${0.35 + clarity * 0.45})`);
+                sg.addColorStop(1,   'rgba(0,0,0,0)');
+                ctx.fillStyle = sg;
+                ctx.fillRect(cx - silW*2, cy - silH, silW*4, silH*2.5);
+                ctx.fillStyle = revealed ? `rgba(${rgb},0.9)` : `rgba(255,255,255,${0.5 + clarity * 0.4})`;
+                // Head
+                ctx.beginPath(); ctx.arc(cx, cy - silH * 0.38, silW * 0.28, 0, Math.PI * 2); ctx.fill();
+                // Torso
+                ctx.beginPath();
+                ctx.moveTo(cx - silW*0.38, cy - silH*0.1); ctx.lineTo(cx + silW*0.38, cy - silH*0.1);
+                ctx.lineTo(cx + silW*0.28, cy + silH*0.22); ctx.lineTo(cx - silW*0.28, cy + silH*0.22);
+                ctx.closePath(); ctx.fill();
+                // Arms
+                [[- 1],[1]].forEach(([s]) => {
+                    ctx.beginPath();
+                    ctx.moveTo(cx + s*silW*0.38, cy - silH*0.08);
+                    ctx.lineTo(cx + s*silW*0.58, cy + silH*0.15);
+                    ctx.lineTo(cx + s*silW*0.45, cy + silH*0.18);
+                    ctx.lineTo(cx + s*silW*0.28, cy + silH*0.0);
+                    ctx.closePath(); ctx.fill();
+                });
+                // Legs
+                [[-1],[1]].forEach(([s]) => {
+                    ctx.beginPath();
+                    ctx.moveTo(cx + s*silW*0.18, cy + silH*0.22);
+                    ctx.lineTo(cx + s*silW*0.28, cy + silH*0.5);
+                    ctx.lineTo(cx + s*silW*0.12, cy + silH*0.5);
+                    ctx.lineTo(cx + s*silW*0.05, cy + silH*0.22);
+                    ctx.closePath(); ctx.fill();
+                });
+                ctx.filter = 'none';
+                ctx.globalAlpha = 1;
+                ctx.restore();
+
+                // Focus lens
+                if (pointer.active && !revealed) {
+                    const lg = ctx.createRadialGradient(focusX, focusY, 0, focusX, focusY, 80);
+                    lg.addColorStop(0, 'rgba(255,255,255,0.07)');
+                    lg.addColorStop(1, 'rgba(255,255,255,0)');
+                    ctx.fillStyle = lg;
+                    ctx.fillRect(focusX - 80, focusY - 80, 160, 160);
+                }
+
+                // Celebration burst
+                if (revealed && revealProgress > 0.55) {
+                    const burstP = Math.min((revealProgress - 0.55) / 0.35, 1);
+                    ctx.globalAlpha = burstP * (1 - Math.max(0, (revealProgress - 0.88) / 0.12));
+                    for (let i = 0; i < 16; i++) {
+                        const a = (i / 16) * Math.PI * 2;
+                        const r1 = silW * 0.95 + burstP * 20, r2 = r1 + 30 + burstP * 40;
+                        ctx.beginPath();
+                        ctx.moveTo(cx + Math.cos(a)*r1, cy + Math.sin(a)*r1);
+                        ctx.lineTo(cx + Math.cos(a)*r2, cy + Math.sin(a)*r2);
+                        ctx.strokeStyle = `rgba(${rgb},0.9)`;
+                        ctx.lineWidth = 2.5;
+                        ctx.stroke();
+                    }
+                    ctx.globalAlpha = 1;
+                }
+
+                // Card name reveal
+                if (revealProgress > 0.8 && revealed) {
+                    const na = Math.min(1, (revealProgress - 0.8) / 0.2);
+                    ctx.globalAlpha = na;
+                    ctx.textAlign = 'center';
+                    ctx.fillStyle = 'white';
+                    ctx.font = `bold 22px system-ui, sans-serif`;
+                    ctx.fillText(card.name, cx, cy + silH * 0.7);
+                    ctx.font = `14px system-ui, sans-serif`;
+                    ctx.fillStyle = color;
+                    ctx.fillText(info.name, cx, cy + silH * 0.7 + 26);
+                    ctx.globalAlpha = 1;
+                }
+
+                // Transition to popup
+                if (revealProgress >= 1 && !done) {
+                    done = true;
+                    setTimeout(() => {
+                        mapointState.cleanup?.();
+                        closeMiseAuPoint();
+                        // Show toast on map with supertype color glow
+                        lastRevealedCard = card;
+                        document.getElementById('popupCardName').textContent = card.name;
+                        document.getElementById('popupCardType').textContent = info.name + ' · ' + card.type;
+                        const glow = document.getElementById('toastGlow');
+                        glow.style.background = `radial-gradient(ellipse at 20% 50%, ${color}, transparent 70%)`;
+                        const toast = document.getElementById('cardPopup');
+                        toast.classList.add('show');
+                        // Auto-dismiss after 5 seconds
+                        setTimeout(() => toast.classList.remove('show'), 5000);
+                    }, 700);
+                }
+
+                if (!done) mapointAnimId = requestAnimationFrame(draw);
+            }
+
+            mapointAnimId = requestAnimationFrame(draw);
+        }
+
+        function collectCard() {
+            if (!currentNearbyPOI) return;
+            const allCards = Object.values(COLLECTIONS).flatMap(c => c.cards);
+            const card = allCards.find(c => c.poiId === currentNearbyPOI.id && !collectedCards.includes(c.id));
+            if (!card) return;
+            collectedCards.push(card.id);
+            if (!cardLevels[card.id]) cardLevels[card.id] = { level: 0, experience: 0, dustSpent: 0 };
+            updatePOIVisibility();
+            checkNearbyPOI();
+            openMiseAuPoint(card);
+        }
+
+        function collectDust() {
+            if (!currentNearbyDust) return;
+            collectedDustPoints.push(currentNearbyDust.id);
+            const amount = Math.floor(Math.random() * (MAX_DUST_DROP - MIN_DUST_DROP + 1)) + MIN_DUST_DROP;
+            memorialDust += amount;
+            document.getElementById('dustCounter').textContent = memorialDust;
+            updateDustVisibility();
+            checkNearbyPOI();
+        }
+
+        function collectEcho() {
+            if (!currentNearbyEcho) return;
+            collectedEchoes.push(currentNearbyEcho.id);
+            echoInventory[currentNearbyEcho.supertype]++;
+            updateEchoVisibility();
+            checkNearbyPOI();
+        }
+
+        function closeCardPopup() {
+            document.getElementById('cardPopup').classList.remove('show');
+        }
+
+        function openRevealedCard() {
+            if (!lastRevealedCard) return;
+            closeCardPopup();
+            // Small delay so the toast closes cleanly before opening card
+            setTimeout(() => openCardDetail(lastRevealedCard), 150);
+        }
+
+        // ==================== COLLECTIONS UI ====================
+
+        let currentColTab = 'collections';
+
+        // ==================== AVATAR MENU ====================
+
+        function toggleAvatarMenu() {
+            const menu = document.getElementById('avatarMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        function closeAvatarMenu() {
+            document.getElementById('avatarMenu').classList.add('hidden');
+        }
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            const wrap = document.getElementById('avatarBtn')?.closest('.hud-avatar-wrap');
+            if (wrap && !wrap.contains(e.target)) closeAvatarMenu();
+        });
+
+        function openCollections() {
+            document.getElementById('collectionsPanel').classList.add('show');
+            switchColTab('collections');
+        }
+
+        function closeCollections() {
+            document.getElementById('collectionsPanel').classList.remove('show');
+            selectedCollectionId = null;
+            document.getElementById('collectionsList').classList.remove('hidden');
+            document.getElementById('collectionDetail').classList.remove('show');
+        }
+
+        function switchColTab(tab) {
+            currentColTab = tab;
+            document.querySelectorAll('.col-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(`colTab${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.add('active');
+            document.getElementById('colPaneCollections').classList.toggle('hidden', tab !== 'collections');
+            document.getElementById('colPaneEchoes').classList.toggle('hidden', tab !== 'echoes');
+            if (tab === 'collections') renderCollectionsList();
+            if (tab === 'echoes') renderEchoesPanel();
+        }
+
+        function renderEchoesPanel() {
+            const panel = document.getElementById('echoesPanel');
+            panel.innerHTML = '';
+
+            const hasAny = Object.values(echoInventory).some(v => v > 0);
+
+            if (!hasAny) {
+                panel.innerHTML = `<div class="echo-empty"><div style="font-size:48px;margin-bottom:12px;">✨</div><div>Aucun écho collecté pour le moment.<br>Explorez Lyon pour en trouver !</div></div>`;
+                return;
+            }
+
+            // All cards across all collections
+            const allCards = Object.values(COLLECTIONS).flatMap(col => col.cards);
+
+            Object.entries(SUPERTYPES).forEach(([supertypeKey, supertypeInfo]) => {
+                const count = echoInventory[supertypeKey] || 0;
+
+                // Find all cards matching this supertype
+                const matchingCards = allCards.filter(c => c.supertype === supertypeKey);
+                if (matchingCards.length === 0) return;
+
+                const section = document.createElement('div');
+                section.className = 'echo-type-section';
+
+                section.innerHTML = `
+                    <div class="echo-type-header supertype-${supertypeKey}">
+                        <span style="font-size:20px;">${supertypeInfo.symbol}</span>
+                        <span>${supertypeInfo.name}</span>
+                        <span class="echo-type-count">${count} écho${count > 1 ? 's' : ''}</span>
+                    </div>
+                    <div class="echo-compatible-cards" id="echoCards_${supertypeKey}"></div>
+                `;
+
+                panel.appendChild(section);
+
+                const cardsContainer = document.getElementById(`echoCards_${supertypeKey}`);
+
+                matchingCards.forEach(card => {
+                    const isCollected = collectedCards.includes(card.id);
+                    const rarityInfo = RARITY_CONFIG[card.rarity] || RARITY_CONFIG.common;
+
+                    const cardEl = document.createElement('div');
+                    cardEl.className = `echo-compatible-card${isCollected ? '' : ' not-collected'}`;
+
+                    if (isCollected) {
+                        cardEl.onclick = () => {
+                            closeCollections();
+                            openCardDetail(card);
+                        };
+                    }
+
+                    cardEl.innerHTML = `
+                        <div class="echo-card-icon supertype-${supertypeKey}">
+                            ${isCollected ? '🎴' : '❓'}
+                        </div>
+                        <div class="echo-card-info">
+                            <div class="echo-card-name">${isCollected ? card.name : '???'}</div>
+                            <div class="echo-card-meta">${isCollected ? card.type : 'Carte non collectée'} · <span style="color:${rarityInfo.color};font-weight:600;">${rarityInfo.name}</span></div>
+                        </div>
+                        <span class="echo-card-status ${isCollected ? 'collected' : 'locked'}">
+                            ${isCollected ? '✓ Collectée' : '🔒 Verr.'}
+                        </span>
+                    `;
+
+                    cardsContainer.appendChild(cardEl);
+                });
+            });
+        }
+
+        function renderCollectionsList() {
+            const listDiv = document.getElementById('collectionsList');
+            listDiv.innerHTML = '';
+            const cols = Object.values(COLLECTIONS).filter(col => col.cards.some(c => collectedCards.includes(c.id)));
+            if (cols.length === 0) {
+                listDiv.innerHTML = `<div class="empty-state"><div class="empty-icon">📦</div><p>Aucune carte collectée pour le moment</p><p style="font-size:14px;margin-top:8px;">Explorez Lyon pour commencer votre collection!</p></div>`;
+                return;
+            }
+            cols.forEach(col => {
+                const p = getCollectionProgress(col.id);
+                const div = document.createElement('div');
+                div.className = 'collection-item';
+                div.onclick = () => showCollectionDetail(col.id);
+                div.innerHTML = `
+                    <div class="collection-item-header">
+                        <div><h3 class="collection-item-title">${col.name}</h3><p class="collection-item-desc">${col.description}</p></div>
+                        <span class="collection-badge">${p.collected}/${p.total}</span>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill" style="width:${(p.collected/p.total)*100}%"></div></div>`;
+                listDiv.appendChild(div);
+            });
+        }
+
+        function getCollectionProgress(collectionId) {
+            const col = COLLECTIONS[collectionId];
+            return { collected: col.cards.filter(c => collectedCards.includes(c.id)).length, total: col.cards.length };
+        }
+
+        function showCollectionDetail(collectionId) {
+            selectedCollectionId = collectionId;
+            const col = COLLECTIONS[collectionId];
+            const p = getCollectionProgress(collectionId);
+            document.getElementById('detailTitle').textContent = col.name;
+            document.getElementById('detailDesc').textContent = col.description;
+            document.getElementById('detailBadge').textContent = `${p.collected}/${p.total} cartes`;
+            const grid = document.getElementById('cardsGrid');
+            grid.innerHTML = '';
+            col.cards.forEach(card => {
+                const isCollected = collectedCards.includes(card.id);
+                const div = document.createElement('div');
+                div.className = `card-item ${isCollected ? 'collected' : 'locked'}`;
+                if (isCollected) div.onclick = () => openCardDetail(card);
+                div.innerHTML = `<div class="card-icon">${isCollected ? '🎴' : '❓'}</div><div class="card-name">${isCollected ? card.name : '???'}</div><div class="card-type">${isCollected ? card.type : 'Non collectée'}</div>`;
+                grid.appendChild(div);
+            });
+            document.getElementById('collectionsList').classList.add('hidden');
+            document.getElementById('collectionDetail').classList.add('show');
+        }
+
+        function backToCollections() {
+            selectedCollectionId = null;
+            document.getElementById('collectionsList').classList.remove('hidden');
+            document.getElementById('collectionDetail').classList.remove('show');
+        }
+
+        // ==================== CARD DETAIL ====================
+
+        function openCardDetail(card) {
+            selectedCard = card;
+            if (!cardLevels[card.id]) cardLevels[card.id] = { level: 0, experience: 0, dustSpent: 0 };
+            document.getElementById('cardDetailHeaderTitle').textContent = card.name;
+            document.getElementById('cardDetailName').textContent = card.name;
+            document.getElementById('cardCategory').textContent = card.type;
+            if (card.supertype) {
+                const info = SUPERTYPES[card.supertype];
+                const badge = document.getElementById('cardSupertypeBadge');
+                badge.textContent = info.symbol;
+                badge.className = `card-supertype-badge supertype-${card.supertype}`;
+            }
+            document.getElementById('cardDetailDustCounter').textContent = memorialDust;
+            updateCardLevelDisplay();
+            switchTabProgrammatically('general');
+            document.getElementById('cardDetailView').classList.add('show');
+        }
+
+        function closeCardDetail() {
+            document.getElementById('cardDetailView').classList.remove('show');
+            selectedCard = null;
+        }
+
+        function getRarityGemHTML(rarity) {
+            const cfg = RARITY_CONFIG[rarity] || RARITY_CONFIG.common;
+            return `<div class="gem-${cfg.shape}" style="background: ${cfg.color};"></div>`;
+        }
+
+        function getExpNeeded(card, level) {
+            const rarity = card.rarity || 'common';
+            return RARITY_CONFIG[rarity].exp[level] || 0;
+        }
+
+        function updateCardLevelDisplay() {
+            if (!selectedCard) return;
+            const cl = cardLevels[selectedCard.id] || { level: 0, experience: 0 };
+            document.getElementById('cardLevelDisplay').textContent = `Niveau ${cl.level}`;
+            document.getElementById('cardRarityGem').innerHTML = getRarityGemHTML(selectedCard.rarity);
+            if (cl.level >= MAX_LEVEL) {
+                document.getElementById('cardExpDisplay').textContent = 'MAX';
+                document.getElementById('cardExpBar').style.width = '100%';
+                document.getElementById('addExpBtn').disabled = true;
+                document.getElementById('addExpBtn').textContent = '✨ Niveau maximum atteint';
+                return;
+            }
+            const needed = getExpNeeded(selectedCard, cl.level);
+            document.getElementById('cardExpDisplay').textContent = `${cl.experience}/${needed} 💜`;
+            document.getElementById('cardExpBar').style.width = `${(cl.experience / needed) * 100}%`;
+            const btn = document.getElementById('addExpBtn');
+            const canAdd = memorialDust >= DUST_INCREMENT;
+            btn.disabled = !canAdd;
+            btn.textContent = canAdd ? `💜 Ajouter ${DUST_INCREMENT} poudre (+EXP)` : `💜 Poudre insuffisante (${memorialDust}/${DUST_INCREMENT})`;
+        }
+
+        function addExperience() {
+            if (!selectedCard || memorialDust < DUST_INCREMENT) return;
+            const cl = cardLevels[selectedCard.id];
+            if (cl.level >= MAX_LEVEL) return;
+            memorialDust -= DUST_INCREMENT;
+            document.getElementById('dustCounter').textContent = memorialDust;
+            document.getElementById('cardDetailDustCounter').textContent = memorialDust;
+            cl.dustSpent = (cl.dustSpent || 0) + DUST_INCREMENT;
+            cl.experience += DUST_INCREMENT;
+            const needed = getExpNeeded(selectedCard, cl.level);
+            if (cl.experience >= needed) {
+                cl.level += 1;
+                cl.experience = Math.max(0, cl.experience - needed);
+                const frame = document.querySelector('.card-frame');
+                frame.style.animation = 'levelUpPulse 0.6s ease';
+                setTimeout(() => {
+                    frame.style.animation = '';
+                    // Open journal with previous state (level-1 overlays shown, new slot empty)
+                    openJournalScreen(cl.level - 1);
+                    // Then animate the new overlay after a short pause for drama
+                    setTimeout(() => animateJournalLevel(cl.level), 300);
+                }, 600);
+            }
+            if (cl.dustSpent === 100) {
+                document.getElementById('journalNotification').classList.remove('hidden');
+                setTimeout(() => showCardDialogue(true), 500);
+            }
+            updateCardLevelDisplay();
+        }
+
+        function showCardDialogue(isMilestone = false) {
+            const bubble = document.getElementById('cardDialogueBubble');
+            const text = document.getElementById('cardDialogueText');
+            if (isMilestone) {
+                text.textContent = CARD_DIALOGUES.milestone;
+            } else {
+                text.textContent = CARD_DIALOGUES.random[Math.floor(Math.random() * CARD_DIALOGUES.random.length)];
+            }
+            bubble.classList.add('show');
+            setTimeout(() => bubble.classList.remove('show'), 4000);
+        }
+
+        function switchTab(tabName, e) {
+            currentTab = tabName;
+            document.querySelectorAll('.card-tab:not(.journal-tab):not(.studio-tab)').forEach(t => t.classList.remove('active'));
+            if (e && e.target) e.target.classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            const map2 = { general: 'generalTab', skins: 'skinsTab', competences: 'competencesTab' };
+            if (map2[tabName]) document.getElementById(map2[tabName]).classList.add('active');
+        }
+
+        function switchTabProgrammatically(tabName) {
+            currentTab = tabName;
+            const tabs = document.querySelectorAll('.card-tab:not(.journal-tab):not(.studio-tab)');
+            tabs.forEach(t => t.classList.remove('active'));
+            if (tabs[0]) tabs[0].classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            const map2 = { general: 'generalTab', skins: 'skinsTab', competences: 'competencesTab' };
+            if (map2[tabName]) document.getElementById(map2[tabName]).classList.add('active');
+        }
+
+        // ==================== JOURNAL ====================
+
+        function openJournalScreen(maxLevel) {
+            if (!selectedCard) return;
+            document.getElementById('journalScreenCardName').textContent = selectedCard.name;
+            document.getElementById('journalScreenCardType').textContent = selectedCard.type;
+            document.getElementById('journalNotification').classList.add('hidden');
+            // Restore this card's journal state (maxLevel limits overlay restore for animation)
+            restoreJournalState(selectedCard.id, maxLevel);
+            document.getElementById('journalScreen').classList.add('show');
+            renderEchoInventory();
+        }
+
+        const OVERLAY_COLORS = [
+            'linear-gradient(180deg, #10B981 0%, #059669 100%)',
+            'linear-gradient(180deg, #3B82F6 0%, #2563EB 100%)',
+            'linear-gradient(180deg, #F59E0B 0%, #D97706 100%)'
+        ];
+
+        function resetJournalOverlays() {
+            // Instantly clear all overlays (no transition)
+            ['journalLevelOverlay1','journalLevelOverlay2','journalLevelOverlay3'].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.style.transition = 'none';
+                el.style.height = '0%';
+                el.style.background = '';
+            });
+            ['journalBtn1','journalBtn2','journalBtn3'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            });
+        }
+
+        function applyOverlaysInstant(level) {
+            const ids = ['journalLevelOverlay1','journalLevelOverlay2','journalLevelOverlay3'];
+            for (let i = 0; i < level && i < 3; i++) {
+                const el = document.getElementById(ids[i]);
+                if (!el) continue;
+                el.style.transition = 'none';
+                el.style.background = OVERLAY_COLORS[i];
+                el.style.height = '33.33%';
+                const btn = document.getElementById(`journalBtn${i+1}`);
+                if (btn) btn.style.display = 'block';
+            }
+        }
+
+        function restoreJournalState(cardId, maxLevel) {
+            // Reset slots
+            for (let i = 1; i <= 3; i++) {
+                const slot = document.getElementById(`echoSlot${i}`);
+                const content = slot.querySelector('.echo-slot-content');
+                content.textContent = '';
+                content.style.background = '';
+                slot.className = 'echo-slot';
+                slot.setAttribute('ondragover', 'allowDrop(event)');
+                slot.setAttribute('ondrop', 'dropEcho(event)');
+                const unlockedDiv = document.getElementById(`unlockedContent${i}`);
+                if (unlockedDiv) unlockedDiv.classList.add('hidden');
+            }
+            // Reset overlays instantly
+            resetJournalOverlays();
+            // Re-apply echo slots
+            const journal = cardJournals[cardId] || {};
+            Object.entries(journal).forEach(([slotId, supertype]) => {
+                placeEchoInSlot(slotId, supertype);
+            });
+            // Re-apply level overlays instantly (maxLevel caps restore for level-up animation)
+            const cl = cardLevels[cardId];
+            const levelToShow = (maxLevel !== undefined) ? maxLevel : (cl ? cl.level : 0);
+            if (levelToShow > 0) applyOverlaysInstant(levelToShow);
+        }
+
+        function closeJournalScreen() {
+            document.getElementById('journalScreen').classList.remove('show');
+        }
+
+        // ==================== STUDIO ====================
+
+        const STUDIO_ITEMS = {
+            window: {
+                icon: '🖼️',
+                name: 'Fenêtre magique',
+                desc: 'Une fenêtre qui s\'ouvre sur des panoramas de Lyon à travers les âges. La lumière qui en filtre change selon l\'heure.'
+            },
+            bookshelf: {
+                icon: '📚',
+                name: 'Bibliothèque',
+                desc: 'Remplie de volumes sur l\'histoire de Lyon. Chaque carte collectée y ajoute un nouveau chapitre.'
+            },
+            desk: {
+                icon: '🗃️',
+                name: 'Bureau de recherche',
+                desc: 'Vos notes et cartes d\'exploration s\'y accumulent. Un endroit idéal pour organiser vos découvertes.'
+            },
+            chest: {
+                icon: '💎',
+                name: 'Coffre aux merveilles',
+                desc: 'Un coffre mystérieux qui contient vos plus précieux artefacts. Il grandit à mesure que vous collectez.'
+            },
+            plant: {
+                icon: '🌿',
+                name: 'Plante mémorielle',
+                desc: 'Une plante rare qui fleurit chaque fois que vous débloquez un nouveau contenu dans vos carnets.'
+            },
+            armchair: {
+                icon: '💺',
+                name: 'Fauteuil de lecture',
+                desc: 'Un fauteuil confortable pour relire vos carnets et méditer sur vos découvertes lyonnaises.'
+            },
+            lamp: {
+                icon: '🕯️',
+                name: 'Lampe à mémoire',
+                desc: 'Sa lumière s\'intensifie avec chaque poudre mémorielle collectée. Elle illumine vos souvenirs.'
+            },
+            mirror: {
+                icon: '🔮',
+                name: 'Miroir de réflexion',
+                desc: 'Reflète les échos que vous avez récoltés. Regardez-y pour voir les connexions entre vos cartes.'
+            },
+            globe: {
+                icon: '🌍',
+                name: 'Globe de Lyon',
+                desc: 'Retourne à la carte d\'exploration. Tous vos points d\'intérêt y sont marqués en lumière.'
+            },
+            arch: {
+                icon: '🌀',
+                name: 'Arche de retour',
+                desc: 'Un portail magique qui vous ramène à la carte d\'exploration de Lyon.'
+            },
+            harp: {
+                icon: '🎵',
+                name: 'Harpe lyonnaise',
+                desc: 'Joue les mélodies associées à vos cartes de type Arts. Chaque note est un souvenir.'
+            },
+            cauldron: {
+                icon: '💧',
+                name: 'Chaudron alchimique',
+                desc: 'Permet de fusionner des poudres mémorielles pour créer des échos rares. En cours de développement...'
+            }
+        };
+
+        let studioOwnedItems = ['window', 'bookshelf', 'desk', 'chest', 'plant', 'armchair', 'lamp', 'globe'];
+
+        function openStudioScreen() {
+            document.getElementById('studioCardName').textContent = selectedCard ? selectedCard.name : '';
+            document.getElementById('studioDustCounter').textContent = memorialDust;
+            updateStudioShop();
+            document.getElementById('studioScreen').classList.add('show');
+        }
+
+        function openStudioFromMap() {
+            // Open studio without requiring a selected card
+            document.getElementById('studioCardName').textContent = 'Mon espace';
+            document.getElementById('studioDustCounter').textContent = memorialDust;
+            updateStudioShop();
+            document.getElementById('studioScreen').classList.add('show');
+        }
+
+        function closeStudioScreen() {
+            document.getElementById('studioScreen').classList.remove('show');
+            closeStudioTooltip();
+        }
+
+        function studioItemClick(itemId) {
+            // Special actions
+            if (itemId === 'globe' || itemId === 'arch') {
+                closeStudioScreen();
+                return;
+            }
+            if (itemId === 'bookshelf') {
+                closeStudioScreen();
+                openCollections();
+                return;
+            }
+
+            const item = STUDIO_ITEMS[itemId];
+            if (!item) return;
+            const tooltip = document.getElementById('studioTooltip');
+            document.getElementById('tooltipIcon').textContent = item.icon;
+            document.getElementById('tooltipName').textContent = item.name;
+            document.getElementById('tooltipDesc').textContent = item.desc;
+            tooltip.classList.remove('hidden');
+        }
+
+        function closeStudioTooltip() {
+            document.getElementById('studioTooltip').classList.add('hidden');
+        }
+
+        function buyStudioItem(itemId, price) {
+            if (studioOwnedItems.includes(itemId)) return;
+            if (memorialDust < price) {
+                const tooltip = document.getElementById('studioTooltip');
+                document.getElementById('tooltipIcon').textContent = '💜';
+                document.getElementById('tooltipName').textContent = 'Poudre insuffisante';
+                document.getElementById('tooltipDesc').textContent = `Il vous faut ${price} poudres mémorielle pour débloquer cet objet. Vous en avez ${memorialDust}.`;
+                tooltip.classList.remove('hidden');
+                return;
+            }
+            memorialDust -= price;
+            document.getElementById('dustCounter').textContent = memorialDust;
+            document.getElementById('studioDustCounter').textContent = memorialDust;
+            studioOwnedItems.push(itemId);
+
+            // Add item to the scene
+            addItemToScene(itemId);
+            updateStudioShop();
+
+            // Show success tooltip
+            const item = STUDIO_ITEMS[itemId];
+            const tooltip = document.getElementById('studioTooltip');
+            document.getElementById('tooltipIcon').textContent = item.icon;
+            document.getElementById('tooltipName').textContent = `${item.name} ajouté !`;
+            document.getElementById('tooltipDesc').textContent = `Nouvel objet ajouté à votre studio. ${item.desc}`;
+            tooltip.classList.remove('hidden');
+        }
+
+        // SVG snippets for buyable items
+        const STUDIO_ITEM_SVG = {
+            mirror: `<g id="item-mirror" onclick="studioItemClick('mirror')" style="cursor:pointer;opacity:0">
+              <polygon points="0,45 35,30 35,50 0,65" fill="#3d2010"/>
+              <polygon points="5,42 30,28 30,32 5,46" fill="#8c5020" opacity="0.8"/>
+              <ellipse cx="17" cy="22" rx="12" ry="16" fill="#1a1a3e" stroke="#a070d0" stroke-width="2"/>
+              <ellipse cx="17" cy="22" rx="9" ry="13" fill="#22224e"/>
+              <ellipse cx="12" cy="15" rx="4" ry="5" fill="rgba(180,120,255,0.25)"/>
+              <text x="17" y="68" font-size="8" fill="rgba(255,220,120,0.8)" text-anchor="middle" font-family="sans-serif">Miroir</text>
+            </g>`,
+            harp: `<g id="item-harp" onclick="studioItemClick('harp')" style="cursor:pointer;opacity:0">
+              <polygon points="0,50 45,34 45,54 0,70" fill="#3d2010"/>
+              <line x1="8" y1="48" x2="8" y2="5" stroke="#a06820" stroke-width="3"/>
+              <path d="M8,5 Q40,-5 38,35" fill="none" stroke="#c88030" stroke-width="3"/>
+              <line x1="38" y1="35" x2="8" y2="48" stroke="#8c5010" stroke-width="3"/>
+              <line x1="12" y1="44" x2="16" y2="10" stroke="#ffd080" stroke-width="1"/>
+              <line x1="18" y1="42" x2="22" y2="8" stroke="#ffd080" stroke-width="1"/>
+              <line x1="24" y1="40" x2="28" y2="7" stroke="#ffd080" stroke-width="1"/>
+              <line x1="30" y1="40" x2="33" y2="10" stroke="#ffd080" stroke-width="1"/>
+              <line x1="35" y1="40" x2="37" y2="17" stroke="#ffd080" stroke-width="1"/>
+              <text x="22" y="78" font-size="8" fill="rgba(255,220,120,0.8)" text-anchor="middle" font-family="sans-serif">Harpe</text>
+            </g>`,
+            cauldron: `<g id="item-cauldron" onclick="studioItemClick('cauldron')" style="cursor:pointer;opacity:0">
+              <ellipse cx="30" cy="60" rx="28" ry="7" fill="rgba(0,0,0,0.4)"/>
+              <polygon points="5,52 55,38 55,48 5,62" fill="#1a1a1a"/>
+              <ellipse cx="30" cy="48" rx="28" ry="12" fill="#2a2a2a"/>
+              <ellipse cx="30" cy="38" rx="24" ry="10" fill="#1a1a1a"/>
+              <ellipse cx="30" cy="38" rx="22" ry="8" fill="#0a1520"/>
+              <ellipse cx="30" cy="36" rx="18" ry="6" fill="#0f2535" opacity="0.8"/>
+              <circle cx="22" cy="34" r="3" fill="rgba(0,180,255,0.6)"/>
+              <circle cx="35" cy="32" r="2" fill="rgba(0,220,255,0.5)"/>
+              <circle cx="30" cy="30" r="2.5" fill="rgba(80,160,255,0.4)"/>
+              <line x1="6" y1="40" x2="16" y2="34" stroke="#5a5a5a" stroke-width="3"/>
+              <line x1="54" y1="32" x2="44" y2="26" stroke="#5a5a5a" stroke-width="3"/>
+              <text x="30" y="72" font-size="8" fill="rgba(255,220,120,0.8)" text-anchor="middle" font-family="sans-serif">Chaudron</text>
+            </g>`
+        };
+
+        const STUDIO_ITEM_POS = {
+            mirror:   'translate(60,90)',
+            harp:     'translate(195,155)',
+            cauldron: 'translate(78,165)'
+        };
+
+        function addItemToScene(itemId) {
+            const svg = document.getElementById('studioSvg');
+            if (!svg || !STUDIO_ITEM_SVG[itemId]) return;
+            const tmp = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            tmp.innerHTML = STUDIO_ITEM_SVG[itemId];
+            const g = tmp.firstElementChild;
+            g.setAttribute('transform', STUDIO_ITEM_POS[itemId] || 'translate(150,150)');
+            svg.appendChild(g);
+            // Animate in
+            requestAnimationFrame(() => {
+                g.style.transition = 'opacity 0.5s ease';
+                g.style.opacity = '1';
+            });
+        }
+
+        function updateStudioShop() {
+            document.querySelectorAll('.shop-item').forEach(el => {
+                const itemId = el.getAttribute('onclick')?.match(/'(\w+)'/)?.[1];
+                if (itemId && studioOwnedItems.includes(itemId)) {
+                    el.classList.add('owned');
+                    el.querySelector('.shop-item-price').textContent = '✓ Acquis';
+                }
+            });
+        }
+
+        function animateJournalLevel(level) {
+            // Animate only the NEW overlay for `level` (previous ones already set by restoreJournalState)
+            const idx = level - 1; // 0-based index of the new overlay
+            if (idx < 0 || idx > 2) return;
+            const id = ['journalLevelOverlay1','journalLevelOverlay2','journalLevelOverlay3'][idx];
+            const el = document.getElementById(id);
+            if (!el) return;
+            // Set color, re-enable transition, then trigger height
+            el.style.background = OVERLAY_COLORS[idx];
+            el.style.transition = ''; // re-enable CSS transition
+            // Force browser to register the transition before changing height
+            el.getBoundingClientRect(); // trigger reflow
+            el.style.height = '33.33%';
+            // Show interaction button after animation
+            setTimeout(() => {
+                const btn = document.getElementById(`journalBtn${level}`);
+                if (btn) btn.style.display = 'block';
+                document.getElementById('journalNotification').classList.remove('hidden');
+            }, 1400);
+        }
+
+        // ==================== ECHOES ====================
+
+        // Touch drag state
+        let touchDragSupertype = null;
+        let touchDragGhost = null;
+
+        function createTouchGhost(supertype, info) {
+            const ghost = document.createElement('div');
+            ghost.style.cssText = `
+                position: fixed; z-index: 9999; pointer-events: none;
+                width: 48px; height: 48px; border-radius: 50%;
+                background: ${info.color}; border: 3px solid white;
+                display: flex; align-items: center; justify-content: center;
+                font-size: 22px; opacity: 0.85;
+                box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+                transform: translate(-50%, -50%) scale(1.15);
+                transition: transform 0.05s;
+            `;
+            ghost.textContent = info.symbol;
+            document.body.appendChild(ghost);
+            return ghost;
+        }
+
+        function getSlotAtPoint(x, y) {
+            const slots = document.querySelectorAll('.echo-slot:not(.filled)');
+            for (const slot of slots) {
+                const r = slot.getBoundingClientRect();
+                if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return slot;
+            }
+            return null;
+        }
+
+        function renderEchoInventory() {
+            if (!selectedCard) return;
+            const div = document.getElementById('echoInventory');
+            div.innerHTML = '';
+            const supertype = selectedCard.supertype;
+            const count = echoInventory[supertype] || 0;
+            if (count === 0) {
+                div.innerHTML = '<div style="color:#9ca3af;text-align:center;width:100%;padding:20px;">Aucun écho de ce type</div>';
+                return;
+            }
+            const info = SUPERTYPES[supertype];
+            const item = document.createElement('div');
+            item.className = 'echo-inventory-item';
+            const orb = document.createElement('div');
+            orb.className = `echo-orb supertype-${supertype}`;
+            orb.draggable = true;
+            orb.textContent = info.symbol;
+            orb.dataset.supertype = supertype;
+
+            // ── Mouse drag (desktop) ──
+            orb.ondragstart = (e) => { e.dataTransfer.setData('supertype', supertype); orb.classList.add('dragging'); };
+            orb.ondragend = () => orb.classList.remove('dragging');
+
+            // ── Touch drag (mobile) ──
+            orb.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                touchDragSupertype = supertype;
+                const t = e.touches[0];
+                touchDragGhost = createTouchGhost(supertype, info);
+                touchDragGhost.style.left = t.clientX + 'px';
+                touchDragGhost.style.top  = t.clientY + 'px';
+                orb.classList.add('dragging');
+            }, { passive: false });
+
+            orb.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (!touchDragGhost) return;
+                const t = e.touches[0];
+                touchDragGhost.style.left = t.clientX + 'px';
+                touchDragGhost.style.top  = t.clientY + 'px';
+                // Highlight hovered slot
+                document.querySelectorAll('.echo-slot').forEach(s => s.classList.remove('drag-over'));
+                const slot = getSlotAtPoint(t.clientX, t.clientY);
+                if (slot && !slot.classList.contains('filled')) slot.classList.add('drag-over');
+            }, { passive: false });
+
+            orb.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                if (!touchDragGhost) return;
+                const t = e.changedTouches[0];
+                const slot = getSlotAtPoint(t.clientX, t.clientY);
+                document.querySelectorAll('.echo-slot').forEach(s => s.classList.remove('drag-over'));
+                touchDragGhost.remove(); touchDragGhost = null;
+                orb.classList.remove('dragging');
+                if (slot && !slot.classList.contains('filled') && touchDragSupertype) {
+                    const slotId = slot.dataset.slotId;
+                    if (selectedCard && selectedCard.supertype === touchDragSupertype) {
+                        placeEchoInSlot(slotId, touchDragSupertype);
+                        echoInventory[touchDragSupertype]--;
+                        renderEchoInventory();
+                    }
+                }
+                touchDragSupertype = null;
+            }, { passive: false });
+
+            if (count > 1) {
+                const badge = document.createElement('div');
+                badge.className = 'echo-count';
+                badge.textContent = count;
+                item.appendChild(badge);
+            }
+            item.appendChild(orb);
+            div.appendChild(item);
+        }
+
+        function allowDrop(event) {
+            event.preventDefault();
+            const slot = event.currentTarget;
+            if (!slot.classList.contains('filled')) slot.classList.add('drag-over');
+        }
+
+        function dropEcho(event) {
+            event.preventDefault();
+            const slot = event.currentTarget;
+            slot.classList.remove('drag-over');
+            if (slot.classList.contains('filled')) return;
+            const supertype = event.dataTransfer.getData('supertype');
+            const slotId = slot.dataset.slotId;
+            if (!supertype || !slotId) return;
+            if (selectedCard && selectedCard.supertype === supertype) {
+                placeEchoInSlot(slotId, supertype);
+                echoInventory[supertype]--;
+                renderEchoInventory();
+            }
+        }
+
+        function placeEchoInSlot(slotId, supertype) {
+            const slotNum = slotId.replace('slot', '');
+            const slot = document.getElementById(`echoSlot${slotNum}`);
+            const content = slot.querySelector('.echo-slot-content');
+            const info = SUPERTYPES[supertype];
+            content.textContent = info.symbol;
+            content.style.background = info.color;
+            slot.classList.add('filled', `supertype-${supertype}`);
+            // Save per-card
+            if (selectedCard) {
+                if (!cardJournals[selectedCard.id]) cardJournals[selectedCard.id] = {};
+                cardJournals[selectedCard.id][slotId] = supertype;
+            }
+            placedEchoes[slotId] = supertype; // kept for compat
+            const contentDiv = document.getElementById(`unlockedContent${slotNum}`);
+            if (contentDiv) {
+                contentDiv.querySelector('.unlocked-content-text').textContent = ECHO_UNLOCKS[slotId];
+                contentDiv.classList.remove('hidden');
+            }
+        }
+
+        // ==================== GPS ====================
+
+        function toggleGPS() {
+            const gpsBtn = document.getElementById('gpsBtn');
+            if (!isMobileDevice) {
+                alert('La géolocalisation en direct est réservée au mode téléphone. Sur web, la carte reste centrée sur Lyon.');
+                return;
+            }
+            if (!gpsActive) {
+                if ('geolocation' in navigator) {
+                    gpsWatchId = navigator.geolocation.watchPosition(
+                        (position) => {
+                            playerPos = { lat: position.coords.latitude, lng: position.coords.longitude };
+                            if (playerMarker && map) updatePlayerOnMap();
+                            checkNearbyPOI();
+                        },
+                        (error) => {
+                            console.error('Erreur GPS:', error);
+                            alert('Impossible d\'accéder au GPS. Vérifiez les permissions.');
+                            gpsActive = false;
+                            gpsBtn.classList.remove('active');
+                        },
+                        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+                    );
+                    gpsActive = true;
+                    gpsBtn.classList.add('active');
+                } else {
+                    alert('La géolocalisation n\'est pas disponible sur cet appareil.');
+                }
+            } else {
+                if (gpsWatchId) { navigator.geolocation.clearWatch(gpsWatchId); gpsWatchId = null; }
+                gpsActive = false;
+                gpsBtn.classList.remove('active');
+            }
+        }
+    </script>
+</body>
+</html>
