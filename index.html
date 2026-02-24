@@ -2,8 +2,8 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <link href="https://unpkg.com/maplibre-gl@4.4.1/dist/maplibre-gl.css" rel="stylesheet">
-    <script src="https://unpkg.com/maplibre-gl@4.4.1/dist/maplibre-gl.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.4.1/dist/maplibre-gl.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.4.1/dist/maplibre-gl.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Lyon Cards - Prototype</title>
     <style>
@@ -853,15 +853,31 @@
             position: absolute;
             top: -10px;
             right: -10px;
-            width: 50px;
-            height: 50px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 20px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             border: 3px solid white;
+            z-index: 2;
+        }
+        .card-supertype-badge2 {
+            position: absolute;
+            top: -10px;
+            right: 28px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border: 3px solid white;
+            z-index: 1;
         }
 
         .card-tabs {
@@ -1085,24 +1101,6 @@
             z-index: 15;
         }
 
-        .gps-btn {
-            width: 56px;
-            height: 56px;
-            background: white;
-            border: 2px solid #4F46E5;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            transition: all 0.2s;
-        }
-
-        .gps-btn.active { background: #4F46E5; color: white; }
-        .gps-btn:active { transform: scale(0.95); }
-
         /* Studio button on map */
         .studio-map-btn-container {
             position: absolute;
@@ -1156,15 +1154,22 @@
             position: absolute;
             top: -10px;
             right: -10px;
-            width: 50px;
-            height: 50px;
+            width: 44px; height: 44px;
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            border: 3px solid white;
+            border: 3px solid white; z-index: 2;
+        }
+        .card-supertype-badge2 {
+            position: absolute;
+            top: -10px; right: 28px;
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border: 3px solid white; z-index: 1;
         }
 
         .echo-slot {
@@ -1522,6 +1527,601 @@
         .shop-item-name { font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 600; margin-bottom: 2px; }
         .shop-item-price { font-size: 10px; color: #A78BFA; font-weight: 700; }
         .shop-item.owned .shop-item-price { color: #10B981; }
+
+        /* ==================== PROGRESSION SYSTEM ==================== */
+
+        /* Avatar menu XP mini bar */
+        .avatar-menu-xp {
+            padding: 10px 16px 12px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .avatar-menu-xp-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+        .avatar-menu-rank {
+            font-size: 13px;
+            font-weight: 800;
+            color: #4F46E5;
+        }
+        .avatar-menu-level {
+            font-size: 11px;
+            font-weight: 700;
+            color: #9ca3af;
+            background: #f3f4f6;
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
+        .avatar-menu-xp-bar {
+            width: 100%;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .avatar-menu-xp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4F46E5 0%, #7C3AED 100%);
+            border-radius: 3px;
+            transition: width 0.4s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .avatar-menu-xp-label {
+            font-size: 10px;
+            color: #9ca3af;
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        /* Progression Screen */
+        .progression-screen {
+            display: none;
+            position: absolute;
+            inset: 0;
+            background: #0f0a1e;
+            z-index: 450;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .progression-screen.show { display: flex; }
+
+        .prog-header {
+            background: linear-gradient(135deg, #1a0f2e 0%, #0f0a1e 100%);
+            border-bottom: 1px solid rgba(139,92,246,0.3);
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+        .prog-back {
+            background: none;
+            border: none;
+            color: rgba(167,139,250,0.9);
+            font-size: 22px;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+        .prog-header-info { flex: 1; }
+        .prog-header-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: #e9d5ff;
+            letter-spacing: 0.3px;
+        }
+        .prog-header-subtitle {
+            font-size: 11px;
+            color: rgba(167,139,250,0.6);
+            margin-top: 1px;
+        }
+
+        /* Player rank card */
+        .prog-player-card {
+            background: linear-gradient(135deg, #1e1035 0%, #160c28 100%);
+            border-bottom: 1px solid rgba(139,92,246,0.2);
+            padding: 18px 16px;
+            flex-shrink: 0;
+        }
+        .prog-player-top {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+        .prog-avatar-ring {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            border: 3px solid rgba(139,92,246,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            box-shadow: 0 0 20px rgba(139,92,246,0.4);
+            flex-shrink: 0;
+            position: relative;
+        }
+        .prog-avatar-level-badge {
+            position: absolute;
+            bottom: -5px;
+            right: -5px;
+            background: #F59E0B;
+            color: white;
+            font-size: 10px;
+            font-weight: 800;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #0f0a1e;
+        }
+        .prog-player-info { flex: 1; }
+        .prog-player-rank {
+            font-size: 18px;
+            font-weight: 900;
+            color: #e9d5ff;
+            letter-spacing: 0.3px;
+        }
+        .prog-player-title {
+            font-size: 12px;
+            color: rgba(167,139,250,0.7);
+            margin-top: 2px;
+        }
+        .prog-player-xp-total {
+            font-size: 11px;
+            color: #A78BFA;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+        .prog-xp-bar-wrap { position: relative; }
+        .prog-xp-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: rgba(167,139,250,0.6);
+            margin-bottom: 5px;
+        }
+        .prog-xp-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(255,255,255,0.07);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .prog-xp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6D28D9 0%, #A855F7 60%, #C084FC 100%);
+            border-radius: 5px;
+            transition: width 0.6s cubic-bezier(0.34,1.56,0.64,1);
+            position: relative;
+        }
+        .prog-xp-fill::after {
+            content: '';
+            position: absolute;
+            top: 0; right: 0;
+            width: 20px;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35));
+            border-radius: 5px;
+            animation: xpShine 2s ease-in-out infinite;
+        }
+        @keyframes xpShine {
+            0%,100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* Tabs */
+        .prog-tabs {
+            display: flex;
+            background: rgba(255,255,255,0.03);
+            border-bottom: 1px solid rgba(139,92,246,0.15);
+            flex-shrink: 0;
+        }
+        .prog-tab {
+            flex: 1;
+            background: none;
+            border: none;
+            padding: 11px 4px;
+            font-size: 12px;
+            font-weight: 700;
+            color: rgba(167,139,250,0.5);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            letter-spacing: 0.3px;
+        }
+        .prog-tab.active {
+            color: #C084FC;
+            border-bottom-color: #A855F7;
+        }
+
+        .prog-body { flex: 1; overflow-y: auto; }
+
+        /* ---- BATTLEPASS TRACK ---- */
+        .battlepass-track {
+            padding: 16px;
+        }
+        .battlepass-season-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: rgba(167,139,250,0.5);
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-bottom: 14px;
+            text-align: center;
+        }
+        .bp-node-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 6px;
+            gap: 0;
+        }
+        .bp-connector {
+            width: 3px;
+            height: 20px;
+            background: rgba(255,255,255,0.08);
+            margin: 0 auto;
+            display: block;
+            transition: background 0.3s;
+        }
+        .bp-connector.done { background: linear-gradient(180deg, #A855F7, #7C3AED); }
+
+        .bp-node {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.04);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .bp-node.done {
+            background: linear-gradient(135deg, #6D28D9, #A855F7);
+            border-color: #C084FC;
+            box-shadow: 0 0 12px rgba(168,85,247,0.4);
+        }
+        .bp-node.current {
+            background: rgba(168,85,247,0.2);
+            border-color: #A855F7;
+            box-shadow: 0 0 16px rgba(168,85,247,0.5);
+            animation: currentPulse 2s ease-in-out infinite;
+        }
+        .bp-node.locked {
+            opacity: 0.4;
+        }
+        @keyframes currentPulse {
+            0%,100% { box-shadow: 0 0 16px rgba(168,85,247,0.5); }
+            50% { box-shadow: 0 0 28px rgba(168,85,247,0.8); }
+        }
+        .bp-node-num {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            font-size: 9px;
+            font-weight: 800;
+            color: rgba(255,255,255,0.5);
+            background: rgba(0,0,0,0.6);
+            border-radius: 10px;
+            padding: 1px 4px;
+            line-height: 1.4;
+        }
+        .bp-node.done .bp-node-num { color: #C084FC; }
+
+        .bp-reward-card {
+            flex: 1;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 10px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.2s;
+        }
+        .bp-reward-card.done {
+            background: rgba(109,40,217,0.12);
+            border-color: rgba(168,85,247,0.25);
+        }
+        .bp-reward-icon { font-size: 22px; flex-shrink: 0; }
+        .bp-reward-info { flex: 1; }
+        .bp-reward-name { font-size: 13px; font-weight: 700; color: #e9d5ff; }
+        .bp-reward-type { font-size: 10px; color: rgba(167,139,250,0.55); margin-top: 1px; }
+        .bp-reward-status {
+            font-size: 10px;
+            font-weight: 700;
+            color: #10B981;
+            flex-shrink: 0;
+        }
+        .bp-reward-status.locked { color: rgba(255,255,255,0.2); }
+        .bp-reward-status.current { color: #F59E0B; }
+
+        /* Milestone paliers */
+        .bp-milestone {
+            background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(245,158,11,0.05));
+            border: 1px solid rgba(245,158,11,0.3);
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .bp-milestone-icon { font-size: 26px; flex-shrink: 0; }
+        .bp-milestone-info { flex: 1; }
+        .bp-milestone-name { font-size: 14px; font-weight: 800; color: #FCD34D; }
+        .bp-milestone-desc { font-size: 11px; color: rgba(252,211,77,0.6); margin-top: 2px; }
+        .bp-milestone-badge {
+            background: rgba(245,158,11,0.2);
+            border: 1px solid rgba(245,158,11,0.4);
+            color: #FCD34D;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 20px;
+        }
+
+        /* ---- ACHIEVEMENTS ---- */
+        .achievements-list { padding: 14px; }
+
+        .achievement-category {
+            margin-bottom: 20px;
+        }
+        .achievement-cat-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: rgba(167,139,250,0.5);
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-bottom: 10px;
+            padding-left: 4px;
+        }
+        .achievement-item {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s;
+        }
+        .achievement-item.unlocked {
+            background: rgba(16,185,129,0.08);
+            border-color: rgba(16,185,129,0.25);
+        }
+        .achievement-item.in-progress {
+            background: rgba(79,70,229,0.08);
+            border-color: rgba(79,70,229,0.2);
+        }
+        .achievement-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+            position: relative;
+        }
+        .achievement-item.unlocked .achievement-icon {
+            background: rgba(16,185,129,0.15);
+        }
+        .achievement-check {
+            position: absolute;
+            bottom: -4px;
+            right: -4px;
+            width: 16px;
+            height: 16px;
+            background: #10B981;
+            border-radius: 50%;
+            border: 2px solid #0f0a1e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            color: white;
+            font-weight: 800;
+        }
+        .achievement-info { flex: 1; min-width: 0; }
+        .achievement-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #e9d5ff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .achievement-item.unlocked .achievement-name { color: #6EE7B7; }
+        .achievement-desc {
+            font-size: 11px;
+            color: rgba(167,139,250,0.5);
+            margin-top: 2px;
+        }
+        .achievement-progress-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 6px;
+        }
+        .achievement-prog-bar {
+            flex: 1;
+            height: 4px;
+            background: rgba(255,255,255,0.07);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .achievement-prog-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4F46E5, #7C3AED);
+            border-radius: 2px;
+        }
+        .achievement-item.unlocked .achievement-prog-fill { background: #10B981; }
+        .achievement-prog-label {
+            font-size: 10px;
+            color: rgba(167,139,250,0.5);
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .achievement-xp {
+            font-size: 11px;
+            font-weight: 700;
+            color: #A78BFA;
+            flex-shrink: 0;
+            text-align: right;
+        }
+        .achievement-item.unlocked .achievement-xp { color: #6EE7B7; }
+
+        /* Unlock toast for achievements */
+        .achievement-toast {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 999;
+            background: linear-gradient(135deg, #1e1035 0%, #120828 100%);
+            border: 1px solid rgba(16,185,129,0.5);
+            border-radius: 14px;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5), 0 0 20px rgba(16,185,129,0.2);
+            min-width: 260px;
+            animation: achieveSlideDown 0.4s cubic-bezier(0.34,1.56,0.64,1);
+            pointer-events: none;
+        }
+        @keyframes achieveSlideDown {
+            from { opacity: 0; transform: translateX(-50%) translateY(-20px) scale(0.9); }
+            to   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+        }
+        .achievement-toast-icon { font-size: 26px; flex-shrink: 0; }
+        .achievement-toast-text { flex: 1; }
+        .achievement-toast-label {
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #10B981;
+        }
+        .achievement-toast-name {
+            font-size: 14px;
+            font-weight: 800;
+            color: #e9d5ff;
+            margin-top: 1px;
+        }
+        .achievement-toast-xp {
+            font-size: 11px;
+            color: #A78BFA;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        /* Level-up overlay */
+        .levelup-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(15,10,30,0.85);
+            z-index: 800;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .levelup-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .levelup-burst {
+            font-size: 64px;
+            animation: levelBurst 0.6s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        @keyframes levelBurst {
+            0% { transform: scale(0) rotate(-20deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        .levelup-text {
+            font-size: 28px;
+            font-weight: 900;
+            color: #e9d5ff;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+        .levelup-rank {
+            font-size: 16px;
+            font-weight: 700;
+            color: #A78BFA;
+        }
+        .levelup-xp {
+            font-size: 14px;
+            color: #FCD34D;
+            font-weight: 700;
+        }
+        .levelup-close {
+            margin-top: 8px;
+            background: rgba(168,85,247,0.2);
+            border: 1px solid rgba(168,85,247,0.4);
+            color: #C084FC;
+            padding: 10px 28px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            pointer-events: all;
+        }
+
+        /* HUD XP bar */
+        .hud-xp-bar {
+            position: absolute;
+            top: 70px;
+            left: 14px;
+            right: 14px;
+            z-index: 30;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .hud-xp-pill {
+            flex: 1;
+            height: 5px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 3px;
+            overflow: hidden;
+            backdrop-filter: blur(4px);
+        }
+        .hud-xp-pill-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6D28D9, #A855F7, #C084FC);
+            border-radius: 3px;
+            transition: width 0.5s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .hud-xp-level-label {
+            font-size: 10px;
+            font-weight: 800;
+            color: rgba(255,255,255,0.85);
+            background: rgba(109,40,217,0.6);
+            backdrop-filter: blur(4px);
+            padding: 2px 7px;
+            border-radius: 10px;
+            flex-shrink: 0;
+        }
     </style>
 </head>
 <body>
@@ -1536,6 +2136,20 @@
                 <!-- Dropdown menu -->
                 <div class="avatar-menu hidden" id="avatarMenu">
                     <div class="avatar-menu-name">Lyon Cards</div>
+                    <!-- Mini XP display -->
+                    <div class="avatar-menu-xp">
+                        <div class="avatar-menu-xp-top">
+                            <span class="avatar-menu-rank" id="menuRankName">Novice</span>
+                            <span class="avatar-menu-level" id="menuLevelBadge">Nv. 1</span>
+                        </div>
+                        <div class="avatar-menu-xp-bar">
+                            <div class="avatar-menu-xp-fill" id="menuXpFill" style="width:0%"></div>
+                        </div>
+                        <div class="avatar-menu-xp-label" id="menuXpLabel">0 / 100 XP</div>
+                    </div>
+                    <button class="avatar-menu-item" onclick="closeAvatarMenu(); openProgressionScreen()">
+                        <span>🗺️</span> Progression
+                    </button>
                     <button class="avatar-menu-item" onclick="closeAvatarMenu(); openCollections()">
                         <span>📦</span> Collections
                     </button>
@@ -1549,8 +2163,16 @@
             </div>
             <!-- Dust counter (top-right) -->
             <div class="hud-dust">
-                <span>💜</span>
+                <svg width="22" height="22" viewBox="0 0 24 24" style="display:inline-block;vertical-align:middle" xmlns="http://www.w3.org/2000/svg"><ellipse cx="12" cy="19" rx="9" ry="3" fill="#c084fc" opacity="0.7"/><path d="M5,18 Q7,10 12,7 Q17,10 19,18 Z" fill="#a855f7"/><circle cx="9" cy="14" r="1.2" fill="rgba(255,255,255,0.7)"/><circle cx="13" cy="11" r="1" fill="rgba(255,255,255,0.6)"/><circle cx="15" cy="15" r="0.9" fill="rgba(255,255,255,0.5)"/></svg>
                 <span id="dustCounter">0</span>
+            </div>
+        </div>
+
+        <!-- HUD XP bar -->
+        <div class="hud-xp-bar" id="hudXpBar">
+            <div class="hud-xp-level-label" id="hudXpLevel">Nv.1</div>
+            <div class="hud-xp-pill">
+                <div class="hud-xp-pill-fill" id="hudXpFill" style="width:0%"></div>
             </div>
         </div>
 
@@ -1566,7 +2188,6 @@
 
         <!-- GPS Toggle -->
         <div class="gps-toggle">
-            <button class="gps-btn" id="gpsBtn" onclick="toggleGPS()">📍</button>
         </div>
 
         <!-- Controls -->
@@ -1586,7 +2207,7 @@
             <div id="nearbyDust" class="nearby-poi hidden" style="background: #F3E8FF; border-color: #A855F7;">
                 <div class="nearby-poi-header">
                     <div>
-                        <div class="nearby-poi-name" style="color: #7C3AED;">💜 Poudre mémorielle</div>
+                        <div class="nearby-poi-name" style="color: #7C3AED;"><svg width="22" height="22" viewBox="0 0 24 24" style="display:inline-block;vertical-align:middle" xmlns="http://www.w3.org/2000/svg"><ellipse cx="12" cy="19" rx="9" ry="3" fill="#c084fc" opacity="0.7"/><path d="M5,18 Q7,10 12,7 Q17,10 19,18 Z" fill="#a855f7"/><circle cx="9" cy="14" r="1.2" fill="rgba(255,255,255,0.7)"/><circle cx="13" cy="11" r="1" fill="rgba(255,255,255,0.6)"/><circle cx="15" cy="15" r="0.9" fill="rgba(255,255,255,0.5)"/></svg> Poudre mémorielle</div>
                         <div class="nearby-poi-distance" style="color: #9333EA;">À portée de collecte!</div>
                     </div>
                 </div>
@@ -1647,7 +2268,7 @@
             <!-- Tabs -->
             <div class="col-tabs">
                 <button class="col-tab active" id="colTabCollections" onclick="switchColTab('collections')">🎴 Cartes</button>
-                <button class="col-tab" id="colTabEchoes" onclick="switchColTab('echoes')">✨ Échos</button>
+                <button class="col-tab" id="colTabEchoes" onclick="switchColTab('echoes')"><span id="echoTabIcon" style="display:inline-flex;align-items:center;vertical-align:middle;margin-right:2px;"><svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="7" cy="12" r="3" fill="currentColor"/><path d="M13,6 Q19,12 13,18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M17,3 Q25,12 17,21" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.55"/></svg></span> Échos</button>
             </div>
             <div class="collections-content">
                 <!-- COLLECTIONS TAB -->
@@ -1676,7 +2297,7 @@
                 <div class="card-detail-title-section">
                     <h2 class="collections-title" id="cardDetailHeaderTitle"></h2>
                     <div class="card-detail-dust-display">
-                        <span>💜</span>
+                        <svg width="22" height="22" viewBox="0 0 24 24" style="display:inline-block;vertical-align:middle" xmlns="http://www.w3.org/2000/svg"><ellipse cx="12" cy="19" rx="9" ry="3" fill="#c084fc" opacity="0.7"/><path d="M5,18 Q7,10 12,7 Q17,10 19,18 Z" fill="#a855f7"/><circle cx="9" cy="14" r="1.2" fill="rgba(255,255,255,0.7)"/><circle cx="13" cy="11" r="1" fill="rgba(255,255,255,0.6)"/><circle cx="15" cy="15" r="0.9" fill="rgba(255,255,255,0.5)"/></svg>
                         <span id="cardDetailDustCounter">0</span>
                     </div>
                 </div>
@@ -1687,7 +2308,7 @@
                         <div class="card-dialogue-bubble" id="cardDialogueBubble">
                             <div class="card-dialogue-text" id="cardDialogueText"></div>
                         </div>
-                        <div class="card-supertype-badge" id="cardSupertypeBadge">🏛️</div>
+                        <div class="card-supertype-badge2 hidden" id="cardSupertypeBadge2"></div><div class="card-supertype-badge" id="cardSupertypeBadge">🏛️</div>
                         <div class="card-category-badge" id="cardCategory">Personnage</div>
                         <div class="card-art-area">
                             <div class="card-art-placeholder" onclick="showCardDialogue()">👤</div>
@@ -1696,13 +2317,13 @@
                                 <div class="rarity-gem" id="cardRarityGem"></div>
                                 <div class="card-level-info">
                                     <span class="card-level-label" id="cardLevelDisplay">Niveau 1</span>
-                                    <span class="card-level-label" id="cardExpDisplay">0/10 💜</span>
+                                    <span class="card-level-label" id="cardExpDisplay">0/10 ✦</span>
                                 </div>
                                 <div class="card-exp-bar">
                                     <div class="card-exp-fill" id="cardExpBar" style="width: 0%"></div>
                                 </div>
                                 <button id="addExpBtn" class="card-level-up-btn" onclick="addExperience()" disabled>
-                                    💜 Ajouter 50 poudre (+EXP)
+                                    Ajouter 50 poudre (+EXP)
                                 </button>
                             </div>
                         </div>
@@ -1753,7 +2374,7 @@
                     <span class="studio-card-name" id="studioCardName"></span>
                 </div>
                 <div class="studio-dust-display">
-                    <span>💜</span>
+                    <svg width="22" height="22" viewBox="0 0 24 24" style="display:inline-block;vertical-align:middle" xmlns="http://www.w3.org/2000/svg"><ellipse cx="12" cy="19" rx="9" ry="3" fill="#c084fc" opacity="0.7"/><path d="M5,18 Q7,10 12,7 Q17,10 19,18 Z" fill="#a855f7"/><circle cx="9" cy="14" r="1.2" fill="rgba(255,255,255,0.7)"/><circle cx="13" cy="11" r="1" fill="rgba(255,255,255,0.6)"/><circle cx="15" cy="15" r="0.9" fill="rgba(255,255,255,0.5)"/></svg>
                     <span id="studioDustCounter">0</span>
                 </div>
             </div>
@@ -2116,7 +2737,7 @@
                         <div class="shop-item" onclick="buyStudioItem('mirror', 200)">
                             <div class="shop-item-icon">🔮</div>
                             <div class="shop-item-name">Miroir magique</div>
-                            <div class="shop-item-price">200 💜</div>
+                            <div class="shop-item-price">200 ✦</div>
                         </div>
                         <div class="shop-item owned" onclick="buyStudioItem('globe', 300)">
                             <div class="shop-item-icon">🌍</div>
@@ -2126,12 +2747,12 @@
                         <div class="shop-item" onclick="buyStudioItem('harp', 500)">
                             <div class="shop-item-icon">🎵</div>
                             <div class="shop-item-name">Harpe lyonnaise</div>
-                            <div class="shop-item-price">500 💜</div>
+                            <div class="shop-item-price">500 ✦</div>
                         </div>
                         <div class="shop-item" onclick="buyStudioItem('cauldron', 400)">
                             <div class="shop-item-icon">🫙</div>
                             <div class="shop-item-name">Chaudron</div>
-                            <div class="shop-item-price">400 💜</div>
+                            <div class="shop-item-price">400 ✦</div>
                         </div>
                     </div>
                 </div>
@@ -2234,6 +2855,67 @@
                 </div>
             </div>
         </div>
+        <!-- ==================== PROGRESSION SCREEN ==================== -->
+        <div id="progressionScreen" class="progression-screen">
+
+            <div class="prog-header">
+                <button class="prog-back" onclick="closeProgressionScreen()">←</button>
+                <div class="prog-header-info">
+                    <div class="prog-header-title">Chemin de l'Explorateur</div>
+                    <div class="prog-header-subtitle" id="progHeaderSub">Saison 1 · Lyon à travers les âges</div>
+                </div>
+            </div>
+
+            <!-- Player rank card -->
+            <div class="prog-player-card">
+                <div class="prog-player-top">
+                    <div class="prog-avatar-ring" id="progAvatar">
+                        🧙
+                        <div class="prog-avatar-level-badge" id="progAvatarLevel">1</div>
+                    </div>
+                    <div class="prog-player-info">
+                        <div class="prog-player-rank" id="progRankName">Novice</div>
+                        <div class="prog-player-title" id="progRankTitle">Les premiers pas de l'explorateur</div>
+                        <div class="prog-player-xp-total" id="progXpTotal">0 XP accumulés</div>
+                    </div>
+                </div>
+                <div class="prog-xp-bar-wrap">
+                    <div class="prog-xp-label">
+                        <span id="progXpCurrent">0 XP</span>
+                        <span id="progXpNext">Prochain rang : 100 XP</span>
+                    </div>
+                    <div class="prog-xp-bar">
+                        <div class="prog-xp-fill" id="progXpFill" style="width:0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="prog-tabs">
+                <button class="prog-tab active" id="progTabBP" onclick="switchProgTab('battlepass')">🗺️ Parcours</button>
+                <button class="prog-tab" id="progTabAchiev" onclick="switchProgTab('achievements')">🏆 Succès</button>
+            </div>
+
+            <div class="prog-body">
+                <div id="progPaneBP" class="battlepass-track">
+                    <div class="battlepass-season-title">⟡ Saison 1 · Paliers de progression ⟡</div>
+                    <div id="bpNodesList"></div>
+                </div>
+                <div id="progPaneAchiev" class="achievements-list hidden">
+                    <div id="achievementsList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Level-up overlay -->
+        <div id="levelupOverlay" class="levelup-overlay" onclick="closeLevelupOverlay()">
+            <div class="levelup-burst" id="levelupBurst">⭐</div>
+            <div class="levelup-text">NIVEAU <span id="levelupNum">2</span></div>
+            <div class="levelup-rank" id="levelupRank">Chroniqueur</div>
+            <div class="levelup-xp" id="levelupXpBonus">Nouveau rang débloqué !</div>
+            <button class="levelup-close" onclick="closeLevelupOverlay()">Continuer →</button>
+        </div>
+
     </div><!-- fin mainApp -->
 
     <script>
@@ -2249,8 +2931,8 @@
                     { id: 'card1', name: 'Antoine de Saint-Exupéry', type: 'Personnage', poiId: 'bellecour', rarity: 'rare', supertype: 'arts' },
                     { id: 'card2', name: 'Les Frères Lumière', type: 'Personnage', poiId: 'institut_lumiere', rarity: 'legendary', supertype: 'science' },
                     { id: 'card3', name: 'Paul Bocuse', type: 'Personnage', poiId: 'halles_bocuse', rarity: 'rare', supertype: 'societe' },
-                    { id: 'card4', name: 'Guignol', type: 'Personnage', poiId: 'vieux_lyon', rarity: 'common', supertype: 'arts' },
-                    { id: 'card5', name: 'Tony Garnier', type: 'Personnage', poiId: 'confluence', rarity: 'common', supertype: 'histoire' },
+                    { id: 'card4', name: 'Guignol', type: 'Personnage', poiId: 'vieux_lyon', rarity: 'common', supertype: 'arts', supertype2: 'societe' },
+                    { id: 'card5', name: 'Tony Garnier', type: 'Personnage', poiId: 'confluence', rarity: 'common', supertype: 'histoire', supertype2: 'arts' },
                 ]
             },
             presquile: {
@@ -2262,7 +2944,7 @@
                     { id: 'card6', name: 'Place Bellecour', type: 'Lieu', poiId: 'bellecour', rarity: 'legendary', supertype: 'histoire' },
                     { id: 'card7', name: 'Opéra de Lyon', type: 'Lieu', poiId: 'opera', rarity: 'rare', supertype: 'arts' },
                     { id: 'card8', name: 'Hôtel de Ville', type: 'Lieu', poiId: 'hotel_ville', rarity: 'common', supertype: 'societe' },
-                    { id: 'card9', name: 'Les Terreaux', type: 'Lieu', poiId: 'terreaux', rarity: 'common', supertype: 'histoire' },
+                    { id: 'card9', name: 'Les Terreaux', type: 'Lieu', poiId: 'terreaux', rarity: 'common', supertype: 'histoire', supertype2: 'nature' },
                     { id: 'card10', name: 'Fontaine Bartholdi', type: 'Objet', poiId: 'terreaux', rarity: 'rare', supertype: 'arts' },
                 ]
             },
@@ -2272,11 +2954,13 @@
                 type: 'locale',
                 description: 'Patrimoine de la colline et du Vieux-Lyon',
                 cards: [
-                    { id: 'card11', name: 'Basilique Notre-Dame', type: 'Lieu', poiId: 'fourviere', rarity: 'legendary', supertype: 'histoire' },
+                    { id: 'card11', name: 'Basilique Notre-Dame', type: 'Lieu', poiId: 'fourviere', rarity: 'legendary', supertype: 'histoire', supertype2: 'nature' },
                     { id: 'card12', name: 'Théâtre Romain', type: 'Lieu', poiId: 'theatre_romain', rarity: 'rare', supertype: 'histoire' },
                     { id: 'card13', name: 'Cathédrale Saint-Jean', type: 'Lieu', poiId: 'saint_jean', rarity: 'rare', supertype: 'histoire' },
-                    { id: 'card14', name: 'Traboule Renaissance', type: 'Lieu', poiId: 'vieux_lyon', rarity: 'common', supertype: 'societe' },
+                    { id: 'card14', name: 'Traboule Renaissance', type: 'Lieu', poiId: 'vieux_lyon', rarity: 'common', supertype: 'societe', supertype2: 'histoire' },
                     { id: 'card15', name: 'Horloge Astronomique', type: 'Objet', poiId: 'saint_jean', rarity: 'common', supertype: 'science' },
+                    { id: 'card16', name: 'Parc de la Tête d\'Or', type: 'Lieu', poiId: 'confluence', rarity: 'rare', supertype: 'nature' },
+                    { id: 'card17', name: 'Jardin des Curiosités', type: 'Lieu', poiId: 'fourviere', rarity: 'common', supertype: 'nature', supertype2: 'science' },
                 ]
             }
         };
@@ -2322,6 +3006,18 @@
             societe:  { name: 'Société',  color: '#F59E0B', symbol: '🏛️' }
         };
 
+
+        // Shared echo SVG icon — used on map markers, orbs, panels
+        // Unified echo icon: symmetric wave on a square viewbox
+        // Same shape used on map markers, orbs, panels, slots
+        function echoSvg(color, size) {
+            size = size || 28;
+            return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="7" cy="12" r="3" fill="${color}"/>
+              <path d="M13,6 Q19,12 13,18" fill="none" stroke="${color}" stroke-width="2.2" stroke-linecap="round"/>
+              <path d="M17,3 Q25,12 17,21" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" opacity="0.55"/>
+            </svg>`;
+        }
         const ECHO_POINTS = [
             { id: 'echo1',  supertype: 'histoire', lat: 45.7592, lng: 4.8292 },
             { id: 'echo2',  supertype: 'nature',   lat: 45.7612, lng: 4.8312 },
@@ -2406,8 +3102,6 @@
         let joystickInterval = null;
         let joystickDirection = { x: 0, y: 0 };
 
-        let teleportMode = false;
-        let selectedTeleportPOI = null;
 
         // Init echo inventory
         Object.keys(SUPERTYPES).forEach(type => { echoInventory[type] = 0; });
@@ -2423,7 +3117,7 @@
             setTimeout(() => {
                 initJoystick();
                 if (isMobileDevice && 'geolocation' in navigator) {
-                    setTimeout(toggleGPS, 500);
+                    setTimeout(startGPS, 500);
                 }
             }, 1500);
         });
@@ -2450,6 +3144,12 @@
             map = new maplibregl.Map({
                 container: 'map',
                 style: 'https://tiles.openfreemap.org/styles/bright',
+                transformRequest: (url, resourceType) => {
+                    // Ensure HTTPS for all tile requests (GitHub Pages requires it)
+                    if (url.startsWith('http://')) {
+                        return { url: url.replace('http://', 'https://') };
+                    }
+                },
                 center: [playerPos.lng, playerPos.lat],
                 zoom: 17,
                 pitch: ISOMETRIC_TILT,
@@ -2460,7 +3160,6 @@
             map.addControl(new maplibregl.AttributionControl({ compact: true }));
 
             // Disable default interactions we don't want
-            // Keep double-click zoom disabled (conflicts with teleport click)
             map.doubleClickZoom.disable();
 
             // ---- Player marker (HTML element) ----
@@ -2478,18 +3177,14 @@
             // ---- POI markers (card icon + capture radius circle) ----
             // Add GeoJSON source + layer inside load event
             map.on('load', () => {
+            // ── Calibrated capture zone circles (exact meters → pixels at Lyon lat 45.76°) ──
+            // POI: 50m, Dust: 30m, Echo: 30m
+            // Pixel formula: meters * 512 * 2^zoom * cos(45.76°) / (2π * 6378137)
+
             map.addSource('poi-circles', {
                 type: 'geojson',
-                data: {
-                    type: 'FeatureCollection',
-                    features: POIS.map(poi => ({
-                        type: 'Feature',
-                        properties: { id: poi.id },
-                        geometry: { type: 'Point', coordinates: [poi.lng, poi.lat] }
-                    }))
-                }
+                data: { type: 'FeatureCollection', features: [] }
             });
-            // Circle layer (approximate radius in pixels; real radius set via circle-radius in meters via zoom)
             map.addLayer({
                 id: 'poi-capture-circles',
                 type: 'circle',
@@ -2497,15 +3192,88 @@
                 paint: {
                     'circle-radius': [
                         'interpolate', ['exponential', 2], ['zoom'],
-                        13, 4,
-                        17, 30,
-                        18, 50,
-                        19, 90
+                        14, 7.3,
+                        15, 14.6,
+                        16, 29.2,
+                        17, 58.4,
+                        17.5, 82.6,
+                        18, 116.8,
+                        19, 233.7
                     ],
                     'circle-color': '#EF4444',
-                    'circle-opacity': 0.10,
+                    'circle-opacity': 0.08,
                     'circle-stroke-color': '#EF4444',
                     'circle-stroke-width': 1.5,
+                    'circle-stroke-opacity': 0.4
+                }
+            });
+
+            // Dust circles (30m)
+            map.addSource('dust-circles', {
+                type: 'geojson',
+                data: {
+                    type: 'FeatureCollection',
+                    features: DUST_POINTS.map(d => ({
+                        type: 'Feature',
+                        properties: { id: d.id },
+                        geometry: { type: 'Point', coordinates: [d.lng, d.lat] }
+                    }))
+                }
+            });
+            map.addLayer({
+                id: 'dust-capture-circles',
+                type: 'circle',
+                source: 'dust-circles',
+                paint: {
+                    'circle-radius': [
+                        'interpolate', ['exponential', 2], ['zoom'],
+                        14, 4.4,
+                        15, 8.8,
+                        16, 17.5,
+                        17, 35.0,
+                        17.5, 49.6,
+                        18, 70.1,
+                        19, 140.2
+                    ],
+                    'circle-color': '#A855F7',
+                    'circle-opacity': 0.08,
+                    'circle-stroke-color': '#A855F7',
+                    'circle-stroke-width': 1.2,
+                    'circle-stroke-opacity': 0.35
+                }
+            });
+
+            // Echo circles (30m)
+            map.addSource('echo-circles', {
+                type: 'geojson',
+                data: {
+                    type: 'FeatureCollection',
+                    features: ECHO_POINTS.map(e => ({
+                        type: 'Feature',
+                        properties: { id: e.id, supertype: e.supertype },
+                        geometry: { type: 'Point', coordinates: [e.lng, e.lat] }
+                    }))
+                }
+            });
+            map.addLayer({
+                id: 'echo-capture-circles',
+                type: 'circle',
+                source: 'echo-circles',
+                paint: {
+                    'circle-radius': [
+                        'interpolate', ['exponential', 2], ['zoom'],
+                        14, 4.4,
+                        15, 8.8,
+                        16, 17.5,
+                        17, 35.0,
+                        17.5, 49.6,
+                        18, 70.1,
+                        19, 140.2
+                    ],
+                    'circle-color': '#6366F1',
+                    'circle-opacity': 0.08,
+                    'circle-stroke-color': '#6366F1',
+                    'circle-stroke-width': 1.2,
                     'circle-stroke-opacity': 0.35
                 }
             });
@@ -2526,89 +3294,83 @@
                         }
                     });
                 }
+                // Populate circles with initial data now that sources exist
+                updatePOIVisibility();
+                updateDustVisibility();
+                updateEchoVisibility();
+                checkNearbyPOI();
             }); // end map.on('load')
 
             POIS.forEach(poi => {
                 // Single centered element: card icon centered in its own space
                 // The GeoJSON circle renders separately underneath via MapLibre layer
+                // Outer wrapper: zero size, never transforms (keeps marker stable)
                 const el = document.createElement('div');
-                el.style.cssText = `
-                    width: 36px; height: 36px;
-                    display: flex; align-items: center; justify-content: center;
-                    font-size: 22px;
-                    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
-                    cursor: pointer;
-                    transition: transform 0.15s;
-                `;
-                el.textContent = '🎴';
+                el.style.cssText = 'width:0;height:0;overflow:visible;cursor:pointer;';
                 el.title = poi.name;
+                // Inner icon: scales without affecting marker anchor
+                const inner = document.createElement('div');
+                inner.style.cssText = `
+                    position: absolute;
+                    width: 28px; height: 28px;
+                    transform: translate(-50%, -50%);
+                    display: flex; align-items: center; justify-content: center;
+                    font-size: 20px;
+                    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+                    transition: transform 0.15s, filter 0.15s;
+                    pointer-events: none;
+                `;
+                inner.textContent = '🎴';
+                el.appendChild(inner);
 
                 const marker = new maplibregl.Marker({ element: el, anchor: 'center' })
                     .setLngLat([poi.lng, poi.lat])
                     .addTo(map);
 
-                el.addEventListener('click', () => {
-                    if (gpsActive) { alert('⚠️ Désactivez le GPS pour utiliser la téléportation !'); return; }
-                    teleportMode = true;
-                    selectedTeleportPOI = poi;
-                    el.style.transform = 'scale(1.25)';
-                    alert(`📍 ${poi.name} sélectionné ! Cliquez sur la carte pour vous téléporter.`);
-                });
 
-                poiMarkers.push({ marker, el, poi });
+
+                poiMarkers.push({ marker, el, inner, poi });
             });
 
-            // Click on map to teleport
-            map.on('click', (e) => {
-                if (teleportMode && selectedTeleportPOI) {
-                    playerPos = { lat: e.lngLat.lat, lng: e.lngLat.lng };
-                    updatePlayerOnMap();
-                    teleportMode = false;
-                    poiMarkers.forEach(({ el }) => {
-                        if (el) el.style.transform = '';
-                    });
-                    selectedTeleportPOI = null;
-                    checkNearbyPOI();
-                }
-            });
 
-            // ---- Dust markers ----
+
+            // ---- Dust markers — powder icon (triangle pile) ----
             DUST_POINTS.forEach(dust => {
                 const el = document.createElement('div');
-                el.style.cssText = `
-                    width: 14px; height: 14px;
-                    background: #A855F7; border: 2px solid white;
-                    transform: rotate(45deg);
-                    box-shadow: 0 2px 6px rgba(168,85,247,0.4);
-                    cursor: default;
-                `;
+                el.style.cssText = 'width:24px;height:24px;cursor:default;filter:drop-shadow(0 2px 4px rgba(168,85,247,0.6));';
+                el.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <!-- Plate/base -->
+                  <ellipse cx="12" cy="19" rx="9" ry="3" fill="#c084fc" opacity="0.6"/>
+                  <!-- Powder mound (triangle) -->
+                  <path d="M5,18 Q7,10 12,7 Q17,10 19,18 Z" fill="#a855f7"/>
+                  <!-- Sparkle dots -->
+                  <circle cx="9" cy="14" r="1" fill="rgba(255,255,255,0.7)"/>
+                  <circle cx="13" cy="11" r="0.8" fill="rgba(255,255,255,0.6)"/>
+                  <circle cx="15" cy="15" r="0.8" fill="rgba(255,255,255,0.5)"/>
+                </svg>`;
                 const marker = new maplibregl.Marker({ element: el, anchor: 'center' })
                     .setLngLat([dust.lng, dust.lat])
                     .addTo(map);
                 dustMarkers.push({ marker, el, dust });
             });
 
-            // ---- Echo markers ----
+            // ---- Echo markers — sound wave / echo icon ----
             ECHO_POINTS.forEach(echo => {
                 const info = SUPERTYPES[echo.supertype];
+                // Parse color hex to rgb for wave arcs
+                const hex = info.color.replace('#','');
+                const r = parseInt(hex.slice(0,2),16);
+                const g = parseInt(hex.slice(2,4),16);
+                const b = parseInt(hex.slice(4,6),16);
                 const el = document.createElement('div');
-                el.style.cssText = `
-                    width: 16px; height: 16px; border-radius: 50%;
-                    background: ${info.color}; border: 2px solid white;
-                    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-                    cursor: default;
-                `;
+                el.style.cssText = 'width:28px;height:24px;cursor:default;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));';
                 el.title = `Écho ${info.name}`;
+                el.innerHTML = echoSvg(info.color, 28);
                 const marker = new maplibregl.Marker({ element: el, anchor: 'center' })
                     .setLngLat([echo.lng, echo.lat])
                     .addTo(map);
                 echoMarkers.push({ marker, el, echo });
             });
-
-            updatePOIVisibility();
-            updateDustVisibility();
-            updateEchoVisibility();
-            checkNearbyPOI();
 
             // Hide all POI icons and labels to keep the map clean
 
@@ -2785,7 +3547,7 @@
             const visiblePOIIds = [];
             poiMarkers.forEach(({ marker, el, poi }) => {
                 const hasCards = allCards.some(card => card.poiId === poi.id && !collectedCards.includes(card.id));
-                el.style.display = hasCards ? 'flex' : 'none';
+                el.style.display = hasCards ? 'block' : 'none';
                 if (hasCards) visiblePOIIds.push(poi.id);
             });
             // Update the GeoJSON circle source to only show uncollected POIs
@@ -2804,15 +3566,39 @@
         }
 
         function updateDustVisibility() {
+            const visible = [];
             dustMarkers.forEach(({ marker, el, dust }) => {
-                el.style.display = !collectedDustPoints.includes(dust.id) ? 'block' : 'none';
+                const show = !collectedDustPoints.includes(dust.id);
+                el.style.display = show ? 'block' : 'none';
+                if (show) visible.push(dust);
             });
+            if (map.getSource('dust-circles')) {
+                map.getSource('dust-circles').setData({
+                    type: 'FeatureCollection',
+                    features: visible.map(d => ({
+                        type: 'Feature', properties: { id: d.id },
+                        geometry: { type: 'Point', coordinates: [d.lng, d.lat] }
+                    }))
+                });
+            }
         }
 
         function updateEchoVisibility() {
+            const visible = [];
             echoMarkers.forEach(({ marker, el, echo }) => {
-                el.style.display = !collectedEchoes.includes(echo.id) ? 'block' : 'none';
+                const show = !collectedEchoes.includes(echo.id);
+                el.style.display = show ? 'block' : 'none';
+                if (show) visible.push(echo);
             });
+            if (map.getSource('echo-circles')) {
+                map.getSource('echo-circles').setData({
+                    type: 'FeatureCollection',
+                    features: visible.map(e => ({
+                        type: 'Feature', properties: { id: e.id },
+                        geometry: { type: 'Point', coordinates: [e.lng, e.lat] }
+                    }))
+                });
+            }
         }
 
         // ==================== COLLECTION ====================
@@ -3202,8 +3988,8 @@
             Object.entries(SUPERTYPES).forEach(([supertypeKey, supertypeInfo]) => {
                 const count = echoInventory[supertypeKey] || 0;
 
-                // Find all cards matching this supertype
-                const matchingCards = allCards.filter(c => c.supertype === supertypeKey);
+                // Find all cards matching this supertype (primary OR secondary)
+                const matchingCards = allCards.filter(c => c.supertype === supertypeKey || c.supertype2 === supertypeKey);
                 if (matchingCards.length === 0) return;
 
                 const section = document.createElement('div');
@@ -3322,6 +4108,15 @@
                 const badge = document.getElementById('cardSupertypeBadge');
                 badge.textContent = info.symbol;
                 badge.className = `card-supertype-badge supertype-${card.supertype}`;
+                const badge2 = document.getElementById('cardSupertypeBadge2');
+                if (card.supertype2) {
+                    const info2 = SUPERTYPES[card.supertype2];
+                    badge2.textContent = info2.symbol;
+                    badge2.className = `card-supertype-badge2 supertype-${card.supertype2}`;
+                    badge2.classList.remove('hidden');
+                } else {
+                    badge2.classList.add('hidden');
+                }
             }
             document.getElementById('cardDetailDustCounter').textContent = memorialDust;
             updateCardLevelDisplay();
@@ -3769,75 +4564,86 @@
             if (!selectedCard) return;
             const div = document.getElementById('echoInventory');
             div.innerHTML = '';
-            const supertype = selectedCard.supertype;
-            const count = echoInventory[supertype] || 0;
-            if (count === 0) {
-                div.innerHTML = '<div style="color:#9ca3af;text-align:center;width:100%;padding:20px;">Aucun écho de ce type</div>';
+
+            // Collect valid supertypes for this card
+            const validTypes = [selectedCard.supertype];
+            if (selectedCard.supertype2) validTypes.push(selectedCard.supertype2);
+
+            const anyEcho = validTypes.some(st => (echoInventory[st] || 0) > 0);
+            if (!anyEcho) {
+                const label = validTypes.map(st => SUPERTYPES[st].name).join(' / ');
+                div.innerHTML = `<div style="color:#9ca3af;text-align:center;width:100%;padding:20px;">Aucun écho ${label}</div>`;
                 return;
             }
-            const info = SUPERTYPES[supertype];
-            const item = document.createElement('div');
-            item.className = 'echo-inventory-item';
-            const orb = document.createElement('div');
-            orb.className = `echo-orb supertype-${supertype}`;
-            orb.draggable = true;
-            orb.textContent = info.symbol;
-            orb.dataset.supertype = supertype;
 
-            // ── Mouse drag (desktop) ──
-            orb.ondragstart = (e) => { e.dataTransfer.setData('supertype', supertype); orb.classList.add('dragging'); };
-            orb.ondragend = () => orb.classList.remove('dragging');
+            validTypes.forEach(function(st) {
+                const count = echoInventory[st] || 0;
+                if (count === 0) return;
+                const info = SUPERTYPES[st];
 
-            // ── Touch drag (mobile) ──
-            orb.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                touchDragSupertype = supertype;
-                const t = e.touches[0];
-                touchDragGhost = createTouchGhost(supertype, info);
-                touchDragGhost.style.left = t.clientX + 'px';
-                touchDragGhost.style.top  = t.clientY + 'px';
-                orb.classList.add('dragging');
-            }, { passive: false });
+                const item = document.createElement('div');
+                item.className = 'echo-inventory-item';
 
-            orb.addEventListener('touchmove', (e) => {
-                e.preventDefault();
-                if (!touchDragGhost) return;
-                const t = e.touches[0];
-                touchDragGhost.style.left = t.clientX + 'px';
-                touchDragGhost.style.top  = t.clientY + 'px';
-                // Highlight hovered slot
-                document.querySelectorAll('.echo-slot').forEach(s => s.classList.remove('drag-over'));
-                const slot = getSlotAtPoint(t.clientX, t.clientY);
-                if (slot && !slot.classList.contains('filled')) slot.classList.add('drag-over');
-            }, { passive: false });
+                const orb = document.createElement('div');
+                orb.className = 'echo-orb supertype-' + st;
+                orb.draggable = true;
+                orb.textContent = info.symbol;
+                orb.dataset.supertype = st;
 
-            orb.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                if (!touchDragGhost) return;
-                const t = e.changedTouches[0];
-                const slot = getSlotAtPoint(t.clientX, t.clientY);
-                document.querySelectorAll('.echo-slot').forEach(s => s.classList.remove('drag-over'));
-                touchDragGhost.remove(); touchDragGhost = null;
-                orb.classList.remove('dragging');
-                if (slot && !slot.classList.contains('filled') && touchDragSupertype) {
-                    const slotId = slot.dataset.slotId;
-                    if (selectedCard && selectedCard.supertype === touchDragSupertype) {
-                        placeEchoInSlot(slotId, touchDragSupertype);
-                        echoInventory[touchDragSupertype]--;
-                        renderEchoInventory();
+                // ── Mouse drag (desktop) ──
+                orb.ondragstart = function(e) { e.dataTransfer.setData('supertype', st); orb.classList.add('dragging'); };
+                orb.ondragend = function() { orb.classList.remove('dragging'); };
+
+                // ── Touch drag (mobile) ──
+                orb.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    touchDragSupertype = st;
+                    const t = e.touches[0];
+                    touchDragGhost = createTouchGhost(st, info);
+                    touchDragGhost.style.left = t.clientX + 'px';
+                    touchDragGhost.style.top  = t.clientY + 'px';
+                    orb.classList.add('dragging');
+                }, { passive: false });
+
+                orb.addEventListener('touchmove', function(e) {
+                    e.preventDefault();
+                    if (!touchDragGhost) return;
+                    const t = e.touches[0];
+                    touchDragGhost.style.left = t.clientX + 'px';
+                    touchDragGhost.style.top  = t.clientY + 'px';
+                    document.querySelectorAll('.echo-slot').forEach(function(s) { s.classList.remove('drag-over'); });
+                    const slot = getSlotAtPoint(t.clientX, t.clientY);
+                    if (slot && !slot.classList.contains('filled')) slot.classList.add('drag-over');
+                }, { passive: false });
+
+                orb.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    if (!touchDragGhost) return;
+                    const t = e.changedTouches[0];
+                    const slot = getSlotAtPoint(t.clientX, t.clientY);
+                    document.querySelectorAll('.echo-slot').forEach(function(s) { s.classList.remove('drag-over'); });
+                    touchDragGhost.remove(); touchDragGhost = null;
+                    orb.classList.remove('dragging');
+                    if (slot && !slot.classList.contains('filled') && touchDragSupertype) {
+                        const slotId = slot.dataset.slotId;
+                        if (validTypes.includes(touchDragSupertype)) {
+                            placeEchoInSlot(slotId, touchDragSupertype);
+                            echoInventory[touchDragSupertype]--;
+                            renderEchoInventory();
+                        }
                     }
-                }
-                touchDragSupertype = null;
-            }, { passive: false });
+                    touchDragSupertype = null;
+                }, { passive: false });
 
-            if (count > 1) {
-                const badge = document.createElement('div');
-                badge.className = 'echo-count';
-                badge.textContent = count;
-                item.appendChild(badge);
-            }
-            item.appendChild(orb);
-            div.appendChild(item);
+                if (count > 1) {
+                    const badge = document.createElement('div');
+                    badge.className = 'echo-count';
+                    badge.textContent = count;
+                    item.appendChild(badge);
+                }
+                item.appendChild(orb);
+                div.appendChild(item);
+            });
         }
 
         function allowDrop(event) {
@@ -3854,7 +4660,9 @@
             const supertype = event.dataTransfer.getData('supertype');
             const slotId = slot.dataset.slotId;
             if (!supertype || !slotId) return;
-            if (selectedCard && selectedCard.supertype === supertype) {
+            const validTypes = [selectedCard.supertype];
+            if (selectedCard.supertype2) validTypes.push(selectedCard.supertype2);
+            if (selectedCard && validTypes.includes(supertype)) {
                 placeEchoInSlot(slotId, supertype);
                 echoInventory[supertype]--;
                 renderEchoInventory();
@@ -3884,39 +4692,497 @@
 
         // ==================== GPS ====================
 
-        function toggleGPS() {
-            const gpsBtn = document.getElementById('gpsBtn');
-            if (!isMobileDevice) {
-                alert('La géolocalisation en direct est réservée au mode téléphone. Sur web, la carte reste centrée sur Lyon.');
-                return;
+        function startGPS() {
+            if (!('geolocation' in navigator)) return;
+            gpsWatchId = navigator.geolocation.watchPosition(
+                (position) => {
+                    playerPos = { lat: position.coords.latitude, lng: position.coords.longitude };
+                    if (playerMarker && map) {
+                        map.easeTo({
+                            center: [playerPos.lng, playerPos.lat + CAM_LAT_OFFSET],
+                            duration: 300
+                        });
+                        updatePlayerOnMap();
+                    }
+                    checkNearbyPOI();
+                },
+                (error) => { console.error('Erreur GPS:', error); gpsActive = false; },
+                { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+            );
+            gpsActive = true;
+        }
+        // ==================== PROGRESSION SYSTEM ====================
+
+        // ---- Config ----
+        const PLAYER_RANKS = [
+            { level: 1,  name: 'Novice',           title: 'Les premiers pas de l\'explorateur', xpNeeded: 0,    icon: '🌱' },
+            { level: 2,  name: 'Curieux',           title: 'La curiosité éveille la mémoire',    xpNeeded: 100,  icon: '🔍' },
+            { level: 3,  name: 'Flâneur',           title: 'Les rues n\'ont plus de secrets',    xpNeeded: 250,  icon: '🚶' },
+            { level: 4,  name: 'Chroniqueur',       title: 'Gardien des récits lyonnais',         xpNeeded: 500,  icon: '📖' },
+            { level: 5,  name: 'Passeur',           title: 'Passeur de mémoire collective',       xpNeeded: 900,  icon: '🕯️' },
+            { level: 6,  name: 'Archiviste',        title: 'Maître des archives de Lyon',         xpNeeded: 1400, icon: '📜' },
+            { level: 7,  name: 'Mémoriel',          title: 'La ville n\'a plus d\'ombre pour toi',xpNeeded: 2000, icon: '🏛️' },
+            { level: 8,  name: 'Écho Vivant',       title: 'Tu es devenu un écho toi-même',       xpNeeded: 3000, icon: '✨' },
+            { level: 9,  name: 'Gardien de Lyon',   title: 'La cité te confie ses secrets',       xpNeeded: 4500, icon: '🦁' },
+            { level: 10, name: 'Légende',           title: 'Ton nom résonne dans les siècles',    xpNeeded: 6500, icon: '👑' },
+        ];
+
+        const BATTLEPASS_NODES = [
+            { palier: 1,  icon: '💜',  name: '+50 Poudre',          type: 'Poudre mémorielle',  xpRequired: 0   },
+            { palier: 2,  icon: '🎴',  name: 'Carte bonus : Guignol', type: 'Carte rare',       xpRequired: 50  },
+            { palier: 3,  icon: '💜',  name: '+100 Poudre',         type: 'Poudre mémorielle',  xpRequired: 120 },
+            { palier: 4,  icon: '🎨',  name: 'Skin Aurora',         type: 'Skin de carte',      xpRequired: 220 },
+            { palier: 5,  icon: '⭐',  name: 'Badge Flâneur',       type: 'Titre spécial',      xpRequired: 350, milestone: true },
+            { palier: 6,  icon: '💜',  name: '+150 Poudre',         type: 'Poudre mémorielle',  xpRequired: 500 },
+            { palier: 7,  icon: '✨',  name: '3 Échos Histoire',    type: 'Échos rares',        xpRequired: 680 },
+            { palier: 8,  icon: '🏠',  name: 'Déco Studio : Parchemin', type: 'Décoration',    xpRequired: 880 },
+            { palier: 9,  icon: '💜',  name: '+200 Poudre',         type: 'Poudre mémorielle',  xpRequired: 1100 },
+            { palier: 10, icon: '🦁',  name: 'Carte Légendaire : Fourvière', type: 'Légendaire', xpRequired: 1350, milestone: true },
+            { palier: 11, icon: '💜',  name: '+250 Poudre',         type: 'Poudre mémorielle',  xpRequired: 1620 },
+            { palier: 12, icon: '🎴',  name: 'Carte : Saône la Bleue', type: 'Carte exclusive', xpRequired: 1920 },
+            { palier: 13, icon: '🌿',  name: '5 Échos Nature',      type: 'Échos rares',        xpRequired: 2250 },
+            { palier: 14, icon: '🎨',  name: 'Skin Crépuscule',     type: 'Skin de carte',      xpRequired: 2600 },
+            { palier: 15, icon: '👑',  name: 'Titre : Passeur de Mémoire', type: 'Titre légendaire', xpRequired: 3000, milestone: true },
+            { palier: 16, icon: '💜',  name: '+300 Poudre',         type: 'Poudre mémorielle',  xpRequired: 3420 },
+            { palier: 17, icon: '🏛️',  name: 'Écho légendaire x1',  type: 'Écho légendaire',   xpRequired: 3870 },
+            { palier: 18, icon: '🎴',  name: 'Carte : Le Vieux-Lyon', type: 'Carte exclusive',  xpRequired: 4350 },
+            { palier: 19, icon: '💜',  name: '+400 Poudre',         type: 'Poudre mémorielle',  xpRequired: 4860 },
+            { palier: 20, icon: '✨',  name: 'Cadre dorée pour cartes', type: 'Décoration',     xpRequired: 5400, milestone: true },
+            { palier: 21, icon: '🎨',  name: 'Skin Nebula',         type: 'Skin de carte',      xpRequired: 5970 },
+            { palier: 22, icon: '💜',  name: '+500 Poudre',         type: 'Poudre mémorielle',  xpRequired: 6570 },
+            { palier: 23, icon: '🎴',  name: 'Carte : Bellecour Nuit', type: 'Carte exclusive', xpRequired: 7200 },
+            { palier: 24, icon: '🏠',  name: 'Déco Studio : Portail', type: 'Décoration',       xpRequired: 7860 },
+            { palier: 25, icon: '👑',  name: 'Avatar : Gardien des Étoiles', type: 'Avatar légendaire', xpRequired: 8550, milestone: true },
+            { palier: 26, icon: '💜',  name: '+600 Poudre',         type: 'Poudre mémorielle',  xpRequired: 9270 },
+            { palier: 27, icon: '🦁',  name: 'Skin Lyon Antique',   type: 'Skin légendaire',    xpRequired: 10020 },
+            { palier: 28, icon: '🎴',  name: 'Carte Secrète : ???', type: 'Mystère',            xpRequired: 10800 },
+            { palier: 29, icon: '✨',  name: 'Cadre Légendaire',    type: 'Décoration',         xpRequired: 11610 },
+            { palier: 30, icon: '👑',  name: 'Titre : Légende de Lyon', type: 'Titre ultime',   xpRequired: 12450, milestone: true },
+        ];
+
+        const ACHIEVEMENTS_DATA = [
+            // Explorateur
+            { id: 'ach_first_card',  cat: 'Explorateur', icon: '🎴', name: 'Première découverte', desc: 'Collecter votre première carte',        xpReward: 20,  goal: 1,  stat: 'cards' },
+            { id: 'ach_cards5',      cat: 'Explorateur', icon: '🗺️', name: 'Aventurier',           desc: 'Collecter 5 cartes différentes',        xpReward: 50,  goal: 5,  stat: 'cards' },
+            { id: 'ach_cards15',     cat: 'Explorateur', icon: '🧭', name: 'Grand Explorateur',    desc: 'Collecter 15 cartes différentes',       xpReward: 150, goal: 15, stat: 'cards' },
+            { id: 'ach_dust100',     cat: 'Explorateur', icon: '💜', name: 'Collecteur de poudre', desc: 'Accumuler 100 poudres au total',        xpReward: 30,  goal: 100, stat: 'dust_total' },
+            { id: 'ach_dust500',     cat: 'Explorateur', icon: '💫', name: 'Riche en mémoire',     desc: 'Accumuler 500 poudres au total',        xpReward: 80,  goal: 500, stat: 'dust_total' },
+            // Archiviste
+            { id: 'ach_first_echo',  cat: 'Archiviste',  icon: '✨', name: 'Premier Écho',         desc: 'Collecter votre premier écho',          xpReward: 20,  goal: 1,  stat: 'echoes' },
+            { id: 'ach_echoes5',     cat: 'Archiviste',  icon: '🔮', name: 'Résonance',            desc: 'Collecter 5 échos',                     xpReward: 60,  goal: 5,  stat: 'echoes' },
+            { id: 'ach_echoes10',    cat: 'Archiviste',  icon: '🌀', name: 'Maître des Échos',     desc: 'Collecter 10 échos',                    xpReward: 120, goal: 10, stat: 'echoes' },
+            { id: 'ach_place_echo',  cat: 'Archiviste',  icon: '📖', name: 'Premier Souvenir',     desc: 'Placer un écho dans un carnet',         xpReward: 30,  goal: 1,  stat: 'echoes_placed' },
+            // Alchimiste
+            { id: 'ach_level_card',  cat: 'Alchimiste',  icon: '⬆️', name: 'Première évolution',   desc: 'Faire monter une carte de niveau',      xpReward: 40,  goal: 1,  stat: 'card_levels' },
+            { id: 'ach_dust_spent',  cat: 'Alchimiste',  icon: '🔥', name: 'Investisseur',         desc: 'Dépenser 200 poudres sur les cartes',   xpReward: 70,  goal: 200, stat: 'dust_spent' },
+            { id: 'ach_max_level',   cat: 'Alchimiste',  icon: '💎', name: 'Maîtrise totale',      desc: 'Atteindre le niveau max sur une carte',  xpReward: 200, goal: 1,  stat: 'max_level_cards' },
+            // Collectionneur
+            { id: 'ach_collection',  cat: 'Collectionneur', icon: '📦', name: 'Passion Cartes',    desc: 'Compléter une collection entière',      xpReward: 250, goal: 1,  stat: 'collections_done' },
+            { id: 'ach_legendary',   cat: 'Collectionneur', icon: '🌟', name: 'Légendaire !',      desc: 'Collecter une carte légendaire',        xpReward: 100, goal: 1,  stat: 'legendary_cards' },
+            { id: 'ach_all_types',   cat: 'Collectionneur', icon: '🌈', name: 'Touche-à-tout',     desc: 'Collecter une carte de chaque supertype', xpReward: 150, goal: 5, stat: 'supertypes_collected' },
+        ];
+
+        // ---- State ----
+        let playerXP = 0;
+        let playerTotalXP = 0;
+        let playerLevel = 1;
+        let achievementsState = {}; // { id: { progress, unlocked } }
+        let bpClaimedPaliers = new Set();
+
+        // XP rewards per action
+        const XP_REWARDS = {
+            collect_card:    25,
+            collect_echo:    10,
+            collect_dust:    5,
+            level_card:      40,
+            max_level_card:  100,
+            place_echo:      15,
+        };
+
+        // Stats for achievements
+        let playerStats = {
+            cards: 0,
+            echoes: 0,
+            echoes_placed: 0,
+            dust_total: 0,
+            dust_spent: 0,
+            card_levels: 0,
+            max_level_cards: 0,
+            collections_done: 0,
+            legendary_cards: 0,
+            supertypes_collected: 0,
+        };
+
+        // Init achievements state
+        ACHIEVEMENTS_DATA.forEach(a => {
+            achievementsState[a.id] = { progress: 0, unlocked: false };
+        });
+
+        // ---- Core XP functions ----
+
+        function getCurrentRank(level) {
+            let rank = PLAYER_RANKS[0];
+            for (let i = PLAYER_RANKS.length - 1; i >= 0; i--) {
+                if (level >= PLAYER_RANKS[i].level) { rank = PLAYER_RANKS[i]; break; }
             }
-            if (!gpsActive) {
-                if ('geolocation' in navigator) {
-                    gpsWatchId = navigator.geolocation.watchPosition(
-                        (position) => {
-                            playerPos = { lat: position.coords.latitude, lng: position.coords.longitude };
-                            if (playerMarker && map) updatePlayerOnMap();
-                            checkNearbyPOI();
-                        },
-                        (error) => {
-                            console.error('Erreur GPS:', error);
-                            alert('Impossible d\'accéder au GPS. Vérifiez les permissions.');
-                            gpsActive = false;
-                            gpsBtn.classList.remove('active');
-                        },
-                        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-                    );
-                    gpsActive = true;
-                    gpsBtn.classList.add('active');
-                } else {
-                    alert('La géolocalisation n\'est pas disponible sur cet appareil.');
-                }
-            } else {
-                if (gpsWatchId) { navigator.geolocation.clearWatch(gpsWatchId); gpsWatchId = null; }
-                gpsActive = false;
-                gpsBtn.classList.remove('active');
+            return rank;
+        }
+
+        function getNextRank(level) {
+            for (let i = 0; i < PLAYER_RANKS.length; i++) {
+                if (PLAYER_RANKS[i].level > level) return PLAYER_RANKS[i];
+            }
+            return null; // max level
+        }
+
+        function getXpForLevel(level) {
+            const nextRank = PLAYER_RANKS.find(r => r.level === level + 1);
+            const curRank = PLAYER_RANKS.find(r => r.level === level) || PLAYER_RANKS[0];
+            if (!nextRank) return Infinity;
+            return nextRank.xpNeeded - curRank.xpNeeded;
+        }
+
+        function awardXP(amount, reason) {
+            playerXP += amount;
+            playerTotalXP += amount;
+
+            // Level up check
+            let leveled = false;
+            while (true) {
+                const xpForNext = getXpForLevel(playerLevel);
+                if (playerXP >= xpForNext && xpForNext !== Infinity) {
+                    playerXP -= xpForNext;
+                    playerLevel++;
+                    leveled = true;
+                    showLevelupOverlay();
+                    break; // show one at a time
+                } else break;
+            }
+
+            updateProgressionHUD();
+            updateAvatarMenuXP();
+        }
+
+        function updateProgressionHUD() {
+            const rank = getCurrentRank(playerLevel);
+            const xpNeeded = getXpForLevel(playerLevel);
+            const pct = xpNeeded === Infinity ? 100 : Math.min(100, (playerXP / xpNeeded) * 100);
+
+            // HUD pill
+            const fill = document.getElementById('hudXpFill');
+            const label = document.getElementById('hudXpLevel');
+            if (fill) fill.style.width = pct + '%';
+            if (label) label.textContent = `Nv.${playerLevel}`;
+        }
+
+        function updateAvatarMenuXP() {
+            const rank = getCurrentRank(playerLevel);
+            const xpNeeded = getXpForLevel(playerLevel);
+            const pct = xpNeeded === Infinity ? 100 : Math.min(100, (playerXP / xpNeeded) * 100);
+
+            const nameEl = document.getElementById('menuRankName');
+            const badge = document.getElementById('menuLevelBadge');
+            const fill = document.getElementById('menuXpFill');
+            const xpLabel = document.getElementById('menuXpLabel');
+
+            if (nameEl) nameEl.textContent = rank.name;
+            if (badge) badge.textContent = `Nv. ${playerLevel}`;
+            if (fill) fill.style.width = pct + '%';
+            if (xpLabel) {
+                const display = xpNeeded === Infinity ? `${playerXP} XP (MAX)` : `${playerXP} / ${xpNeeded} XP`;
+                xpLabel.textContent = display;
             }
         }
+
+        // ---- Achievement checks ----
+
+        function updateStat(stat, value) {
+            if (stat in playerStats) {
+                playerStats[stat] = value !== undefined ? value : playerStats[stat] + 1;
+            }
+            checkAchievements();
+        }
+
+        function checkAchievements() {
+            ACHIEVEMENTS_DATA.forEach(a => {
+                const state = achievementsState[a.id];
+                if (state.unlocked) return;
+
+                const current = playerStats[a.stat] || 0;
+                const prev = state.progress;
+                state.progress = Math.min(a.goal, current);
+
+                if (state.progress >= a.goal && !state.unlocked) {
+                    state.unlocked = true;
+                    awardXP(a.xpReward, `Achievement: ${a.name}`);
+                    showAchievementToast(a);
+                }
+            });
+        }
+
+        function showAchievementToast(achievement) {
+            // Remove any existing toast
+            const existing = document.getElementById('achieveToast');
+            if (existing) existing.remove();
+
+            const toast = document.createElement('div');
+            toast.id = 'achieveToast';
+            toast.className = 'achievement-toast';
+            toast.innerHTML = `
+                <div class="achievement-toast-icon">${achievement.icon}</div>
+                <div class="achievement-toast-text">
+                    <div class="achievement-toast-label">🏆 Succès débloqué !</div>
+                    <div class="achievement-toast-name">${achievement.name}</div>
+                </div>
+                <div class="achievement-toast-xp">+${achievement.xpReward} XP</div>
+            `;
+            document.getElementById('mainApp').appendChild(toast);
+            setTimeout(() => { if (toast.parentNode) toast.remove(); }, 3500);
+        }
+
+        // ---- Level-up overlay ----
+        function showLevelupOverlay() {
+            const rank = getCurrentRank(playerLevel);
+            document.getElementById('levelupNum').textContent = playerLevel;
+            document.getElementById('levelupRank').textContent = rank.name;
+            document.getElementById('levelupBurst').textContent = rank.icon;
+            const overlay = document.getElementById('levelupOverlay');
+            overlay.classList.add('show');
+        }
+
+        function closeLevelupOverlay() {
+            document.getElementById('levelupOverlay').classList.remove('show');
+        }
+
+        // ---- Progression Screen ----
+        function openProgressionScreen() {
+            const screen = document.getElementById('progressionScreen');
+            // Reparent to mainApp if needed
+            const app = document.getElementById('mainApp');
+            if (screen.parentNode !== app) app.appendChild(screen);
+            renderProgPlayerCard();
+            renderBattlepassNodes();
+            renderAchievementsList();
+            switchProgTab('battlepass');
+            screen.classList.add('show');
+        }
+
+        function closeProgressionScreen() {
+            document.getElementById('progressionScreen').classList.remove('show');
+        }
+
+        function switchProgTab(tab) {
+            document.querySelectorAll('.prog-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(tab === 'battlepass' ? 'progTabBP' : 'progTabAchiev').classList.add('active');
+            document.getElementById('progPaneBP').classList.toggle('hidden', tab !== 'battlepass');
+            document.getElementById('progPaneAchiev').classList.toggle('hidden', tab !== 'achievements');
+        }
+
+        function renderProgPlayerCard() {
+            const rank = getCurrentRank(playerLevel);
+            const xpNeeded = getXpForLevel(playerLevel);
+            const pct = xpNeeded === Infinity ? 100 : Math.min(100, (playerXP / xpNeeded) * 100);
+
+            document.getElementById('progAvatar').querySelector('.avatar-emoji') &&
+                (document.getElementById('progAvatar').querySelector('.avatar-emoji').textContent = '🧙');
+            document.getElementById('progAvatarLevel').textContent = playerLevel;
+            document.getElementById('progRankName').textContent = rank.name;
+            document.getElementById('progRankTitle').textContent = rank.title;
+            document.getElementById('progXpTotal').textContent = `${playerTotalXP} XP accumulés`;
+            document.getElementById('progXpFill').style.width = pct + '%';
+            document.getElementById('progXpCurrent').textContent = `${playerXP} XP`;
+            document.getElementById('progXpNext').textContent =
+                xpNeeded === Infinity ? 'Niveau maximum !' : `Prochain rang : ${xpNeeded - playerXP} XP`;
+        }
+
+        function renderBattlepassNodes() {
+            const container = document.getElementById('bpNodesList');
+            container.innerHTML = '';
+
+            BATTLEPASS_NODES.forEach((node, idx) => {
+                const done = playerTotalXP >= node.xpRequired;
+                const isCurrent = !done && (idx === 0 || playerTotalXP >= BATTLEPASS_NODES[idx - 1]?.xpRequired);
+
+                if (node.milestone) {
+                    const ms = document.createElement('div');
+                    ms.className = 'bp-milestone';
+                    ms.innerHTML = `
+                        <div class="bp-milestone-icon">${node.icon}</div>
+                        <div class="bp-milestone-info">
+                            <div class="bp-milestone-name">${node.name}</div>
+                            <div class="bp-milestone-desc">${node.type}</div>
+                        </div>
+                        <div class="bp-milestone-badge">${done ? '✓ Débloqué' : `${node.xpRequired} XP`}</div>
+                    `;
+                    container.appendChild(ms);
+                    return;
+                }
+
+                const row = document.createElement('div');
+                row.className = 'bp-node-row';
+                row.innerHTML = `
+                    <div class="bp-node ${done ? 'done' : isCurrent ? 'current' : 'locked'}">
+                        ${done ? '✓' : node.icon}
+                        <span class="bp-node-num">${node.palier}</span>
+                    </div>
+                    <div style="width:10px;flex-shrink:0;"></div>
+                    <div class="bp-reward-card ${done ? 'done' : ''}">
+                        <div class="bp-reward-icon">${done ? '✅' : isCurrent ? '🔓' : '🔒'}</div>
+                        <div class="bp-reward-info">
+                            <div class="bp-reward-name">${node.name}</div>
+                            <div class="bp-reward-type">${node.type}</div>
+                        </div>
+                        <div class="bp-reward-status ${done ? '' : isCurrent ? 'current' : 'locked'}">
+                            ${done ? '✓' : isCurrent ? `${node.xpRequired} XP` : `${node.xpRequired} XP`}
+                        </div>
+                    </div>
+                `;
+
+                // Add connector below (not for last)
+                if (idx < BATTLEPASS_NODES.length - 1) {
+                    const conn = document.createElement('div');
+                    conn.style.cssText = 'display:flex;align-items:center;padding-left:20px;';
+                    conn.innerHTML = `<div class="bp-connector ${done ? 'done' : ''}"></div>`;
+                    container.appendChild(row);
+                    container.appendChild(conn);
+                } else {
+                    container.appendChild(row);
+                }
+            });
+        }
+
+        function renderAchievementsList() {
+            const container = document.getElementById('achievementsList');
+            container.innerHTML = '';
+
+            const cats = [...new Set(ACHIEVEMENTS_DATA.map(a => a.cat))];
+
+            cats.forEach(cat => {
+                const catDiv = document.createElement('div');
+                catDiv.className = 'achievement-category';
+                catDiv.innerHTML = `<div class="achievement-cat-title">${cat}</div>`;
+
+                ACHIEVEMENTS_DATA.filter(a => a.cat === cat).forEach(a => {
+                    const state = achievementsState[a.id];
+                    const progress = Math.min(a.goal, playerStats[a.stat] || 0);
+                    const pct = Math.min(100, (progress / a.goal) * 100);
+                    const inProgress = progress > 0 && !state.unlocked;
+
+                    const item = document.createElement('div');
+                    item.className = `achievement-item ${state.unlocked ? 'unlocked' : inProgress ? 'in-progress' : ''}`;
+                    item.innerHTML = `
+                        <div class="achievement-icon">
+                            ${a.icon}
+                            ${state.unlocked ? '<div class="achievement-check">✓</div>' : ''}
+                        </div>
+                        <div class="achievement-info">
+                            <div class="achievement-name">${a.name}</div>
+                            <div class="achievement-desc">${a.desc}</div>
+                            <div class="achievement-progress-row">
+                                <div class="achievement-prog-bar">
+                                    <div class="achievement-prog-fill" style="width:${pct}%"></div>
+                                </div>
+                                <span class="achievement-prog-label">${progress}/${a.goal}</span>
+                            </div>
+                        </div>
+                        <div class="achievement-xp">+${a.xpReward} XP</div>
+                    `;
+                    catDiv.appendChild(item);
+                });
+
+                container.appendChild(catDiv);
+            });
+        }
+
+        // ---- Hook into existing game actions ----
+
+        // Wrap collectCard to award XP
+        const _origCollectCard = collectCard;
+        collectCard = function() {
+            const before = collectedCards.length;
+            _origCollectCard();
+            if (collectedCards.length > before) {
+                awardXP(XP_REWARDS.collect_card, 'carte');
+                playerStats.cards = collectedCards.length;
+                // Check legendary
+                const allCards = Object.values(COLLECTIONS).flatMap(c => c.cards);
+                const newCard = allCards.find(c => collectedCards.includes(c.id) && !collectedCards.slice(0,-1).includes(c.id));
+                if (newCard && newCard.rarity === 'legendary') {
+                    playerStats.legendary_cards++;
+                }
+                // Count unique supertypes
+                const types = new Set(collectedCards.map(id => allCards.find(c => c.id === id)?.supertype).filter(Boolean));
+                playerStats.supertypes_collected = types.size;
+                updateStat('cards', collectedCards.length);
+            }
+        };
+
+        // Wrap collectEcho
+        const _origCollectEcho = collectEcho;
+        collectEcho = function() {
+            const before = collectedEchoes.length;
+            _origCollectEcho();
+            if (collectedEchoes.length > before) {
+                awardXP(XP_REWARDS.collect_echo, 'écho');
+                playerStats.echoes = collectedEchoes.length;
+                updateStat('echoes', collectedEchoes.length);
+            }
+        };
+
+        // Wrap collectDust
+        const _origCollectDust = collectDust;
+        collectDust = function() {
+            const before = memorialDust;
+            _origCollectDust();
+            if (memorialDust > before) {
+                const gained = memorialDust - before;
+                awardXP(XP_REWARDS.collect_dust, 'poudre');
+                playerStats.dust_total += gained;
+                updateStat('dust_total', playerStats.dust_total);
+            }
+        };
+
+        // Wrap addExperience
+        const _origAddExperience = addExperience;
+        addExperience = function() {
+            const levelsBefore = selectedCard ? (cardLevels[selectedCard.id]?.level || 0) : 0;
+            const dustBefore = memorialDust;
+            _origAddExperience();
+            const levelsAfter = selectedCard ? (cardLevels[selectedCard.id]?.level || 0) : 0;
+            const dustSpent = dustBefore - memorialDust;
+            if (dustSpent > 0) {
+                playerStats.dust_spent += dustSpent;
+                updateStat('dust_spent', playerStats.dust_spent);
+            }
+            if (levelsAfter > levelsBefore) {
+                awardXP(XP_REWARDS.level_card, 'level');
+                playerStats.card_levels++;
+                updateStat('card_levels', playerStats.card_levels);
+                if (levelsAfter >= MAX_LEVEL) {
+                    awardXP(XP_REWARDS.max_level_card, 'max_level');
+                    playerStats.max_level_cards++;
+                    updateStat('max_level_cards', playerStats.max_level_cards);
+                }
+            }
+        };
+
+        // Wrap placeEchoInSlot
+        const _origPlaceEchoInSlot = placeEchoInSlot;
+        placeEchoInSlot = function(slotId, supertype) {
+            _origPlaceEchoInSlot(slotId, supertype);
+            awardXP(XP_REWARDS.place_echo, 'écho placé');
+            playerStats.echoes_placed++;
+            updateStat('echoes_placed', playerStats.echoes_placed);
+        };
+
+        // Init HUD on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                updateProgressionHUD();
+                updateAvatarMenuXP();
+            }, 100);
+        });
+
     </script>
 </body>
 </html>
