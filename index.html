@@ -342,15 +342,31 @@
         .popup-close-btn:hover { background: #4338CA; }
 
         .collections-panel {
-            display: none;
+            display: flex;
+            flex-direction: column;
             position: absolute;
             inset: 0;
             background: white;
             z-index: 200;
-            flex-direction: column;
+            /* Slide depuis le bas */
+            transform: translateY(100%);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: transform 0.32s cubic-bezier(0.32,0.72,0,1),
+                        opacity 0.28s ease,
+                        visibility 0s linear 0.32s;
         }
 
-        .collections-panel.show { display: flex; }
+        .collections-panel.show {
+            transform: translateY(0);
+            opacity: 1;
+            visibility: visible;
+            pointer-events: all;
+            transition: transform 0.32s cubic-bezier(0.32,0.72,0,1),
+                        opacity 0.28s ease,
+                        visibility 0s linear 0s;
+        }
 
         .collections-header {
             background: #4F46E5;
@@ -386,10 +402,11 @@
             padding: 16px;
             margin-bottom: 12px;
             cursor: pointer;
-            transition: border-color 0.2s;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
         .collection-item:hover { border-color: #818CF8; }
+        .collection-item.open { border-color: #818CF8; box-shadow: 0 4px 16px rgba(99,102,241,0.12); }
 
         .collection-item-header {
             display: flex;
@@ -400,6 +417,26 @@
 
         .collection-item-title { font-size: 18px; font-weight: bold; color: #1f2937; }
         .collection-item-desc { font-size: 14px; color: #6b7280; margin-bottom: 12px; }
+
+        .collection-chevron {
+            font-size: 18px;
+            color: #818CF8;
+            transition: transform 0.25s;
+            flex-shrink: 0;
+            margin-left: 8px;
+            align-self: center;
+        }
+        .collection-item.open .collection-chevron { transform: rotate(180deg); }
+
+        .collection-cards-inline {
+            display: none;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid #f0f0f0;
+        }
+        .collection-item.open .collection-cards-inline { display: grid; }
 
         .collection-badge {
             background: #EEF2FF;
@@ -599,65 +636,82 @@
         .card-type { font-size: 12px; opacity: 0.8; }
 
         .card-detail-view {
-            display: none;
+            display: flex;
             position: absolute;
             inset: 0;
-            background: white;
             z-index: 300;
+            background: rgba(10, 8, 30, 0.55);
+            backdrop-filter: blur(12px) saturate(0.7);
+            -webkit-backdrop-filter: blur(12px) saturate(0.7);
             flex-direction: column;
-        }
-
-        .card-detail-view.show { display: flex; }
-
-        .card-detail-header {
-            background: #4F46E5;
-            color: white;
-            padding: 16px;
-            display: flex;
             align-items: center;
-            gap: 16px;
-        }
-
-        .card-detail-title-section {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .card-detail-dust-display {
-            background: rgba(255,255,255,0.2);
-            padding: 6px 12px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .card-detail-back {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 24px;
+            justify-content: flex-start;
+            overflow-y: auto;
             cursor: pointer;
-            padding: 0;
+            opacity: 0; visibility: hidden; pointer-events: none;
+            transition: opacity 0.22s ease, visibility 0s linear 0.22s;
         }
 
-        .card-detail-body { flex: 1; overflow-y: auto; display: flex; flex-direction: column; padding-bottom: max(0px, env(safe-area-inset-bottom)); }
+        .card-detail-view.show {
+            opacity: 1; visibility: visible; pointer-events: all;
+            transition: opacity 0.22s ease, visibility 0s linear 0s;
+        }
 
+        /* Colonne centrale : largeur fixe, stopPropagation, non-cliquable pour fermer */
+        .card-detail-inner {
+            width: 300px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            padding: 16px 0 max(24px, env(safe-area-inset-bottom, 24px));
+            cursor: default;
+        }
+        .card-detail-inner.animate-in {
+            animation: cardDetailSlideUp 0.28s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+        }
+
+        @media (max-width: 360px) {
+            .card-detail-inner { width: 270px; }
+        }
+
+        @keyframes cardDetailSlideUp {
+            from { opacity: 0; transform: scale(0.90) translateY(24px); }
+            to   { opacity: 1; transform: scale(1)    translateY(0); }
+        }
+
+        /* Bouton fermer — croix en haut à droite de la colonne */
+        .card-detail-close-btn {
+            align-self: flex-end;
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(255,255,255,0.25);
+            color: white;
+            font-size: 16px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            margin-bottom: 10px;
+            flex-shrink: 0;
+            z-index: 2;
+        }
+
+        .card-detail-header { display: none; }
+        .card-detail-dust-inline { display: none; } /* remplacé dans le bloc onglets */
+
+        .card-detail-body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* card-display transparent, sert juste de wrapper */
         .card-display {
-            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
-            padding: 24px;
+            background: none;
+            padding: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 480px;
-        }
-
-        @media (max-width: 480px) {
-            .card-display { padding: 16px; min-height: 380px; }
+            width: 100%;
         }
 
         .card-frame {
@@ -665,14 +719,14 @@
             border-radius: 16px;
             padding: 16px;
             width: 100%;
-            max-width: 280px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            max-width: 300px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.35);
             position: relative;
-            min-height: 420px;
+            min-height: 380px;
         }
 
-        @media (max-width: 480px) {
-            .card-frame { max-width: 220px; padding: 12px; border-radius: 12px; min-height: 300px; }
+        @media (max-width: 360px) {
+            .card-frame { max-width: 270px; padding: 12px; border-radius: 12px; min-height: 320px; }
         }
 
         .card-rarity-badge {
@@ -975,15 +1029,30 @@
         .info-value { color: #6b7280; }
 
         .journal-screen {
-            display: none;
+            display: flex;
+            flex-direction: column;
             position: absolute;
             inset: 0;
             background: white;
             z-index: 400;
-            flex-direction: column;
+            transform: translateX(100%);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: transform 0.3s cubic-bezier(0.32,0.72,0,1),
+                        opacity 0.25s ease,
+                        visibility 0s linear 0.3s;
         }
 
-        .journal-screen.show { display: flex; }
+        .journal-screen.show {
+            transform: translateX(0);
+            opacity: 1;
+            visibility: visible;
+            pointer-events: all;
+            transition: transform 0.3s cubic-bezier(0.32,0.72,0,1),
+                        opacity 0.25s ease,
+                        visibility 0s linear 0s;
+        }
 
         .journal-screen-header {
             background: #4F46E5;
@@ -1372,7 +1441,21 @@
         .avatar-menu-xp-label { font-size: 10px; color: #9ca3af; margin-top: 4px; text-align: right; }
 
         /* Progression Screen */
-        .progression-screen { display: none; position: absolute; inset: 0; background: #0f0a1e; z-index: 450; flex-direction: column; overflow: hidden; }
+        .progression-screen {
+            display: flex; flex-direction: column;
+            position: absolute; inset: 0;
+            background: #0f0a1e; z-index: 450; overflow: hidden;
+            transform: translateY(100%); opacity: 0;
+            visibility: hidden; pointer-events: none;
+            transition: transform 0.32s cubic-bezier(0.32,0.72,0,1),
+                        opacity 0.28s ease, visibility 0s linear 0.32s;
+        }
+        .progression-screen.show {
+            transform: translateY(0); opacity: 1;
+            visibility: visible; pointer-events: all;
+            transition: transform 0.32s cubic-bezier(0.32,0.72,0,1),
+                        opacity 0.28s ease, visibility 0s linear 0s;
+        }
         .progression-screen.show { display: flex; }
         .prog-header { background: linear-gradient(135deg, #1a0f2e 0%, #0f0a1e 100%); border-bottom: 1px solid rgba(139,92,246,0.3); padding: 14px 16px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
         .prog-back { background: none; border: none; color: rgba(167,139,250,0.9); font-size: 22px; cursor: pointer; padding: 0; line-height: 1; }
@@ -1530,10 +1613,20 @@
 
         /* ==================== STUDIO ==================== */
         .studio-screen {
-            display: none; position: absolute; inset: 0;
-            background: #1a0f2e; z-index: 400; flex-direction: column;
+            display: flex; flex-direction: column;
+            position: absolute; inset: 0;
+            background: #1a0f2e; z-index: 400;
+            transform: translateX(100%); opacity: 0;
+            visibility: hidden; pointer-events: none;
+            transition: transform 0.3s cubic-bezier(0.32,0.72,0,1),
+                        opacity 0.25s ease, visibility 0s linear 0.3s;
         }
-        .studio-screen.show { display: flex; }
+        .studio-screen.show {
+            transform: translateX(0); opacity: 1;
+            visibility: visible; pointer-events: all;
+            transition: transform 0.3s cubic-bezier(0.32,0.72,0,1),
+                        opacity 0.25s ease, visibility 0s linear 0s;
+        }
 
         .studio-header {
             background: linear-gradient(135deg, #2d1040 0%, #1a0f2e 100%);
@@ -1705,24 +1798,39 @@
             font-weight: 900; font-size: 16px; line-height: 1;
             box-shadow: 0 3px 10px rgba(29,78,216,0.55);
             cursor: pointer;
-            transition: transform 0.15s, box-shadow 0.15s;
+            transition: transform 0.15s, box-shadow 0.15s, background 0.3s;
             user-select: none;
         }
         .info-marker:hover {
             transform: scale(1.15);
             box-shadow: 0 5px 16px rgba(29,78,216,0.7);
         }
+        /* Dans la zone de capture : pulsation verte */
+        .info-marker.in-range {
+            background: linear-gradient(135deg, #059669, #10B981);
+            box-shadow: 0 3px 14px rgba(16,185,129,0.7);
+            animation: infoInRangePulse 1.4s ease-in-out infinite;
+        }
+        @keyframes infoInRangePulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.5), 0 3px 14px rgba(16,185,129,0.6); }
+            50%       { box-shadow: 0 0 0 8px rgba(16,185,129,0), 0 3px 20px rgba(16,185,129,0.8); }
+        }
 
         /* ── Écran fiche Info ── */
         .info-screen {
-            display: none; position: absolute; inset: 0;
+            display: flex; position: absolute; inset: 0;
             background: rgba(10,8,20,0.88);
             backdrop-filter: blur(6px);
             z-index: 500;
             align-items: center; justify-content: center;
             padding: 24px 18px;
+            opacity: 0; visibility: hidden; pointer-events: none;
+            transition: opacity 0.22s ease, visibility 0s linear 0.22s;
         }
-        .info-screen.show { display: flex; }
+        .info-screen.show {
+            opacity: 1; visibility: visible; pointer-events: all;
+            transition: opacity 0.22s ease, visibility 0s linear 0s;
+        }
 
         .info-card {
             background: #fff;
@@ -1813,14 +1921,19 @@
 
         /* ── Formulaire "souvenir" avant ajout au musée ── */
         .memory-screen {
-            display: none; position: absolute; inset: 0;
+            display: flex; position: absolute; inset: 0;
             background: rgba(6,4,14,0.92);
             backdrop-filter: blur(8px);
             z-index: 550;
             align-items: flex-end; justify-content: center;
             padding: 0;
+            opacity: 0; visibility: hidden; pointer-events: none;
+            transition: opacity 0.25s ease, visibility 0s linear 0.25s;
         }
-        .memory-screen.show { display: flex; }
+        .memory-screen.show {
+            opacity: 1; visibility: visible; pointer-events: all;
+            transition: opacity 0.25s ease, visibility 0s linear 0s;
+        }
 
         .memory-card {
             background: #16141f;
@@ -1943,10 +2056,20 @@
             cursor: pointer; margin-top: 8px;
         }
         .museum-screen {
-            display: none; position: absolute; inset: 0;
-            background: #0a0a0f; z-index: 400; flex-direction: column;
+            display: flex; flex-direction: column;
+            position: absolute; inset: 0;
+            background: #0a0a0f; z-index: 400;
+            transform: translateY(100%); opacity: 0;
+            visibility: hidden; pointer-events: none;
+            transition: transform 0.32s cubic-bezier(0.32,0.72,0,1),
+                        opacity 0.28s ease, visibility 0s linear 0.32s;
         }
-        .museum-screen.show { display: flex; }
+        .museum-screen.show {
+            transform: translateY(0); opacity: 1;
+            visibility: visible; pointer-events: all;
+            transition: transform 0.32s cubic-bezier(0.32,0.72,0,1),
+                        opacity 0.28s ease, visibility 0s linear 0s;
+        }
 
         .museum-header {
             position: absolute;
@@ -2135,10 +2258,16 @@
            VIEWFINDER — écran "regarder à travers l'objectif"
            ======================================================== */
         .viewfinder-screen {
-            display: none; position: absolute; inset: 0;
-            z-index: 520; background: #000; flex-direction: column;
+            display: flex; flex-direction: column;
+            position: absolute; inset: 0;
+            z-index: 520; background: #000;
+            opacity: 0; visibility: hidden; pointer-events: none;
+            transition: opacity 0.25s ease, visibility 0s linear 0.25s;
         }
-        .viewfinder-screen.show { display: flex; }
+        .viewfinder-screen.show {
+            opacity: 1; visibility: visible; pointer-events: all;
+            transition: opacity 0.25s ease, visibility 0s linear 0s;
+        }
 
         /* Zone principale : le "viseur" */
         .viewfinder-viewport {
@@ -2619,12 +2748,7 @@
         </div>
 
         <!-- HUD XP bar -->
-        <div class="hud-xp-bar" id="hudXpBar">
-            <div class="hud-xp-level-label" id="hudXpLevel">Nv.1</div>
-            <div class="hud-xp-pill">
-                <div class="hud-xp-pill-fill" id="hudXpFill" style="width:0%"></div>
-            </div>
-        </div>
+
 
         <!-- Map -->
         <div id="map"></div>
@@ -2713,7 +2837,7 @@
         <div id="collectionsPanel" class="collections-panel">
             <div class="collections-header">
                 <h2 class="collections-title">Mes Collections</h2>
-                <button onclick="closeCollections()" class="close-btn">✕</button>
+                <button onclick="closeCollections()" class="close-btn" style="font-size:20px; padding: 4px 10px;">←</button>
             </div>
             <!-- Tabs -->
             <div class="col-tabs">
@@ -2724,15 +2848,7 @@
                 <!-- COLLECTIONS TAB -->
                 <div id="colPaneCollections">
                     <div id="collectionsList"></div>
-                    <div id="collectionDetail" class="collection-detail">
-                        <button onclick="backToCollections()" class="back-btn">← Retour</button>
-                        <div class="collection-detail-header">
-                            <h3 class="collection-detail-title" id="detailTitle"></h3>
-                            <p class="collection-detail-desc" id="detailDesc"></p>
-                            <span class="collection-badge" id="detailBadge"></span>
-                        </div>
-                        <div class="cards-grid" id="cardsGrid"></div>
-                    </div>
+
                 </div>
                 <!-- ECHOES TAB -->
                 <div id="colPaneEchoes" class="hidden">
@@ -2742,19 +2858,13 @@
         </div>
 
         <!-- Card Detail View -->
-        <div id="cardDetailView" class="card-detail-view">
-            <div class="card-detail-header">
-                <div class="card-detail-title-section">
-                    <h2 class="collections-title" id="cardDetailHeaderTitle"></h2>
-                    <div class="card-detail-dust-display">
-                        <svg width="22" height="22" viewBox="0 0 24 24" style="display:inline-block;vertical-align:middle" xmlns="http://www.w3.org/2000/svg"><ellipse cx="12" cy="19" rx="9" ry="3" fill="#c084fc" opacity="0.7"/><path d="M5,18 Q7,10 12,7 Q17,10 19,18 Z" fill="#a855f7"/><circle cx="9" cy="14" r="1.2" fill="rgba(255,255,255,0.7)"/><circle cx="13" cy="11" r="1" fill="rgba(255,255,255,0.6)"/><circle cx="15" cy="15" r="0.9" fill="rgba(255,255,255,0.5)"/></svg>
-                        <span id="cardDetailDustCounter">0</span>
-                    </div>
-                </div>
-            </div>
-            <div class="card-detail-body">
-                <div class="card-display" onclick="closeCardDetail()" style="cursor: pointer;">
-                    <div class="card-frame" onclick="event.stopPropagation()" style="cursor: pointer; position: relative;">
+        <div id="cardDetailView" class="card-detail-view" onclick="handleCardDetailBackdropClick(event)">
+            <div class="card-detail-inner" onclick="event.stopPropagation()">
+                <!-- Bouton fermer flottant -->
+
+                <div class="card-detail-body">
+                    <!-- La carte blanche flotte directement sur le fond flouté -->
+                    <div class="card-frame" onclick="event.stopPropagation()" style="position:relative; margin-bottom:12px;">
                         <div class="card-dialogue-bubble" id="cardDialogueBubble">
                             <div class="card-dialogue-text" id="cardDialogueText"></div>
                         </div>
@@ -2778,38 +2888,57 @@
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="card-tabs">
-                    <button class="card-tab active" onclick="switchTab('general', event)">Général</button>
-                    <button class="card-tab" onclick="switchTab('skins', event)">Skins</button>
-                    <button class="card-tab" onclick="switchTab('competences', event)">Skills</button>
-                    <button class="card-tab journal-tab" onclick="openJournalScreen()" id="journalTabBtn">
-                        📖 Carnet
-                        <span class="notification-badge hidden" id="journalNotification">!</span>
-                    </button>
-                </div>
+                    <!-- Bloc onglets + contenu -->
+                    <div style="background:white; border-radius:16px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.18);">
+                        <!-- Nom + poudre -->
+                        <div style="padding:12px 16px 0; display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                            <div style="font-size:17px;font-weight:800;color:#1f2937;" id="cardDetailHeaderTitle"></div>
+                            <div style="display:flex;align-items:center;gap:5px;background:#f3f0ff;border-radius:20px;padding:4px 10px;font-size:12px;font-weight:700;color:#7c3aed;flex-shrink:0;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><ellipse cx="12" cy="19" rx="9" ry="3" fill="#c084fc" opacity="0.7"/><path d="M5,18 Q7,10 12,7 Q17,10 19,18 Z" fill="#a855f7"/></svg>
+                                <span id="cardDetailDustCounter">0</span>
+                            </div>
+                        </div>
 
-                <div id="generalTab" class="tab-content active">
-                    <div class="info-row"><span class="info-label">Naissance</span><span class="info-value">7 novembre 1867</span></div>
-                    <div class="info-row"><span class="info-label">Décès</span><span class="info-value">4 juillet 1934</span></div>
-                    <div class="info-row"><span class="info-label">Nationalité</span><span class="info-value">Polonaise, Française</span></div>
-                    <div class="info-row"><span class="info-label">Conjoint</span><span class="info-value">Pierre Curie</span></div>
-                    <p style="margin-top: 20px;">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-                </div>
+                        <div class="card-tabs" style="border-radius:0; margin-top:4px;">
+                            <button class="card-tab active" onclick="switchTab('general', event)">Général</button>
+                            <button class="card-tab" onclick="switchTab('skins', event)">Skins</button>
+                            <button class="card-tab" onclick="switchTab('competences', event)">Skills</button>
+                            <button class="card-tab journal-tab" onclick="openJournalScreen()" id="journalTabBtn">
+                                📖 Carnet
+                                <span class="notification-badge hidden" id="journalNotification">!</span>
+                            </button>
+                        </div>
 
-                <div id="skinsTab" class="tab-content">
-                    <h3 style="margin-bottom: 12px; color: #1f2937; font-size:14px;">Apparences disponibles</h3>
-                    <div class="skins-grid" id="skinsGrid"></div>
-                </div>
+                        <div id="generalTab" class="tab-content active">
+                            <div class="info-row"><span class="info-label">Naissance</span><span class="info-value">7 novembre 1867</span></div>
+                            <div class="info-row"><span class="info-label">Décès</span><span class="info-value">4 juillet 1934</span></div>
+                            <div class="info-row"><span class="info-label">Nationalité</span><span class="info-value">Polonaise, Française</span></div>
+                            <div class="info-row"><span class="info-label">Conjoint</span><span class="info-value">Pierre Curie</span></div>
+                            <p style="margin-top:12px; padding:0 16px 16px; color:#4b5563; font-size:13px; line-height:1.6;">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                        </div>
 
-                <div id="competencesTab" class="tab-content">
-                    <h3 style="margin-bottom: 16px; color: #1f2937;">Compétences à débloquer</h3>
-                    <div class="info-row"><span class="info-label">Radioactivité</span><span class="info-value">À définir</span></div>
-                    <div class="info-row"><span class="info-label">Physique</span><span class="info-value">À définir</span></div>
-                    <div class="info-row"><span class="info-label">Chimie</span><span class="info-value">À définir</span></div>
-                    <p style="margin-top: 20px;">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                        <div id="skinsTab" class="tab-content">
+                            <h3 style="margin-bottom:12px; color:#1f2937; font-size:14px;">Apparences disponibles</h3>
+                            <div class="skins-grid" id="skinsGrid"></div>
+                        </div>
+
+                        <div id="competencesTab" class="tab-content">
+                            <h3 style="margin-bottom:16px; color:#1f2937;">Compétences à débloquer</h3>
+                            <div class="info-row"><span class="info-label">Radioactivité</span><span class="info-value">À définir</span></div>
+                            <div class="info-row"><span class="info-label">Physique</span><span class="info-value">À définir</span></div>
+                            <div class="info-row"><span class="info-label">Chimie</span><span class="info-value">À définir</span></div>
+                            <p style="margin-top:12px; padding:0 16px 16px;">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                        </div>
+                    </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Header fantôme conservé pour compatibilité JS (caché) -->
+        <div id="cardDetailViewOldHeader" style="display:none">
+            <div class="card-detail-dust-display">
+                <span id="_cardDetailDustCounterUnused">0</span>
             </div>
         </div>
 
@@ -3698,6 +3827,7 @@
         const COLLECTION_RADIUS = 50;
         const DUST_RADIUS = 30;
         const ECHO_RADIUS = 30;
+        const INFO_RADIUS = 30;
         const MOVE_SPEED = 0.000015;
         // Tilt offset: shift camera center north so player appears in lower third of screen
         const TILT_OFFSET_LAT = 0.0018;
@@ -3744,6 +3874,7 @@
         let currentNearbyPOI = null;
         let currentNearbyDust = null;
         let currentNearbyEcho = null;
+        let currentNearbyInfo = null;
 
         let selectedCollectionId = null;
         let currentTab = 'general';
@@ -3931,6 +4062,34 @@
                     'circle-stroke-opacity': 0.35
                 }
             });
+
+            // Info circles (30m) — bleu, même rayon que dust/echo
+            map.addSource('info-circles', {
+                type: 'geojson',
+                data: { type: 'FeatureCollection', features: [] }
+            });
+            map.addLayer({
+                id: 'info-capture-circles',
+                type: 'circle',
+                source: 'info-circles',
+                paint: {
+                    'circle-radius': [
+                        'interpolate', ['exponential', 2], ['zoom'],
+                        14, 4.4,
+                        15, 8.8,
+                        16, 17.5,
+                        17, 35.0,
+                        17.5, 49.6,
+                        18, 70.1,
+                        19, 140.2
+                    ],
+                    'circle-color': '#1D4ED8',
+                    'circle-opacity': 0.07,
+                    'circle-stroke-color': '#3B82F6',
+                    'circle-stroke-width': 1.8,
+                    'circle-stroke-opacity': 0.55
+                }
+            });
                 // Hide POI icon labels (metro, restaurants, etc.)
                 const style = map.getStyle();
                 if (style && style.layers) {
@@ -3953,6 +4112,7 @@
                 updatePOIVisibility();
                 updateDustVisibility();
                 updateEchoVisibility();
+                updateInfoVisibility();
                 checkNearbyPOI();
             }); // end map.on('load')
 
@@ -4166,7 +4326,27 @@
             });
             currentNearbyPOI = nearby;
             const nearbyDiv = document.getElementById('nearbyPOI');
-            if (nearby) { document.getElementById('poiName').textContent = nearby.name; nearbyDiv.classList.remove('hidden'); }
+            if (nearby) {
+                // Compute remaining cards for this POI
+                const seen = new Set();
+                const allCards = Object.values(COLLECTIONS).flatMap(c => c.cards).filter(c => seen.has(c.id) ? false : seen.add(c.id));
+                const poiCards = allCards.filter(c => c.poiId === nearby.id);
+                const remaining = poiCards.filter(c => !collectedCards.includes(c.id));
+                const nextCard = remaining[0];
+                const total = poiCards.length;
+                const collected = total - remaining.length;
+                // Update UI
+                document.getElementById('poiName').textContent = nearby.name;
+                const btn = nearbyDiv.querySelector('.collect-btn');
+                if (btn && nextCard) {
+                    if (total > 1) {
+                        btn.textContent = `Collecter "${nextCard.name}" (${collected + 1}/${total})`;
+                    } else {
+                        btn.textContent = `Collecter la carte`;
+                    }
+                }
+                nearbyDiv.classList.remove('hidden');
+            }
             else { nearbyDiv.classList.add('hidden'); }
 
             // Dust
@@ -4193,6 +4373,22 @@
             } else {
                 nearbyEchoDiv.classList.add('hidden');
             }
+
+            // Info points — mise à jour du marqueur (pulsation si dans zone)
+            currentNearbyInfo = null;
+            infoMarkers.forEach(({ el, inner, info }) => {
+                const alreadySaved = museumCollection.some(m => m.infoId === info.id);
+                if (alreadySaved) return; // déjà capturé, marqueur masqué
+                const dist = getDistance(playerPos.lat, playerPos.lng, info.lat, info.lng);
+                const inZone = dist <= INFO_RADIUS;
+                const target = inner || el;
+                if (inZone) {
+                    currentNearbyInfo = info;
+                    target.classList.add('in-range');
+                } else {
+                    target.classList.remove('in-range');
+                }
+            });
         }
 
         // ==================== VISIBILITY ====================
@@ -4256,6 +4452,29 @@
             }
         }
 
+        function updateInfoVisibility() {
+            const visible = [];
+            infoMarkers.forEach(({ marker, el, info }) => {
+                const captured = museumCollection.some(m => m.infoId === info.id);
+                if (captured) {
+                    // Masquer marqueur ET retirer de la liste cercles
+                    el.style.display = 'none';
+                } else {
+                    el.style.display = 'block';
+                    visible.push(info);
+                }
+            });
+            if (map && map.getSource('info-circles')) {
+                map.getSource('info-circles').setData({
+                    type: 'FeatureCollection',
+                    features: visible.map(info => ({
+                        type: 'Feature', properties: { id: info.id },
+                        geometry: { type: 'Point', coordinates: [info.lng, info.lat] }
+                    }))
+                });
+            }
+        }
+
         // ==================== COLLECTION ====================
 
         // ==================== MISE AU POINT ====================
@@ -4265,7 +4484,10 @@
         let mapointAnimId = null;
         let mapointState = {};
 
+        let _mapointOpen = false;
         function openMiseAuPoint(card) {
+            if (_mapointOpen) return; // guard: never open twice
+            _mapointOpen = true;
             mapointCard = card;
             const screen = document.getElementById('miseAuPointScreen');
             screen.classList.add('active');
@@ -4273,6 +4495,7 @@
         }
 
         function closeMiseAuPoint() {
+            _mapointOpen = false;
             const screen = document.getElementById('miseAuPointScreen');
             screen.classList.remove('active');
             if (mapointAnimId) { cancelAnimationFrame(mapointAnimId); mapointAnimId = null; }
@@ -4544,7 +4767,9 @@
 
         function collectCard() {
             if (!currentNearbyPOI) return;
-            const allCards = Object.values(COLLECTIONS).flatMap(c => c.cards);
+            // Deduplicate cards by id to prevent double mini-games with multi-supertype cards
+            const seen = new Set();
+            const allCards = Object.values(COLLECTIONS).flatMap(c => c.cards).filter(c => seen.has(c.id) ? false : seen.add(c.id));
             const card = allCards.find(c => c.poiId === currentNearbyPOI.id && !collectedCards.includes(c.id));
             if (!card) return;
             collectedCards.push(card.id);
@@ -4640,15 +4865,21 @@
                 return;
             }
 
-            // All cards across all collections
-            const allCards = Object.values(COLLECTIONS).flatMap(col => col.cards);
+            // All cards across all collections (deduped)
+            const seen = new Set();
+            const allCards = Object.values(COLLECTIONS).flatMap(col => col.cards).filter(c => seen.has(c.id) ? false : seen.add(c.id));
 
             Object.entries(SUPERTYPES).forEach(([supertypeKey, supertypeInfo]) => {
                 const count = echoInventory[supertypeKey] || 0;
 
-                // Find all cards matching this supertype (primary OR secondary)
-                const matchingCards = allCards.filter(c => c.supertype === supertypeKey || c.supertype2 === supertypeKey);
-                if (matchingCards.length === 0) return;
+                // Only show sections where the player has at least one echo
+                if (count === 0) return;
+
+                // Only show cards the player has collected with this supertype
+                const collectedMatchingCards = allCards.filter(c =>
+                    (c.supertype === supertypeKey || c.supertype2 === supertypeKey) &&
+                    collectedCards.includes(c.id)
+                );
 
                 const section = document.createElement('div');
                 section.className = 'echo-type-section';
@@ -4666,35 +4897,47 @@
 
                 const cardsContainer = document.getElementById(`echoCards_${supertypeKey}`);
 
-                matchingCards.forEach(card => {
-                    const isCollected = collectedCards.includes(card.id);
+                if (collectedMatchingCards.length === 0) {
+                    cardsContainer.innerHTML = `<div style="color:#9ca3af;font-size:13px;padding:8px 0;">Aucune carte ${supertypeInfo.name} collectée pour l'instant.</div>`;
+                    return;
+                }
+
+                collectedMatchingCards.forEach(card => {
                     const rarityInfo = RARITY_CONFIG[card.rarity] || RARITY_CONFIG.common;
-
                     const cardEl = document.createElement('div');
-                    cardEl.className = `echo-compatible-card${isCollected ? '' : ' not-collected'}`;
-
-                    if (isCollected) {
-                        cardEl.onclick = () => {
-                            closeCollections();
-                            openCardDetail(card);
-                        };
-                    }
-
+                    cardEl.className = 'echo-compatible-card';
+                    cardEl.onclick = () => navigateToCardFromEchoes(card);
                     cardEl.innerHTML = `
                         <div class="echo-card-icon supertype-${supertypeKey}">
-                            ${isCollected ? '🎴' : '❓'}
+                            ${SUPERTYPES[card.supertype]?.symbol || '🎴'}
                         </div>
                         <div class="echo-card-info">
-                            <div class="echo-card-name">${isCollected ? card.name : '???'}</div>
-                            <div class="echo-card-meta">${isCollected ? card.type : 'Carte non collectée'} · <span style="color:${rarityInfo.color};font-weight:600;">${rarityInfo.name}</span></div>
+                            <div class="echo-card-name">${card.name}</div>
+                            <div class="echo-card-meta">${card.type} · <span style="color:${rarityInfo.color};font-weight:600;">${rarityInfo.name}</span></div>
                         </div>
-                        <span class="echo-card-status ${isCollected ? 'collected' : 'locked'}">
-                            ${isCollected ? '✓ Collectée' : '🔒 Verr.'}
-                        </span>
+                        <span class="echo-card-status collected">✓ Collectée</span>
                     `;
-
                     cardsContainer.appendChild(cardEl);
                 });
+            });
+        }
+
+        function navigateToCardFromEchoes(card) {
+            // Trouver la collection qui contient cette carte
+            const colEntry = Object.entries(COLLECTIONS).find(([, col]) => col.cards.some(c => c.id === card.id));
+            if (!colEntry) return;
+            const colId = colEntry[0];
+
+            // Passer à l'onglet Collections
+            switchColTab('collections');
+
+            // Ouvrir l'accordéon puis directement la carte — sans scroll automatique
+            requestAnimationFrame(() => {
+                const item = document.querySelector(`.collection-item[data-col-id="${colId}"]`);
+                if (item && !item.classList.contains('open')) {
+                    item.classList.add('open');
+                }
+                openCardDetail(card);
             });
         }
 
@@ -4710,13 +4953,37 @@
                 const p = getCollectionProgress(col.id);
                 const div = document.createElement('div');
                 div.className = 'collection-item';
-                div.onclick = () => showCollectionDetail(col.id);
+                div.dataset.colId = col.id;
+
+                // Cards grid (inline, hidden by default)
+                const cardsGrid = document.createElement('div');
+                cardsGrid.className = 'collection-cards-inline';
+                col.cards.forEach(card => {
+                    const isCollected = collectedCards.includes(card.id);
+                    const cardEl = document.createElement('div');
+                    cardEl.className = `card-item ${isCollected ? 'collected' : 'locked'}`;
+                    if (isCollected) cardEl.onclick = (e) => { e.stopPropagation(); openCardDetail(card); };
+                    cardEl.innerHTML = `<div class="card-icon">${isCollected ? (SUPERTYPES[card.supertype]?.symbol || '🎴') : '❓'}</div><div class="card-name">${isCollected ? card.name : '???'}</div><div class="card-type">${isCollected ? card.type : 'Non collectée'}</div>`;
+                    cardsGrid.appendChild(cardEl);
+                });
+
                 div.innerHTML = `
                     <div class="collection-item-header">
-                        <div><h3 class="collection-item-title">${col.name}</h3><p class="collection-item-desc">${col.description}</p></div>
+                        <div style="flex:1;min-width:0;">
+                            <h3 class="collection-item-title">${col.name}</h3>
+                            <p class="collection-item-desc">${col.description}</p>
+                        </div>
                         <span class="collection-badge">${p.collected}/${p.total}</span>
+                        <span class="collection-chevron">▾</span>
                     </div>
                     <div class="progress-bar"><div class="progress-fill" style="width:${(p.collected/p.total)*100}%"></div></div>`;
+                div.appendChild(cardsGrid);
+
+                div.onclick = (e) => {
+                    if (e.target.closest('.card-item')) return; // don't toggle when clicking a card
+                    div.classList.toggle('open');
+                };
+
                 listDiv.appendChild(div);
             });
         }
@@ -4726,32 +4993,9 @@
             return { collected: col.cards.filter(c => collectedCards.includes(c.id)).length, total: col.cards.length };
         }
 
-        function showCollectionDetail(collectionId) {
-            selectedCollectionId = collectionId;
-            const col = COLLECTIONS[collectionId];
-            const p = getCollectionProgress(collectionId);
-            document.getElementById('detailTitle').textContent = col.name;
-            document.getElementById('detailDesc').textContent = col.description;
-            document.getElementById('detailBadge').textContent = `${p.collected}/${p.total} cartes`;
-            const grid = document.getElementById('cardsGrid');
-            grid.innerHTML = '';
-            col.cards.forEach(card => {
-                const isCollected = collectedCards.includes(card.id);
-                const div = document.createElement('div');
-                div.className = `card-item ${isCollected ? 'collected' : 'locked'}`;
-                if (isCollected) div.onclick = () => openCardDetail(card);
-                div.innerHTML = `<div class="card-icon">${isCollected ? '🎴' : '❓'}</div><div class="card-name">${isCollected ? card.name : '???'}</div><div class="card-type">${isCollected ? card.type : 'Non collectée'}</div>`;
-                grid.appendChild(div);
-            });
-            document.getElementById('collectionsList').classList.add('hidden');
-            document.getElementById('collectionDetail').classList.add('show');
-        }
+        function showCollectionDetail(collectionId) { /* replaced by accordion */ }
 
-        function backToCollections() {
-            selectedCollectionId = null;
-            document.getElementById('collectionsList').classList.remove('hidden');
-            document.getElementById('collectionDetail').classList.remove('show');
-        }
+        function backToCollections() { /* replaced by accordion */ }
 
         // ==================== CARD DETAIL ====================
 
@@ -4767,6 +5011,8 @@
                 badge.textContent = info.symbol;
                 badge.className = `card-supertype-badge supertype-${card.supertype}`;
                 const badge2 = document.getElementById('cardSupertypeBadge2');
+                const artArea = document.querySelector('.card-art-area');
+                const frame = document.querySelector('.card-frame');
                 if (card.supertype2) {
                     const info2 = SUPERTYPES[card.supertype2];
                     badge2.textContent = info2.symbol;
@@ -4775,11 +5021,34 @@
                 } else {
                     badge2.classList.add('hidden');
                 }
+                // Couleur supertype sur le frame (contour) — jamais modifiée par le skin
+                if (frame) {
+                    if (card.supertype2) {
+                        const info2 = SUPERTYPES[card.supertype2];
+                        frame.style.background = `linear-gradient(to right, ${info.color}55 50%, ${info2.color}55 50%)`;
+                    } else {
+                        frame.style.background = `linear-gradient(135deg, ${info.color}44 0%, ${info.color}77 100%)`;
+                    }
+                }
+                // Skin appliqué à l'intérieur (zone d'art uniquement)
+                applyCurrentSkinToFrame();
             }
             document.getElementById('cardDetailDustCounter').textContent = memorialDust;
             updateCardLevelDisplay();
             switchTabProgrammatically('general');
+            // Relancer l'animation d'entrée
+            const inner = document.querySelector('.card-detail-inner');
+            if (inner) {
+                inner.classList.remove('animate-in');
+                void inner.offsetWidth; // reflow
+                inner.classList.add('animate-in');
+            }
             document.getElementById('cardDetailView').classList.add('show');
+        }
+
+        function handleCardDetailBackdropClick(e) {
+            // Fermer si clic sur le backdrop (pas sur le contenu intérieur)
+            if (e.target === document.getElementById('cardDetailView')) closeCardDetail();
         }
 
         function closeCardDetail() {
@@ -4922,8 +5191,22 @@
                 el.style.transition = 'none';
                 el.style.background = OVERLAY_COLORS[i];
                 el.style.height = '33.33%';
-                const btn = document.getElementById(`journalBtn${i+1}`);
-                if (btn) btn.style.display = 'block';
+                const lvl = i + 1;
+                const btn = document.getElementById(`journalBtn${lvl}`);
+                if (!btn) continue;
+                const key = `${selectedCard?.id}_${lvl}`;
+                if (journalRewardsClaimed[key]) {
+                    btn.style.display = 'none'; // déjà réclamé
+                } else {
+                    btn.style.display = 'block';
+                    btn.style.opacity = '1';
+                    btn.style.transform = 'translateX(-50%)';
+                    const inner = btn.querySelector('.interaction-button');
+                    if (inner) {
+                        inner.style.cursor = 'pointer';
+                        inner.onclick = () => claimJournalReward(selectedCard.id, lvl);
+                    }
+                }
             }
         }
 
@@ -5023,6 +5306,60 @@
         };
 
         let studioOwnedItems = ['window', 'bookshelf', 'desk', 'chest', 'plant', 'armchair', 'lamp', 'globe'];
+
+        // Récompenses journal : itemId studio débloqué par [cardId][level]
+        // Structure : { 'card1_1': true, 'card1_2': true, ... }
+        let journalRewardsClaimed = {};
+
+        // Quelle récompense studio pour quel niveau de carnet (varie selon supertype)
+        function getJournalReward(card, level) {
+            const rewards = {
+                histoire: ['mirror', 'harp',     'cauldron'],
+                nature:   ['plant',  'armchair',  'cauldron'],
+                science:  ['mirror', 'cauldron',  'harp'],
+                arts:     ['harp',   'mirror',    'plant'],
+                societe:  ['armchair','mirror',   'cauldron'],
+            };
+            const list = rewards[card.supertype] || rewards[card.supertype2] || ['mirror','harp','cauldron'];
+            return list[level - 1] || 'mirror';
+        }
+
+        function claimJournalReward(cardId, level) {
+            const key = `${cardId}_${level}`;
+            if (journalRewardsClaimed[key]) return;
+            journalRewardsClaimed[key] = true;
+
+            const card = selectedCard;
+            const itemId = getJournalReward(card, level);
+            const item = STUDIO_ITEMS[itemId];
+
+            // Débloquer l'item dans le studio
+            unlockStudioItem(itemId);
+
+            // Cacher le bouton dans le carnet
+            const btn = document.getElementById(`journalBtn${level}`);
+            if (btn) {
+                btn.style.transition = 'opacity 0.4s, transform 0.4s';
+                btn.style.opacity = '0';
+                btn.style.transform = 'translateX(-50%) scale(0.5)';
+                setTimeout(() => { btn.style.display = 'none'; }, 400);
+            }
+
+            // Toast de confirmation
+            const toast = document.createElement('div');
+            toast.style.cssText = [
+                'position:fixed','bottom:120px','left:50%','transform:translateX(-50%)',
+                'background:linear-gradient(135deg,#1e3a8a,#7C3AED)',
+                'color:white','border-radius:20px','padding:10px 18px',
+                'font-size:13px','font-weight:700','z-index:9999',
+                'box-shadow:0 4px 20px rgba(0,0,0,0.4)',
+                'display:flex','align-items:center','gap:8px',
+                'animation:filmToastAnim 2.8s ease forwards'
+            ].join(';');
+            toast.innerHTML = `${item.icon} <span style="color:#fcd34d">${item.name}</span> ajouté au studio !`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
 
         function unlockStudioItem(itemId) {
             if (studioOwnedItems.includes(itemId)) return;
@@ -5225,7 +5562,17 @@
             // Show interaction button after animation
             setTimeout(() => {
                 const btn = document.getElementById(`journalBtn${level}`);
-                if (btn) btn.style.display = 'block';
+                const key = `${selectedCard?.id}_${level}`;
+                if (btn && !journalRewardsClaimed[key]) {
+                    btn.style.display = 'block';
+                    btn.style.opacity = '1';
+                    btn.style.transform = 'translateX(-50%)';
+                    const inner = btn.querySelector('.interaction-button');
+                    if (inner) {
+                        inner.style.cursor = 'pointer';
+                        inner.onclick = () => claimJournalReward(selectedCard.id, level);
+                    }
+                }
                 document.getElementById('journalNotification').classList.remove('hidden');
             }, 1400);
         }
@@ -5617,22 +5964,13 @@
             setTimeout(() => { if (t.parentNode) t.remove(); }, 3000);
         }
         function updateCameraHUD() {
-            let badge = document.getElementById('cameraHudBadge');
-            if (!badge) {
-                badge = document.createElement('div');
-                badge.id = 'cameraHudBadge';
-                badge.style.cssText = [
-                    'position:absolute','bottom:80px','right:12px',
-                    'background:rgba(15,12,28,0.88)','backdrop-filter:blur(6px)',
-                    'border:1px solid rgba(255,255,255,0.13)','border-radius:12px',
-                    'padding:6px 11px','display:flex','align-items:center','gap:6px',
-                    'font-size:12px','font-weight:700','color:white','z-index:200',
-                    'box-shadow:0 2px 14px rgba(0,0,0,0.45)','cursor:default'
-                ].join(';');
-                document.getElementById('mainApp').appendChild(badge);
-            }
-            badge.innerHTML = `📷 <span style="color:#fcd34d;margin-right:1px">${filmCount}</span><span style="color:rgba(255,255,255,0.45)">pellicule${filmCount !== 1 ? 's' : ''}</span>`;
-            badge.style.display = hasCamera ? 'flex' : 'none';
+            // Film count only shown inside the viewfinder screen — update it there
+            const vfCount = document.getElementById('vfFilmCount');
+            const vfLabel = document.getElementById('vfFilmLabel');
+            const vfBadge = document.getElementById('vfFilmBadge');
+            if (vfCount) vfCount.textContent = filmCount;
+            if (vfLabel) vfLabel.textContent = `pellicule${filmCount !== 1 ? 's' : ''}`;
+            if (vfBadge) vfBadge.classList.toggle('no-film', filmCount === 0);
         }
 
         // ── Skins ──
@@ -5641,15 +5979,52 @@
             const skinsTab = document.getElementById('skinsTab');
             if (skinsTab && skinsTab.classList.contains('active')) renderSkinsTab();
         }
+        // Motifs SVG pour chaque skin (encodés en data URI)
+        const SKIN_PATTERNS = {
+            default:      null,
+            aurora:       `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ccircle cx='15' cy='15' r='12' fill='none' stroke='%2310B981' stroke-width='1.5' opacity='0.35'/%3E%3Ccircle cx='45' cy='45' r='12' fill='none' stroke='%230d9488' stroke-width='1.5' opacity='0.35'/%3E%3Ccircle cx='45' cy='15' r='6' fill='%2310B981' opacity='0.15'/%3E%3Ccircle cx='15' cy='45' r='6' fill='%230d9488' opacity='0.15'/%3E%3C/svg%3E")`,
+            crepuscule:   `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cline x1='0' y1='60' x2='60' y2='0' stroke='%23ea580c' stroke-width='1' opacity='0.25'/%3E%3Cline x1='0' y1='40' x2='40' y2='0' stroke='%23ea580c' stroke-width='1' opacity='0.2'/%3E%3Cline x1='20' y1='60' x2='60' y2='20' stroke='%23ea580c' stroke-width='1' opacity='0.2'/%3E%3Ccircle cx='30' cy='30' r='3' fill='%23f97316' opacity='0.3'/%3E%3C/svg%3E")`,
+            nebula:       `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Ccircle cx='10' cy='10' r='1.5' fill='%23a78bfa' opacity='0.6'/%3E%3Ccircle cx='30' cy='20' r='1' fill='%23c4b5fd' opacity='0.5'/%3E%3Ccircle cx='55' cy='10' r='2' fill='%238b5cf6' opacity='0.4'/%3E%3Ccircle cx='70' cy='35' r='1' fill='%23a78bfa' opacity='0.6'/%3E%3Ccircle cx='20' cy='50' r='1.5' fill='%23c4b5fd' opacity='0.5'/%3E%3Ccircle cx='45' cy='65' r='1' fill='%238b5cf6' opacity='0.5'/%3E%3Ccircle cx='65' cy='60' r='2' fill='%23a78bfa' opacity='0.4'/%3E%3Ccircle cx='40' cy='40' r='1' fill='white' opacity='0.4'/%3E%3Ccircle cx='10' cy='70' r='1' fill='%23c4b5fd' opacity='0.5'/%3E%3C/svg%3E")`,
+            lyon_antique: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Crect x='5' y='5' width='50' height='50' fill='none' stroke='%23d97706' stroke-width='1' opacity='0.2'/%3E%3Crect x='15' y='15' width='30' height='30' fill='none' stroke='%23b45309' stroke-width='1' opacity='0.2'/%3E%3Cline x1='5' y1='5' x2='55' y2='55' stroke='%23d97706' stroke-width='0.8' opacity='0.15'/%3E%3Cline x1='55' y1='5' x2='5' y2='55' stroke='%23d97706' stroke-width='0.8' opacity='0.15'/%3E%3Ccircle cx='30' cy='30' r='4' fill='none' stroke='%23d97706' stroke-width='1' opacity='0.3'/%3E%3C/svg%3E")`,
+        };
+
+        function applyCurrentSkinToFrame() {
+            const skin = CARD_SKINS.find(s => s.id === activeSkin) || CARD_SKINS[0];
+            const artArea = document.querySelector('.card-art-area');
+            if (!artArea) return;
+
+            // Supprimer l'ancien overlay skin s'il existe
+            const oldOverlay = artArea.querySelector('.skin-overlay');
+            if (oldOverlay) oldOverlay.remove();
+
+            // La couleur de fond de artArea reste neutre, fixe
+            artArea.style.background = 'linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%)';
+
+            // Appliquer le motif du skin via un overlay
+            const pattern = SKIN_PATTERNS[skin.id];
+            if (pattern) {
+                const overlay = document.createElement('div');
+                overlay.className = 'skin-overlay';
+                overlay.style.cssText = [
+                    'position:absolute','inset:0','border-radius:12px',
+                    'pointer-events:none','z-index:0',
+                    `background-image:${pattern}`,
+                    'background-repeat:repeat',
+                    'background-size:auto'
+                ].join(';');
+                artArea.appendChild(overlay);
+            }
+
+            // hero si présent
+            const hero = document.querySelector('.card-hero-bg');
+            if (hero) hero.style.background = `linear-gradient(135deg, ${skin.paletteGrad[0]}, ${skin.paletteGrad[1]})`;
+        }
+
         function applySkinToCard(skinId) {
             if (!unlockedSkins.has(skinId)) return;
             activeSkin = skinId;
             renderSkinsTab();
-            const skin = CARD_SKINS.find(s => s.id === skinId);
-            if (!skin) return;
-            // Mettre à jour le bandeau hero de la fiche carte
-            const hero = document.querySelector('.card-hero-bg');
-            if (hero) hero.style.background = `linear-gradient(135deg, ${skin.paletteGrad[0]}, ${skin.paletteGrad[1]})`;
+            applyCurrentSkinToFrame();
         }
         function renderSkinsTab() {
             const grid = document.getElementById('skinsGrid');
@@ -5900,19 +6275,57 @@
 
         function initInfoMarkers() {
             INFO_POINTS.forEach(info => {
+                // Même pattern que les POI : wrapper 0×0 + inner centré
+                // → le marqueur ne dérive pas quand on déplace la carte
                 const el = document.createElement('div');
-                el.className = 'info-marker';
-                el.textContent = 'i';
+                el.style.cssText = 'width:0;height:0;overflow:visible;cursor:pointer;';
                 el.title = info.title;
-                // Ouvre le viewfinder, pas la fiche directement
-                el.addEventListener('click', () => openViewfinder(info));
+
+                const inner = document.createElement('div');
+                inner.className = 'info-marker';
+                inner.textContent = 'i';
+                // Centrage absolu sur le point géographique
+                inner.style.position = 'absolute';
+                inner.style.transform = 'translate(-50%, -50%)';
+
+                el.appendChild(inner);
+
+                el.addEventListener('click', () => {
+                    const already = museumCollection.some(m => m.infoId === info.id);
+                    if (already) return;
+                    const dist = getDistance(playerPos.lat, playerPos.lng, info.lat, info.lng);
+                    if (dist > INFO_RADIUS) {
+                        showInfoTooFarToast(info.title);
+                        return;
+                    }
+                    openViewfinder(info);
+                });
 
                 const marker = new maplibregl.Marker({ element: el, anchor: 'center' })
                     .setLngLat([info.lng, info.lat])
                     .addTo(map);
 
-                infoMarkers.push({ marker, el, info });
+                infoMarkers.push({ marker, el, inner, info });
             });
+        }
+
+        function showInfoTooFarToast(title) {
+            const ex = document.getElementById('infoTooFarToast');
+            if (ex) ex.remove();
+            const t = document.createElement('div');
+            t.id = 'infoTooFarToast';
+            t.style.cssText = [
+                'position:absolute','bottom:160px','left:50%','transform:translateX(-50%)',
+                'background:rgba(15,12,28,0.92)','backdrop-filter:blur(8px)',
+                'border:1px solid rgba(59,130,246,0.4)','border-radius:24px',
+                'padding:10px 20px','display:flex','align-items:center','gap:8px',
+                'font-size:12px','font-weight:700','color:white','z-index:400',
+                'box-shadow:0 4px 20px rgba(0,0,0,0.5)','white-space:nowrap',
+                'animation:filmToastAnim 2.8s ease forwards'
+            ].join(';');
+            t.innerHTML = `📍 Approche-toi de <span style="color:#60a5fa;margin:0 4px">${title}</span> pour photographier`;
+            document.getElementById('mainApp').appendChild(t);
+            setTimeout(() => { if (t.parentNode) t.remove(); }, 3000);
         }
 
         // ==================== VIEWFINDER ====================
@@ -6086,65 +6499,18 @@
 
             // Capturer le SVG comme image PNG via canvas
             const info = currentViewfinderInfo;
-            captureSVGasPhoto(info, (photoData) => {
-                // Fermer viewfinder + ouvrir le formulaire souvenir directement
+            captureSVGasPhoto(info, (capture) => {
                 document.getElementById('viewfinderScreen').classList.remove('show');
                 currentInfoPoint = info;
                 currentViewfinderInfo = null;
-                openMemoryWithPhoto(photoData);
+                window._pendingPhotoZoom = capture ? capture.zoom : 1;
+                openMemoryWithPhoto(null); // pas de PNG — zoom géré par CSS dans le musée
             });
         }
 
         function captureSVGasPhoto(info, callback) {
-            try {
-                const svgEl = document.querySelector('#vfScene svg');
-                if (!svgEl) { callback(null); return; }
-
-                const W = 390, H = 260;
-                const serializer = new XMLSerializer();
-                const svgStr = serializer.serializeToString(svgEl);
-                const svgBlob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
-                const url = URL.createObjectURL(svgBlob);
-
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = W; canvas.height = H;
-                    const ctx = canvas.getContext('2d');
-
-                    // Appliquer le zoom : recadrage centré
-                    const z = vfZoom;
-                    const srcW = W / z, srcH = H / z;
-                    const srcX = (W - srcW) / 2, srcY = (H - srcH) / 2;
-                    ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, W, H);
-
-                    // Vignettage photographique
-                    const vignette = ctx.createRadialGradient(W/2, H/2, H*0.2, W/2, H/2, H*0.85);
-                    vignette.addColorStop(0, 'rgba(0,0,0,0)');
-                    vignette.addColorStop(1, 'rgba(0,0,0,0.55)');
-                    ctx.fillStyle = vignette;
-                    ctx.fillRect(0, 0, W, H);
-
-                    // Grain léger
-                    ctx.globalAlpha = 0.055;
-                    for (let i = 0; i < 4000; i++) {
-                        const x = Math.random() * W;
-                        const y = Math.random() * H;
-                        const s = Math.random() < 0.5 ? 0 : Math.random();
-                        ctx.fillStyle = `rgba(255,255,255,${s})`;
-                        ctx.fillRect(x, y, 1, 1);
-                    }
-                    ctx.globalAlpha = 1;
-
-                    URL.revokeObjectURL(url);
-                    setTimeout(() => callback(canvas.toDataURL('image/jpeg', 0.88)), 200);
-                };
-                img.onerror = () => { URL.revokeObjectURL(url); callback(null); };
-                img.src = url;
-            } catch(e) {
-                console.warn('captureSVGasPhoto error:', e);
-                callback(null);
-            }
+            // On stocke juste l'infoId et le zoom — le musée ré-affiche le SVG directement avec CSS
+            callback({ infoId: info.id, zoom: vfZoom });
         }
 
         function openMemoryWithPhoto(photoData) {
@@ -6239,6 +6605,8 @@
                 icon:     currentInfoPoint.icon,
                 text:     currentInfoPoint.text,
                 photoData, // dataURL PNG ou null
+                tookPhoto: window._pendingPhotoZoom != null, // true si pris avec l'appareil
+                photoZoom: window._pendingPhotoZoom || 1, // zoom au moment de la capture
                 weather:  weatherBtn ? weatherBtn.dataset.weather : null,
                 mood:     moodBtn    ? moodBtn.dataset.mood       : null,
                 note:     note || null,
@@ -6246,6 +6614,7 @@
                 visitTime: now.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' }),
                 savedAt:   now.toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' })
             });
+            window._pendingPhotoZoom = null;
 
             // Fermer formulaire et fiche info
             document.getElementById('memoryScreen').classList.remove('show');
@@ -6256,6 +6625,10 @@
             const btn = document.getElementById('infoCardSaveBtn');
             btn.innerHTML = '✅ Ajouté au musée';
             btn.classList.add('saved');
+
+            // Faire disparaître le marqueur de la carte
+            updateInfoVisibility();
+            currentNearbyInfo = null;
 
             // Récompense XP
             awardXP(15);
@@ -6823,29 +7196,38 @@
             museumCollection.forEach((item, idx) => {
                 const isLast = idx === museumCollection.length - 1;
 
-                // Image : photo réelle ou illustration SVG
-                let frameContent;
-                if (item.photoData) {
-                    frameContent = `
-                        <img src="${item.photoData}" alt="${item.title}"
-                             style="width:100%;height:100%;object-fit:cover;display:block;">
-                        <div style="position:absolute;top:10px;left:12px;background:rgba(0,0,0,0.55);
+                // Image : illustration SVG avec zoom CSS si photo prise
+                const z = item.photoZoom || 1;
+                const isPhoto = z > 1 || item.tookPhoto;
+                const illustration = INFO_ILLUSTRATIONS[item.infoId] || getFallbackIllustration(item.icon);
+                const svgStyle = z > 1
+                    ? `style="transform:scale(${z.toFixed(2)});transform-origin:center center;overflow:visible;"`
+                    : '';
+                const badge = isPhoto
+                    ? `<div style="position:absolute;top:10px;left:12px;background:rgba(0,0,0,0.55);
                              backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,0.18);
                              border-radius:20px;padding:3px 9px;font-size:10px;color:rgba(255,255,255,0.7);
                              letter-spacing:0.5px;display:flex;align-items:center;gap:5px;z-index:2">
                             📷 <span style="font-weight:700;color:white">Photo</span>
-                        </div>`;
-                } else {
-                    const illustration = INFO_ILLUSTRATIONS[item.infoId] || getFallbackIllustration(item.icon);
-                    frameContent = `
-                        ${illustration}
-                        <div style="position:absolute;top:10px;left:12px;background:rgba(0,0,0,0.45);
+                            ${z > 1 ? '<span style="color:#fcd34d;font-weight:700;">' + z.toFixed(1).replace('.0','') + '×</span>' : ''}
+                        </div>`
+                    : `<div style="position:absolute;top:10px;left:12px;background:rgba(0,0,0,0.45);
                              backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,0.1);
                              border-radius:20px;padding:3px 9px;font-size:10px;
                              color:rgba(255,255,255,0.4);letter-spacing:0.5px;z-index:2">
                             🖼️ Illustration
                         </div>`;
-                }
+
+                // Injecter le style de zoom sur le SVG de l'illustration
+                const zoomedIllustration = z > 1
+                    ? illustration.replace('<svg ', `<svg style="transform:scale(${z.toFixed(2)});transform-origin:center center;" `)
+                    : illustration;
+
+                let frameContent = `
+                    <div style="width:100%;height:100%;overflow:hidden;position:relative;">
+                        ${zoomedIllustration}
+                    </div>
+                    ${badge}`;
 
                 // Coins ornementaux (cadre Or)
                 const cornersHTML = hasCorners ? `
