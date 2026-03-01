@@ -790,10 +790,16 @@
             text-align: center;
             max-width: calc(100% - 32px);
             box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            line-height: 1.2;
+            word-break: break-word;
         }
+        .card-art-title.title-long   { font-size: 14px; padding: 6px 14px; }
+        .card-art-title.title-medium { font-size: 16px; padding: 7px 16px; }
 
         @media (max-width: 480px) {
             .card-art-title { font-size: 15px; padding: 6px 16px; }
+            .card-art-title.title-long   { font-size: 12px; }
+            .card-art-title.title-medium { font-size: 13px; }
         }
 
         .card-art-placeholder { font-size: 80px; }
@@ -2699,6 +2705,145 @@
             100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
         }
 
+        /* ==================== CARTE MENTALE ==================== */
+        .mindmap-screen {
+            position: absolute; inset: 0; z-index: 200;
+            background: #0a0a12;
+            display: flex; flex-direction: column;
+            transform: translateY(100%);
+            transition: transform 0.38s cubic-bezier(0.32,0.72,0,1);
+            overflow: hidden;
+        }
+        .mindmap-screen.show { transform: translateY(0); }
+
+        .mindmap-header {
+            display: flex; align-items: center; gap: 10px;
+            padding: 14px 16px 10px;
+            background: rgba(10,10,18,0.95);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            flex-shrink: 0; z-index: 10;
+        }
+        .mindmap-back {
+            background: rgba(255,255,255,0.07); border: none; color: white;
+            width: 34px; height: 34px; border-radius: 50%;
+            font-size: 18px; cursor: pointer; display:flex; align-items:center; justify-content:center;
+        }
+        .mindmap-header-info { flex: 1; }
+        .mindmap-header-title { font-size: 15px; font-weight: 800; color: #fde68a; letter-spacing: 0.3px; }
+        .mindmap-header-sub { font-size: 10px; color: rgba(253,230,138,0.45); margin-top: 1px; }
+        .mindmap-progress-badge {
+            font-size: 11px; font-weight: 700;
+            background: rgba(109,40,217,0.35); color: #c4b5fd;
+            padding: 4px 10px; border-radius: 20px;
+            border: 1px solid rgba(167,139,250,0.25);
+        }
+
+        /* Canvas toile */
+        .mindmap-canvas-wrap {
+            flex: 1; position: relative; overflow: hidden;
+            touch-action: none;
+            max-width: 100vw;
+        }
+        #mindmapCanvas {
+            position: absolute; inset: 0;
+            width: 100%; height: 100%;
+            max-width: 100%;
+            display: block;
+            cursor: grab;
+        }
+        #mindmapCanvas:active { cursor: grabbing; }
+
+        /* Panneau fragment de récit */
+        .fragment-panel {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: linear-gradient(0deg, rgba(10,8,20,0.98) 0%, rgba(10,8,20,0.92) 100%);
+            border-top: 1px solid rgba(167,139,250,0.25);
+            padding: 16px 20px 24px;
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(0.32,0.72,0,1);
+            z-index: 20;
+            max-height: 55%;
+            overflow-y: auto;
+        }
+        .fragment-panel.show { transform: translateY(0); }
+        .fragment-panel-handle {
+            width: 36px; height: 4px; background: rgba(255,255,255,0.15);
+            border-radius: 2px; margin: 0 auto 14px;
+        }
+        .fragment-zone-label {
+            font-size: 10px; font-weight: 700; letter-spacing: 1.2px;
+            text-transform: uppercase; color: rgba(167,139,250,0.7);
+            margin-bottom: 6px;
+        }
+        .fragment-title {
+            font-size: 17px; font-weight: 800; color: #fde68a;
+            margin-bottom: 10px; line-height: 1.3;
+        }
+        .fragment-text {
+            font-size: 13.5px; line-height: 1.7;
+            color: rgba(255,255,255,0.75);
+        }
+        .fragment-close {
+            position: absolute; top: 14px; right: 16px;
+            background: rgba(255,255,255,0.08); border: none; color: rgba(255,255,255,0.5);
+            width: 28px; height: 28px; border-radius: 50%;
+            font-size: 14px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .fragment-locked-hint {
+            font-size: 12px; font-style: italic;
+            color: rgba(196,181,253,0.6); margin-top: 8px;
+        }
+
+        /* Modale substory (réutilisée) */
+        .substory-modal {
+            position: fixed; inset: 0; z-index: 300;
+            background: rgba(0,0,0,0.7); display: flex;
+            align-items: flex-end; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.2s;
+        }
+        .substory-modal.show { opacity: 1; pointer-events: all; }
+        .substory-modal-card {
+            background: linear-gradient(160deg, #1e1b4b 0%, #0f172a 100%);
+            border-radius: 24px 24px 0 0;
+            padding: 0 0 32px;
+            width: 100%; max-width: 480px;
+            max-height: 80vh; overflow-y: auto;
+            animation: substorySlideUp 0.3s cubic-bezier(0.34,1.3,0.64,1);
+        }
+        @keyframes substorySlideUp { from { transform: translateY(60px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .substory-modal-handle {
+            width: 40px; height: 4px; background: rgba(255,255,255,0.15);
+            border-radius: 2px; margin: 12px auto 16px;
+        }
+        .substory-modal-art {
+            height: 140px; display: flex; align-items: center; justify-content: center;
+            font-size: 54px; margin-bottom: 0;
+        }
+        .substory-modal-title {
+            font-size: 20px; font-weight: 800; color: #fde68a;
+            padding: 16px 20px 6px; line-height: 1.3;
+        }
+        .substory-modal-media-row { display: flex; gap: 6px; flex-wrap: wrap; padding: 0 20px 12px; }
+        .substory-media-chip {
+            font-size: 11px; font-weight: 600; color: #c4b5fd;
+            background: rgba(109,40,217,0.2); border-radius: 20px;
+            padding: 4px 10px; border: 1px solid rgba(167,139,250,0.2);
+        }
+        .substory-modal-text {
+            font-size: 14px; line-height: 1.75;
+            color: rgba(255,255,255,0.78);
+            padding: 0 20px 16px;
+        }
+        .substory-close-btn {
+            margin: 0 20px; width: calc(100% - 40px);
+            background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.5); border-radius: 14px;
+            padding: 12px; font-size: 14px; cursor: pointer;
+        }
+        .substory-close-btn:hover { opacity: 0.88; }
+
     </style>
 </head>
 <body>
@@ -2733,7 +2878,10 @@
                         <span>🏠</span> Studio
                     </button>
                     <button class="avatar-menu-item" onclick="closeAvatarMenu(); openProgressionScreen()">
-                        <span>🗺️</span> Progression
+                        <span>⭐</span> Progression
+                    </button>
+                                        <button class="avatar-menu-item" onclick="closeAvatarMenu(); openMindmap()">
+                        <span>🗺️</span> Carte Mentale
                     </button>
                     <button class="avatar-menu-item avatar-menu-item--disabled">
                         <span>🛒</span> Magasin <span class="soon-badge">Bientôt</span>
@@ -2748,7 +2896,10 @@
         </div>
 
         <!-- HUD XP bar -->
-
+        <div class="hud-xp-bar">
+            <div class="hud-xp-pill"><div class="hud-xp-pill-fill" id="hudXpFill" style="width:0%"></div></div>
+            <div class="hud-xp-level-label" id="hudXpLevel">Nv.1</div>
+        </div>
 
         <!-- Map -->
         <div id="map"></div>
@@ -2826,6 +2977,7 @@
                         <div class="toast-label">Carte révélée ✦ <span class="toast-tap-hint">Appuyer pour voir</span></div>
                         <div class="toast-name" id="popupCardName"></div>
                         <div class="toast-type" id="popupCardType"></div>
+                        <div id="toastStoryHint" style="display:none;font-size:11px;margin-top:3px;font-weight:600;"></div>
                     </div>
                     <div class="toast-arrow">›</div>
                 </div>
@@ -2899,6 +3051,8 @@
                                 <span id="cardDetailDustCounter">0</span>
                             </div>
                         </div>
+
+                        <div id="cardStoryLink" style="display:none;margin:6px 16px 0;font-size:11.5px;color:rgba(80,60,140,0.85);gap:5px;align-items:center;padding:6px 10px;background:rgba(109,40,217,0.08);border-radius:8px;border-left:2px solid rgba(167,139,250,0.5);"></div>
 
                         <div class="card-tabs" style="border-radius:0; margin-top:4px;">
                             <button class="card-tab active" onclick="switchTab('general', event)">Général</button>
@@ -3651,7 +3805,47 @@
                 </div>
             </div>
         </div>
-    </div><!-- fin mainApp -->
+            <!-- ══════════════════════════════════════════
+             CARTE MENTALE
+        ══════════════════════════════════════════ -->
+        <div id="mindmapScreen" class="mindmap-screen">
+            <div class="mindmap-header">
+                <button class="mindmap-back" onclick="closeMindmap()">&#8592;</button>
+                <div class="mindmap-header-info">
+                    <div class="mindmap-header-title">&#128506; Carte Mentale</div>
+                    <div class="mindmap-header-sub">Saison 1 · Lyon à travers les âges</div>
+                </div>
+                <div class="mindmap-progress-badge" id="mindmapProgressText">0 / 4</div>
+            </div>
+
+            <div class="mindmap-canvas-wrap" id="mindmapCanvasWrap">
+                <canvas id="mindmapCanvas"></canvas>
+
+                <!-- Panneau fragment de récit -->
+                <div class="fragment-panel" id="fragmentPanel">
+                    <div class="fragment-panel-handle"></div>
+                    <button class="fragment-close" onclick="closeFragmentPanel()">✕</button>
+                    <div class="fragment-zone-label" id="fragmentZoneLabel"></div>
+                    <div class="fragment-title" id="fragmentTitle"></div>
+                    <div class="fragment-text" id="fragmentText"></div>
+                    <div class="fragment-locked-hint" id="fragmentLockedHint"></div>
+                </div>
+            </div>
+
+            <!-- Modale substory complète -->
+            <div class="substory-modal" id="substoryModal" onclick="handleSubstoryModalBackdrop(event)">
+                <div class="substory-modal-card">
+                    <div class="substory-modal-handle"></div>
+                    <div class="substory-modal-art" id="substoryModalArt"></div>
+                    <div class="substory-modal-title" id="substoryModalTitle"></div>
+                    <div class="substory-modal-media-row" id="substoryModalMedia"></div>
+                    <div class="substory-modal-text" id="substoryModalText"></div>
+                    <button class="substory-close-btn" onclick="closeSubstoryModal()">Fermer</button>
+                </div>
+            </div>
+        </div>
+
+        </div><!-- fin mainApp -->
 
     <script>
         // ==================== DATA ====================
@@ -3659,15 +3853,16 @@
         const COLLECTIONS = {
             lumieres: {
                 id: 'lumieres',
-                name: 'Lumières de Lyon',
+                name: 'Figures de Lyon',
                 type: 'thématique',
-                description: 'Personnages historiques lyonnais',
+                description: 'Les grands personnages qui ont fait Lyon',
                 cards: [
                     { id: 'card1', name: 'Antoine de Saint-Exupéry', type: 'Personnage', poiId: 'bellecour', rarity: 'rare', supertype: 'arts' },
                     { id: 'card2', name: 'Les Frères Lumière', type: 'Personnage', poiId: 'institut_lumiere', rarity: 'legendary', supertype: 'science' },
                     { id: 'card3', name: 'Paul Bocuse', type: 'Personnage', poiId: 'halles_bocuse', rarity: 'rare', supertype: 'societe' },
                     { id: 'card4', name: 'Guignol', type: 'Personnage', poiId: 'vieux_lyon', rarity: 'common', supertype: 'arts', supertype2: 'societe' },
-                    { id: 'card5', name: 'Tony Garnier', type: 'Personnage', poiId: 'confluence', rarity: 'common', supertype: 'histoire', supertype2: 'arts' },
+                    { id: 'card5', name: 'Tony Garnier', type: 'Personnage', poiId: 'guillotiere', rarity: 'common', supertype: 'histoire', supertype2: 'arts' },
+                    { id: 'card18', name: 'Auguste Comte', type: 'Personnage', poiId: 'croix_rousse', rarity: 'rare', supertype: 'science' },
                 ]
             },
             presquile: {
@@ -3679,8 +3874,10 @@
                     { id: 'card6', name: 'Place Bellecour', type: 'Lieu', poiId: 'bellecour', rarity: 'legendary', supertype: 'histoire' },
                     { id: 'card7', name: 'Opéra de Lyon', type: 'Lieu', poiId: 'opera', rarity: 'rare', supertype: 'arts' },
                     { id: 'card8', name: 'Hôtel de Ville', type: 'Lieu', poiId: 'hotel_ville', rarity: 'common', supertype: 'societe' },
-                    { id: 'card9', name: 'Les Terreaux', type: 'Lieu', poiId: 'terreaux', rarity: 'common', supertype: 'histoire', supertype2: 'nature' },
-                    { id: 'card10', name: 'Fontaine Bartholdi', type: 'Objet', poiId: 'terreaux', rarity: 'rare', supertype: 'arts' },
+                    { id: 'card9', name: 'Place des Terreaux', type: 'Lieu', poiId: 'terreaux', rarity: 'common', supertype: 'histoire', supertype2: 'nature' },
+                    { id: 'card10', name: 'Fontaine Bartholdi', type: 'Objet', poiId: 'beaux_arts', rarity: 'rare', supertype: 'arts' },
+                    { id: 'card19', name: 'Musée des Beaux-Arts', type: 'Lieu', poiId: 'beaux_arts', rarity: 'rare', supertype: 'arts', supertype2: 'histoire' },
+                    { id: 'card20', name: 'Église Saint-Nizier', type: 'Lieu', poiId: 'saint_nizier', rarity: 'common', supertype: 'histoire' },
                 ]
             },
             fourviere: {
@@ -3694,8 +3891,20 @@
                     { id: 'card13', name: 'Cathédrale Saint-Jean', type: 'Lieu', poiId: 'saint_jean', rarity: 'rare', supertype: 'histoire' },
                     { id: 'card14', name: 'Traboule Renaissance', type: 'Lieu', poiId: 'vieux_lyon', rarity: 'common', supertype: 'societe', supertype2: 'histoire' },
                     { id: 'card15', name: 'Horloge Astronomique', type: 'Objet', poiId: 'saint_jean', rarity: 'common', supertype: 'science' },
-                    { id: 'card16', name: 'Parc de la Tête d\'Or', type: 'Lieu', poiId: 'confluence', rarity: 'rare', supertype: 'nature' },
-                    { id: 'card17', name: 'Jardin des Curiosités', type: 'Lieu', poiId: 'fourviere', rarity: 'common', supertype: 'nature', supertype2: 'science' },
+                    { id: 'card17', name: 'Jardin des Curiosités', type: 'Lieu', poiId: 'jardins_curiosites', rarity: 'common', supertype: 'nature', supertype2: 'science' },
+                ]
+            },
+            nature_ville: {
+                id: 'nature_ville',
+                name: 'Nature & Modernité',
+                type: 'thématique',
+                description: 'Lyon entre espaces verts et architecture contemporaine',
+                cards: [
+                    { id: 'card16', name: 'Parc de la Tête d\'Or', type: 'Lieu', poiId: 'parc_tete_or', rarity: 'rare', supertype: 'nature' },
+                    { id: 'card21', name: 'Musée des Confluences', type: 'Lieu', poiId: 'confluence', rarity: 'legendary', supertype: 'science', supertype2: 'nature' },
+                    { id: 'card22', name: 'Tour Part-Dieu', type: 'Lieu', poiId: 'part_dieu', rarity: 'common', supertype: 'societe' },
+                    { id: 'card23', name: 'Pont de la Guillotière', type: 'Lieu', poiId: 'guillotiere', rarity: 'common', supertype: 'histoire' },
+                    { id: 'card24', name: 'Les Canuts', type: 'Personnage', poiId: 'croix_rousse', rarity: 'rare', supertype: 'societe', supertype2: 'histoire' },
                 ]
             }
         };
@@ -3713,6 +3922,12 @@
             { id: 'saint_jean', name: 'Cathédrale Saint-Jean', lat: 45.7606, lng: 4.8268 },
             { id: 'institut_lumiere', name: 'Institut Lumière', lat: 45.7432, lng: 4.8687 },
             { id: 'halles_bocuse', name: 'Halles Paul Bocuse', lat: 45.7638, lng: 4.8542 },
+            { id: 'croix_rousse', name: 'Plateau de la Croix-Rousse', lat: 45.7726, lng: 4.8274 },
+            { id: 'beaux_arts', name: 'Musée des Beaux-Arts', lat: 45.7677, lng: 4.8344 },
+            { id: 'guillotiere', name: 'Pont de la Guillotière', lat: 45.7520, lng: 4.8362 },
+            { id: 'part_dieu', name: 'Tour Part-Dieu', lat: 45.7607, lng: 4.8597 },
+            { id: 'jardins_curiosites', name: 'Jardin des Curiosités', lat: 45.7583, lng: 4.8193 },
+            { id: 'saint_nizier', name: 'Église Saint-Nizier', lat: 45.7649, lng: 4.8337 },
         ];
 
         const DUST_POINTS = [
@@ -3857,6 +4072,62 @@
 
         let playerPos = { ...LYON_CENTER };
         let collectedCards = [];
+
+        // ── Sauvegarde / Chargement ──
+        function saveProgress() {
+            try {
+                localStorage.setItem('lyon_cards_progress', JSON.stringify({
+                    collectedCards,
+                    collectedEchoes,
+                    collectedDustPoints,
+                    memorialDust,
+                    cardLevels,
+                    cardSkins,
+                    playerXP,
+                    playerTotalXP,
+                    playerLevel,
+                    playerStats,
+                    hasCamera,
+                    filmCount,
+                    unlockedSkins: [...unlockedSkins],
+                    unlockedFrames: [...unlockedFrames],
+                    activeMuseumFrame,
+                    claimedPaliers: [...claimedPaliers],
+                    achievementsState,
+                }));
+            } catch(e) {}
+        }
+
+        function loadProgress() {
+            try {
+                const raw = localStorage.getItem('lyon_cards_progress');
+                if (!raw) return;
+                const d = JSON.parse(raw);
+                if (d.collectedCards)        collectedCards      = d.collectedCards;
+                if (d.collectedEchoes)       collectedEchoes     = d.collectedEchoes;
+                if (d.collectedDustPoints)   collectedDustPoints = d.collectedDustPoints;
+                if (d.memorialDust != null)  memorialDust        = d.memorialDust;
+                if (d.cardLevels)            cardLevels          = d.cardLevels;
+                if (d.cardSkins)             cardSkins           = d.cardSkins;
+                if (d.playerXP != null)      playerXP            = d.playerXP;
+                if (d.playerTotalXP != null) playerTotalXP       = d.playerTotalXP;
+                if (d.playerLevel != null)   playerLevel         = d.playerLevel;
+                if (d.playerStats)           Object.assign(playerStats, d.playerStats);
+                if (d.hasCamera != null)     hasCamera           = d.hasCamera;
+                if (d.filmCount != null)     filmCount           = d.filmCount;
+                if (d.unlockedSkins)         unlockedSkins       = new Set(d.unlockedSkins);
+                if (d.unlockedFrames)        unlockedFrames      = new Set(d.unlockedFrames);
+                if (d.activeMuseumFrame)     activeMuseumFrame   = d.activeMuseumFrame;
+                if (d.claimedPaliers)        claimedPaliers      = new Set(d.claimedPaliers);
+                if (d.achievementsState)     Object.assign(achievementsState, d.achievementsState);
+            } catch(e) {}
+        }
+
+        function resetProgress() {
+            if (!confirm('Réinitialiser toute la progression ? Cette action est irréversible.')) return;
+            localStorage.removeItem('lyon_cards_progress');
+            location.reload();
+        }
         let cardLevels = {};
         let memorialDust = 1000;
         let collectedEchoes = [];
@@ -3906,6 +4177,20 @@
                 }
             }, 1500);
         });
+
+        function initApp() {
+            loadProgress();
+            // Sync UI après chargement
+            document.getElementById('dustCounter').textContent = memorialDust;
+            const studioEl = document.getElementById('studioDustCounter');
+            if (studioEl) studioEl.textContent = memorialDust;
+            updatePOIVisibility();
+            updateDustVisibility();
+            updateEchoVisibility();
+            updateProgressionHUD();
+            updateAvatarMenuXP();
+            updateCameraHUD();
+        }
 
         function initMap() {
             playerPos = { ...LYON_CENTER };
@@ -3961,7 +4246,7 @@
 
             // ---- POI markers (card icon + capture radius circle) ----
             // Add GeoJSON source + layer inside load event
-            map.on('load', () => {
+            map.on('load', () => { initApp();
             // ── Calibrated capture zone circles (exact meters → pixels at Lyon lat 45.76°) ──
             // POI: 50m, Dust: 30m, Echo: 30m
             // Pixel formula: meters * 512 * 2^zoom * cos(45.76°) / (2π * 6378137)
@@ -4746,10 +5031,52 @@
                     setTimeout(() => {
                         mapointState.cleanup?.();
                         closeMiseAuPoint();
+                        // Placer la carte dans la carte mentale + déclencher fragment
+                        (function placeOnMindmap() {
+                            const basePos = MINDMAP_CARD_POSITIONS[card.id];
+                            if (!basePos) return;
+                            mindmapState.cardPositions[card.id] = null;
+                            // Chercher le fragment associé à cette carte
+                            if (mmCanvas && mmW > 0) {
+                                MINDMAP_ZONES.forEach(zone => {
+                                    if (!zone.fragments) return;
+                                    const frag = zone.fragments.find(f => f.cardId === card.id);
+                                    if (!frag) return;
+                                    // Position du fragment : entre le centre de la zone et la carte
+                                    const fx = (zone.cx * 0.6 + basePos.x * 0.4) * mmW;
+                                    const fy = (zone.cy * 0.6 + basePos.y * 0.4) * mmH;
+                                    mindmapState.fragmentAnims.push({
+                                        text: frag.text,
+                                        x: fx, y: fy,
+                                        startTime: mmTime,
+                                        settled: false,
+                                        color: hexToRgb(zone.color),
+                                    });
+                                });
+                            }
+                        })();
                         // Show toast on map with supertype color glow
                         lastRevealedCard = card;
                         document.getElementById('popupCardName').textContent = card.name;
                         document.getElementById('popupCardType').textContent = info.name + ' · ' + card.type;
+                        // Lien vers l'histoire concernée
+                        const linkedStory = MINDMAP_ZONES.find(sub =>
+                            sub.requiredCards.includes(card.id)
+                        );
+                        const storyHintEl = document.getElementById('toastStoryHint');
+                        if (linkedStory) {
+                            const isNowUnlocked = linkedStory.requiredCards.every(cid => collectedCards.includes(cid));
+                            if (isNowUnlocked) {
+                                storyHintEl.textContent = '✦ Histoire débloquée : ' + linkedStory.title;
+                                storyHintEl.style.color = '#fbbf24';
+                            } else {
+                                storyHintEl.textContent = '🗺️ Contribue à : ' + linkedStory.title;
+                                storyHintEl.style.color = 'rgba(196,181,253,0.85)';
+                            }
+                            storyHintEl.style.display = 'block';
+                        } else {
+                            storyHintEl.style.display = 'none';
+                        }
                         const glow = document.getElementById('toastGlow');
                         glow.style.background = `radial-gradient(ellipse at 20% 50%, ${color}, transparent 70%)`;
                         const toast = document.getElementById('cardPopup');
@@ -4774,10 +5101,10 @@
             if (!card) return;
             collectedCards.push(card.id);
             if (!cardLevels[card.id]) cardLevels[card.id] = { level: 0, experience: 0, dustSpent: 0 };
-            awardXP(50, "Carte capturée");
             updatePOIVisibility();
             checkNearbyPOI();
             openMiseAuPoint(card);
+            saveProgress();
         }
 
         function collectDust() {
@@ -4785,17 +5112,16 @@
             collectedDustPoints.push(currentNearbyDust.id);
             const amount = Math.floor(Math.random() * (MAX_DUST_DROP - MIN_DUST_DROP + 1)) + MIN_DUST_DROP;
             memorialDust += amount;
-            awardXP(5, "Poudre collectée");
             document.getElementById('dustCounter').textContent = memorialDust;
             updateDustVisibility();
             checkNearbyPOI();
+            saveProgress();
         }
 
         function collectEcho() {
             if (!currentNearbyEcho) return;
             collectedEchoes.push(currentNearbyEcho.id);
             echoInventory[currentNearbyEcho.supertype]++;
-            awardXP(20, "Écho collecté");
             updateEchoVisibility();
             checkNearbyPOI();
         }
@@ -5003,7 +5329,11 @@
             selectedCard = card;
             if (!cardLevels[card.id]) cardLevels[card.id] = { level: 0, experience: 0, dustSpent: 0 };
             document.getElementById('cardDetailHeaderTitle').textContent = card.name;
-            document.getElementById('cardDetailName').textContent = card.name;
+            const nameEl = document.getElementById('cardDetailName');
+            nameEl.textContent = card.name;
+            nameEl.classList.remove('title-long', 'title-medium');
+            if (card.name.length > 20) nameEl.classList.add('title-long');
+            else if (card.name.length > 12) nameEl.classList.add('title-medium');
             document.getElementById('cardCategory').textContent = card.type;
             if (card.supertype) {
                 const info = SUPERTYPES[card.supertype];
@@ -5034,6 +5364,20 @@
                 applyCurrentSkinToFrame();
             }
             document.getElementById('cardDetailDustCounter').textContent = memorialDust;
+            // Lien histoire dans le détail
+            const cardStoryEl = document.getElementById('cardStoryLink');
+            if (cardStoryEl) {
+                const linkedSub = MINDMAP_ZONES.find(sub => sub.requiredCards.includes(card.id));
+                if (linkedSub) {
+                    const isUnlocked = linkedSub.requiredCards.every(cid => collectedCards.includes(cid));
+                    cardStoryEl.style.display = 'flex';
+                    cardStoryEl.innerHTML = isUnlocked
+                        ? '<span style="color:#fbbf24">✦</span><span>Fragment de <em>' + linkedSub.title + '</em> — <span style="color:#fbbf24">Débloqué</span></span>'
+                        : '<span style="color:rgba(196,181,253,0.8)">🗺️</span><span>Contribue à <em>' + linkedSub.title + '</em></span>';
+                } else {
+                    cardStoryEl.style.display = 'none';
+                }
+            }
             updateCardLevelDisplay();
             switchTabProgrammatically('general');
             // Relancer l'animation d'entrée
@@ -5794,6 +6138,7 @@
             unlockedFrames.add(frameId);
             activeMuseumFrame = frameId; // auto-équipe le nouveau cadre
             showFrameUnlockToast(MUSEUM_FRAMES[frameId]);
+            saveProgress();
         }
 
         function showFrameUnlockToast(frame) {
@@ -5834,10 +6179,12 @@
               rewardFn: () => unlockFrame('fer') },
             { palier:10, icon:'💜', name:'+200 Poudre',                     type:'Poudre mémorielle',   xpRequired:1350,
               rewardFn: () => addDust(200) },
-            { palier:11, icon:'🦁', name:'Carte Légendaire : Fourvière',    type:'Légendaire',           xpRequired:1620, milestone:true },
+            { palier:11, icon:'🦁', name:'Titre : Gardien de Fourvière',    type:'Titre spécial',        xpRequired:1620, milestone:true,
+              rewardFn: () => addDust(350) },
             { palier:12, icon:'💜', name:'+250 Poudre',                     type:'Poudre mémorielle',   xpRequired:1920,
               rewardFn: () => addDust(250) },
-            { palier:13, icon:'🎴', name:'Carte : Saône la Bleue',          type:'Carte exclusive',      xpRequired:2250 },
+            { palier:13, icon:'📷', name:'+10 pellicules',                  type:'Pellicules photo',     xpRequired:2250,
+              rewardFn: () => addFilm(10) },
             { palier:14, icon:'📷', name:'+8 pellicules',                   type:'Pellicules photo',     xpRequired:2600,
               rewardFn: () => addFilm(8) },
             { palier:15, icon:'🎨', name:'Skin Crépuscule',                 type:'Skin de carte',        xpRequired:3000,
@@ -5847,7 +6194,8 @@
               rewardFn: () => addDust(300) },
             { palier:18, icon:'🔶', name:'Cadre Cuivre',                      type:'Cadre musée',          xpRequired:4350,
               rewardFn: () => unlockFrame('cuivre') },
-            { palier:19, icon:'🎴', name:'Carte : Le Vieux-Lyon',           type:'Carte exclusive',      xpRequired:4860 },
+            { palier:19, icon:'🎨', name:'Skin Sépia',                      type:'Skin de carte',        xpRequired:4860,
+              rewardFn: () => unlockSkin('sepia') },
             { palier:20, icon:'💜', name:'+400 Poudre',                     type:'Poudre mémorielle',   xpRequired:5400,
               rewardFn: () => addDust(400) },
             { palier:21, icon:'🪙', name:'Cadre Argent',                      type:'Cadre musée',          xpRequired:5970, milestone:true,
@@ -5856,7 +6204,8 @@
               rewardFn: () => unlockSkin('nebula') },
             { palier:23, icon:'💜', name:'+500 Poudre',                     type:'Poudre mémorielle',   xpRequired:7200,
               rewardFn: () => addDust(500) },
-            { palier:24, icon:'🎴', name:'Carte : Bellecour Nuit',          type:'Carte exclusive',      xpRequired:7860 },
+            { palier:24, icon:'💜', name:'+800 Poudre',                     type:'Poudre mémorielle',   xpRequired:7860,
+              rewardFn: () => addDust(800) },
             { palier:25, icon:'📷', name:'+12 pellicules',                  type:'Pellicules photo',     xpRequired:8550,
               rewardFn: () => addFilm(12) },
             { palier:26, icon:'👑', name:'Avatar : Gardien des Étoiles',    type:'Avatar légendaire',    xpRequired:9270, milestone:true },
@@ -5905,10 +6254,11 @@
             { id:'aurora',      name:'Aurora',        paletteGrad:['#065f46','#0d9488'], emoji:'🌿', palier:5  },
             { id:'crepuscule',  name:'Crépuscule',    paletteGrad:['#7c2d12','#ea580c'], emoji:'🌅', palier:15 },
             { id:'nebula',      name:'Nebula',        paletteGrad:['#1e1b4b','#6d28d9'], emoji:'🌌', palier:22 },
+            { id:'sepia',       name:'Sépia',         paletteGrad:['#92400e','#d4a574'], emoji:'📜', palier:19 },
             { id:'lyon_antique',name:'Lyon Antique',  paletteGrad:['#78350f','#d97706'], emoji:'🏛️', palier:28 },
         ];
         let unlockedSkins = new Set(['default']);  // skins débloqués
-        let activeSkin    = 'default';              // skin actif sur la carte
+        let cardSkins     = {};                     // skin actif par carte : { cardId: skinId }
 
         // ── Paliers battlepass déjà distribués ──
         let claimedPaliers = new Set();
@@ -5945,6 +6295,7 @@
         function addFilm(n) {
             filmCount += n;
             updateCameraHUD();
+            saveProgress();
             // Toast pellicule
             const ex = document.getElementById('filmToast');
             if (ex) ex.remove();
@@ -5978,6 +6329,7 @@
             unlockedSkins.add(skinId);
             const skinsTab = document.getElementById('skinsTab');
             if (skinsTab && skinsTab.classList.contains('active')) renderSkinsTab();
+            saveProgress();
         }
         // Motifs SVG pour chaque skin (encodés en data URI)
         const SKIN_PATTERNS = {
@@ -5985,11 +6337,13 @@
             aurora:       `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ccircle cx='15' cy='15' r='12' fill='none' stroke='%2310B981' stroke-width='1.5' opacity='0.35'/%3E%3Ccircle cx='45' cy='45' r='12' fill='none' stroke='%230d9488' stroke-width='1.5' opacity='0.35'/%3E%3Ccircle cx='45' cy='15' r='6' fill='%2310B981' opacity='0.15'/%3E%3Ccircle cx='15' cy='45' r='6' fill='%230d9488' opacity='0.15'/%3E%3C/svg%3E")`,
             crepuscule:   `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cline x1='0' y1='60' x2='60' y2='0' stroke='%23ea580c' stroke-width='1' opacity='0.25'/%3E%3Cline x1='0' y1='40' x2='40' y2='0' stroke='%23ea580c' stroke-width='1' opacity='0.2'/%3E%3Cline x1='20' y1='60' x2='60' y2='20' stroke='%23ea580c' stroke-width='1' opacity='0.2'/%3E%3Ccircle cx='30' cy='30' r='3' fill='%23f97316' opacity='0.3'/%3E%3C/svg%3E")`,
             nebula:       `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Ccircle cx='10' cy='10' r='1.5' fill='%23a78bfa' opacity='0.6'/%3E%3Ccircle cx='30' cy='20' r='1' fill='%23c4b5fd' opacity='0.5'/%3E%3Ccircle cx='55' cy='10' r='2' fill='%238b5cf6' opacity='0.4'/%3E%3Ccircle cx='70' cy='35' r='1' fill='%23a78bfa' opacity='0.6'/%3E%3Ccircle cx='20' cy='50' r='1.5' fill='%23c4b5fd' opacity='0.5'/%3E%3Ccircle cx='45' cy='65' r='1' fill='%238b5cf6' opacity='0.5'/%3E%3Ccircle cx='65' cy='60' r='2' fill='%23a78bfa' opacity='0.4'/%3E%3Ccircle cx='40' cy='40' r='1' fill='white' opacity='0.4'/%3E%3Ccircle cx='10' cy='70' r='1' fill='%23c4b5fd' opacity='0.5'/%3E%3C/svg%3E")`,
-            lyon_antique: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Crect x='5' y='5' width='50' height='50' fill='none' stroke='%23d97706' stroke-width='1' opacity='0.2'/%3E%3Crect x='15' y='15' width='30' height='30' fill='none' stroke='%23b45309' stroke-width='1' opacity='0.2'/%3E%3Cline x1='5' y1='5' x2='55' y2='55' stroke='%23d97706' stroke-width='0.8' opacity='0.15'/%3E%3Cline x1='55' y1='5' x2='5' y2='55' stroke='%23d97706' stroke-width='0.8' opacity='0.15'/%3E%3Ccircle cx='30' cy='30' r='4' fill='none' stroke='%23d97706' stroke-width='1' opacity='0.3'/%3E%3C/svg%3E")`,
+            sepia:        `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ccircle cx='10' cy='10' r='8' fill='none' stroke='%23d4a574' stroke-width='1' opacity='0.25'/%3E%3Ccircle cx='50' cy='50' r='8' fill='none' stroke='%2392400e' stroke-width='1' opacity='0.25'/%3E%3Cline x1='0' y1='30' x2='60' y2='30' stroke='%23d4a574' stroke-width='0.7' opacity='0.15'/%3E%3Cline x1='30' y1='0' x2='30' y2='60' stroke='%2392400e' stroke-width='0.7' opacity='0.15'/%3E%3C/svg%3E")`,
+                        lyon_antique: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Crect x='5' y='5' width='50' height='50' fill='none' stroke='%23d97706' stroke-width='1' opacity='0.2'/%3E%3Crect x='15' y='15' width='30' height='30' fill='none' stroke='%23b45309' stroke-width='1' opacity='0.2'/%3E%3Cline x1='5' y1='5' x2='55' y2='55' stroke='%23d97706' stroke-width='0.8' opacity='0.15'/%3E%3Cline x1='55' y1='5' x2='5' y2='55' stroke='%23d97706' stroke-width='0.8' opacity='0.15'/%3E%3Ccircle cx='30' cy='30' r='4' fill='none' stroke='%23d97706' stroke-width='1' opacity='0.3'/%3E%3C/svg%3E")`,
         };
 
         function applyCurrentSkinToFrame() {
-            const skin = CARD_SKINS.find(s => s.id === activeSkin) || CARD_SKINS[0];
+            const skinId = (selectedCard && cardSkins[selectedCard.id]) || 'default';
+            const skin = CARD_SKINS.find(s => s.id === skinId) || CARD_SKINS[0];
             const artArea = document.querySelector('.card-art-area');
             if (!artArea) return;
 
@@ -6022,7 +6376,9 @@
 
         function applySkinToCard(skinId) {
             if (!unlockedSkins.has(skinId)) return;
-            activeSkin = skinId;
+            if (!selectedCard) return;
+            cardSkins[selectedCard.id] = skinId;
+            saveProgress();
             renderSkinsTab();
             applyCurrentSkinToFrame();
         }
@@ -6032,7 +6388,7 @@
             grid.innerHTML = '';
             CARD_SKINS.forEach(skin => {
                 const unlocked = unlockedSkins.has(skin.id);
-                const isActive = activeSkin === skin.id;
+                const isActive = ((selectedCard && cardSkins[selectedCard.id]) || 'default') === skin.id;
                 const item = document.createElement('div');
                 item.className = 'skin-item' + (isActive ? ' active' : '') + (!unlocked ? ' locked' : '');
                 const grad = `linear-gradient(135deg,${skin.paletteGrad[0]},${skin.paletteGrad[1]})`;
@@ -6056,6 +6412,7 @@
                 if (playerTotalXP >= node.xpRequired) {
                     claimedPaliers.add(node.palier);
                     node.rewardFn();
+                    saveProgress();
                 }
             });
         }
@@ -6144,6 +6501,7 @@
             });
 
             document.getElementById('levelupOverlay').classList.add('show');
+            saveProgress();
         }
         function closeLevelupOverlay() { document.getElementById('levelupOverlay').classList.remove('show'); }
 
@@ -7273,6 +7631,871 @@
 
             body.appendChild(feed);
         }
+
+
+                // ==================== CARTE MENTALE ====================
+
+        // ── Données : positions des cartes sur la toile (0–1 normalisé) ──
+        // Positions des cartes narratives sur la toile (0-1 normalisé)
+        const MINDMAP_CARD_POSITIONS = {
+            // Zone "Le vœu des Lyonnais" — colline Fourvière
+            card11: { x: 0.22, y: 0.38 }, // Basilique Notre-Dame
+            card12: { x: 0.14, y: 0.52 }, // Théâtre Romain
+            card17: { x: 0.28, y: 0.52 }, // Jardin des Curiosités
+            // Zone "La lumière des Frères" — science lyonnaise
+            card2:  { x: 0.68, y: 0.22 }, // Frères Lumière
+            card18: { x: 0.55, y: 0.18 }, // Auguste Comte
+            card15: { x: 0.78, y: 0.32 }, // Horloge Astronomique
+            // Zone "La colline qui brille" — Fourvière + Presqu'île
+            card11b: null, // card11 partagée (référencée depuis zone 1)
+            card6:  { x: 0.52, y: 0.44 }, // Place Bellecour
+            card13: { x: 0.38, y: 0.60 }, // Cathédrale Saint-Jean
+            // Zone "L'art de la lumière" — art contemporain
+            card7:  { x: 0.62, y: 0.62 }, // Opéra de Lyon
+            card10: { x: 0.74, y: 0.52 }, // Fontaine Bartholdi
+            card19: { x: 0.78, y: 0.68 }, // Musée des Beaux-Arts
+        };
+
+        // ── Zones narratives ──
+        // requiredCards = toutes les cartes à l'intérieur de l'ellipse
+        // L'histoire se débloque quand TOUTES sont collectées
+        const MINDMAP_ZONES = [
+            {
+                id: 'sub_voeu',
+                cx: 0.21, cy: 0.45, rx: 0.13, ry: 0.16,
+                angle: -0.1,
+                color: '#7c3aed',
+                requiredCards: ['card11', 'card12', 'card17'],
+                title: 'Le vœu des Lyonnais',
+                icon: '🕯️',
+                artBg: 'linear-gradient(135deg, #1e1035 0%, #3d1060 100%)',
+                mediaTypes: ['📖 Récit', '🎵 Ambiance'],
+                whisper: 'Une promesse faite au ciel, tenue depuis des siècles sur la colline...',
+                text: "En 1643, la ville de Lyon était ravagée par la peste. Les échevins firent un vœu à la Vierge : si Lyon était épargnée, ils monteraient chaque année en procession à Fourvière avec un cierge à la main. La ville fut sauvée. Deux siècles plus tard, en 1852, lors de l'inauguration de la statue de la Vierge dorée sur la basilique, les Lyonnais sortirent spontanément leurs bougies sur les fenêtres. La tradition était née.",
+                fragments: [
+                    { cardId: 'card11', text: 'En 1643...' },
+                    { cardId: 'card12', text: 'la ville fit un vœu.' },
+                    { cardId: 'card17', text: 'Lyon fut épargnée.' },
+                ],
+            },
+            {
+                id: 'sub_lumiere_freres',
+                cx: 0.67, cy: 0.24, rx: 0.17, ry: 0.13,
+                angle: 0.15,
+                color: '#0369a1',
+                requiredCards: ['card2', 'card18', 'card15'],
+                title: 'La lumière des Frères',
+                icon: '🎬',
+                artBg: 'linear-gradient(135deg, #0a1520 0%, #1a3a5a 100%)',
+                mediaTypes: ['🎬 Cinéma', '📷 Archive'],
+                whisper: 'Deux frères, une invention, et la lumière capturée pour la première fois...',
+                text: "Auguste et Louis Lumière grandirent à Lyon au moment où la Fête des Lumières prenait son essor moderne. Cette culture de la lumière comme spectacle, ancrée dans leur ville natale, nourrit peut-être leur obsession pour la capture et la projection de la lumière en mouvement. Le cinématographe, inventé en 1895, est aussi une machine à faire jouer la lumière — un héritage lyonnais profond.",
+                fragments: [
+                    { cardId: 'card2',  text: 'Deux frères...' },
+                    { cardId: 'card18', text: 'une ville de lumière.' },
+                    { cardId: 'card15', text: 'Le temps capturé.' },
+                ],
+            },
+            {
+                id: 'sub_colline_lumiere',
+                cx: 0.37, cy: 0.48, rx: 0.20, ry: 0.15,
+                angle: 0.08,
+                color: '#b45309',
+                requiredCards: ['card11', 'card6', 'card13'],
+                title: 'La colline qui brille',
+                icon: '⛪',
+                artBg: 'linear-gradient(135deg, #1a0d00 0%, #4a2a00 100%)',
+                mediaTypes: ['🏛️ Patrimoine', '🗺️ Lieu'],
+                whisper: 'Quand la Presqu\'île répond à la colline... deux visages de Lyon dans la nuit.',
+                text: "Fourvière — 'la colline qui prie' — devient chaque 8 décembre la colline qui brille. Des milliers de bougies posées sur les fenêtres des immeubles lyonnais créent un halo de lumière visible depuis toute la ville. La basilique, illuminée depuis ses fondations, dialogue avec les installations contemporaines de la Presqu'île. Deux Lyon se répondent : l'antique et le moderne, la foi et l'art.",
+                fragments: [
+                    { cardId: 'card11', text: 'La colline...' },
+                    { cardId: 'card6',  text: 'répond à la ville.' },
+                    { cardId: 'card13', text: "Deux Lyon s'éclairent." },
+                ],
+            },
+            {
+                id: 'sub_art_lumiere',
+                cx: 0.71, cy: 0.62, rx: 0.16, ry: 0.15,
+                angle: -0.08,
+                color: '#065f46',
+                requiredCards: ['card7', 'card10', 'card19'],
+                title: 'L\'art de la lumière',
+                icon: '🎨',
+                artBg: 'linear-gradient(135deg, #0d1a0d 0%, #1a3a1a 100%)',
+                mediaTypes: ['🎨 Art', '🌆 Ville'],
+                whisper: 'Sur les façades de la ville, des artistes écrivent en lumière...',
+                text: "Depuis les années 1990, la Fête des Lumières est devenue un festival d'art contemporain à ciel ouvert. Des artistes du monde entier projettent leurs œuvres sur les façades de la ville : l'Opéra de Jean Nouvel, la cathédrale Saint-Jean, les Terreaux se transforment en écrans géants. L'éphémère devient monument. Chaque année, la ville s'efface pour laisser parler la lumière.",
+                fragments: [
+                    { cardId: 'card7',  text: "L'art s'invite..." },
+                    { cardId: 'card10', text: 'dans les fontaines.' },
+                    { cardId: 'card19', text: 'La ville devient toile.' },
+                ],
+            },
+            // Méta-zone englobante (grande ellipse)
+            {
+                id: 'meta',
+                cx: 0.45, cy: 0.44, rx: 0.44, ry: 0.40,
+                angle: 0.05,
+                color: '#fbbf24',
+                requiredCards: [], // débloquée par les 4 sous-histoires, pas par des cartes
+                isMeta: true,
+                title: 'Une bien jolie fête',
+                icon: '✨',
+                artBg: 'linear-gradient(135deg, #1a0a00 0%, #4a2800 50%, #1a1035 100%)',
+                mediaTypes: ['📖 Récit complet', '🏆 Histoire révélée'],
+                whisper: 'Quatre fragments... une même lumière. Lyon tout entière attend d\'être révélée.',
+                text: "Lyon s'illumine chaque année pour honorer un vœu fait à la Vierge Marie en 1852. Ce qui devait être une simple procession est devenu la plus grande fête de lumière du monde, attirant des millions de visiteurs. La ville entière devient une galerie d'art éphémère, où chaque façade raconte une histoire de lumière et de mémoire.",
+            },
+        ];
+
+        // ── État ──
+        let mindmapState = {
+            unlockedSubstories: new Set(),
+            whisperedSubstories: new Set(),
+            metaUnlocked: false,
+            newlyUnlocked: null,
+            cardPositions: {},
+            unlockAnim: null,
+            fragmentAnims: [], // { text, x, y, startTime, alpha, settled }
+        };
+
+        // ── Canvas state ──
+        let mmCanvas = null, mmCtx = null;
+        let mmW = 0, mmH = 0;
+        let mmAnimId = null;
+        let mmTime = 0;
+        let mmTouchStartX = 0, mmTouchStartY = 0;
+
+        function openMindmap() {
+            refreshMindmapState();
+            document.getElementById('mindmapScreen').classList.add('show');
+            requestAnimationFrame(() => initMindmapCanvas());
+        }
+
+        function closeMindmap() {
+            document.getElementById('mindmapScreen').classList.remove('show');
+            if (mmAnimId) { cancelAnimationFrame(mmAnimId); mmAnimId = null; }
+            closeFragmentPanel();
+        }
+
+        function refreshMindmapState() {
+            const allC = Object.values(COLLECTIONS).flatMap(c => c.cards);
+            MINDMAP_ZONES.forEach(zone => {
+                if (zone.isMeta) return; // méta gérée séparément
+                const allCollected = zone.requiredCards.every(cid => collectedCards.includes(cid));
+                if (allCollected) {
+                    const isNew = !mindmapState.unlockedSubstories.has(zone.id);
+                    mindmapState.unlockedSubstories.add(zone.id);
+                    mindmapState.whisperedSubstories.delete(zone.id);
+                    if (isNew && mmCanvas) triggerUnlockAnim(zone);
+                    return;
+                }
+                if (!mindmapState.unlockedSubstories.has(zone.id)) {
+                    // Whisper : au moins une carte de la zone collectée
+                    const anyCollected = zone.requiredCards.some(cid => collectedCards.includes(cid));
+                    if (anyCollected) mindmapState.whisperedSubstories.add(zone.id);
+                }
+            });
+            const subZones = MINDMAP_ZONES.filter(z => !z.isMeta);
+            const done = subZones.filter(z => mindmapState.unlockedSubstories.has(z.id)).length;
+            const total = subZones.length;
+            document.getElementById('mindmapProgressText').textContent = done + ' / ' + total;
+            if (done === total && !mindmapState.metaUnlocked) {
+                mindmapState.metaUnlocked = true;
+                mindmapState.unlockedSubstories.add('meta');
+                awardXP(100);
+                const metaZone = MINDMAP_ZONES.find(z => z.isMeta);
+                if (metaZone && mmCanvas) triggerUnlockAnim(metaZone);
+            }
+            // Whisper méta dès qu'une sous-histoire débloquée
+            if (done > 0 && !mindmapState.metaUnlocked) {
+                mindmapState.whisperedSubstories.add('meta');
+            }
+        }
+
+        function initMindmapCanvas() {
+            mmCanvas = document.getElementById('mindmapCanvas');
+            mmCtx = mmCanvas.getContext('2d');
+            const wrap = document.getElementById('mindmapCanvasWrap');
+            mmW = wrap.offsetWidth;
+            mmH = wrap.offsetHeight;
+            mmCanvas.width = mmW;
+            mmCanvas.height = mmH;
+
+            // Calculer les positions pixel de toutes les cartes collectées
+            const allC = Object.values(COLLECTIONS).flatMap(c => c.cards);
+            allC.forEach(card => {
+                if (!collectedCards.includes(card.id)) return;
+                const basePos = MINDMAP_CARD_POSITIONS[card.id] || { x: 0.5, y: 0.5 };
+                // Toujours recalculer depuis la position normalisée (fixe, non modifiable)
+                mindmapState.cardPositions[card.id] = {
+                    x: basePos.x * mmW,
+                    y: basePos.y * mmH,
+                };
+            });
+
+            // Événements tap uniquement (pas de drag)
+            mmCanvas.addEventListener('click', mmOnClick);
+            mmCanvas.addEventListener('touchstart', mmOnTouchStart, { passive: false });
+            mmCanvas.addEventListener('touchend', mmOnTouchEnd);
+
+            // Matérialiser les fragments des cartes déjà collectées (mode settled)
+            mindmapState.fragmentAnims = [];
+            MINDMAP_ZONES.forEach(zone => {
+                if (!zone.fragments) return;
+                zone.fragments.forEach(frag => {
+                    if (!collectedCards.includes(frag.cardId)) return;
+                    const basePos = MINDMAP_CARD_POSITIONS[frag.cardId];
+                    if (!basePos) return;
+                    const fx = (zone.cx * 0.6 + basePos.x * 0.4) * mmW;
+                    const fy = (zone.cy * 0.6 + basePos.y * 0.4) * mmH;
+                    mindmapState.fragmentAnims.push({
+                        text: frag.text,
+                        x: fx, y: fy,
+                        startTime: mmTime - 10,
+                        settled: true,
+                        color: hexToRgb(zone.color),
+                    });
+                });
+            });
+
+            if (mmAnimId) cancelAnimationFrame(mmAnimId);
+            mmLoop();
+        }
+
+        function mmLoop() {
+            mmTime += 0.016;
+            drawMindmap();
+            mmAnimId = requestAnimationFrame(mmLoop);
+        }
+
+        // ── Dessin principal ──
+        function drawMindmap() {
+            mmCtx.clearRect(0, 0, mmW, mmH);
+
+            // Fond étoilé discret
+            mmCtx.fillStyle = '#0a0a12';
+            mmCtx.fillRect(0, 0, mmW, mmH);
+            drawStarfield();
+
+            const allC = Object.values(COLLECTIONS).flatMap(c => c.cards);
+
+            // 1. Dessiner les arcs d'ellipses révélés par la lumière des cartes
+            MINDMAP_ZONES.forEach(zone => drawZoneArc(zone, allC));
+
+            // 2. Lumière radiale des cartes narratives collectées
+            const narrativeIds = new Set(MINDMAP_ZONES.flatMap(z => z.requiredCards));
+            narrativeIds.forEach(cid => {
+                if (!collectedCards.includes(cid)) return;
+                const base = MINDMAP_CARD_POSITIONS[cid];
+                if (!base) return;
+                const pos = { x: base.x * mmW, y: base.y * mmH };
+                const card = allC.find(c => c.id === cid);
+                if (card) drawCardGlow(pos.x, pos.y, card);
+            });
+
+            // Fragments narratifs flottants
+            drawFragmentAnims();
+
+            // 3b. Animation de déblocage (par-dessus tout)
+            drawUnlockAnim();
+
+            // 3. Cartes narratives : collectées en plein, non collectées en fantôme gris
+            const narrativeCardIds = new Set(MINDMAP_ZONES.flatMap(z => z.requiredCards));
+            narrativeCardIds.forEach(cid => {
+                const base = MINDMAP_CARD_POSITIONS[cid];
+                if (!base) return; // card partagée sans position propre (ex: card11 dans zone 3)
+                const isCollected = collectedCards.includes(cid);
+                const pos = { x: base.x * mmW, y: base.y * mmH };
+                const card = allC.find(c => c.id === cid);
+                if (card) drawCardNode(pos.x, pos.y, card, isCollected);
+            });
+        }
+
+        function drawMetaZoneArc(zone) {
+            const subZones = MINDMAP_ZONES.filter(z => !z.isMeta);
+            const done = subZones.filter(z => mindmapState.unlockedSubstories.has(z.id)).length;
+            const total = subZones.length;
+            const revealRatio = done / total; // 0..1
+
+            if (revealRatio === 0) return; // rien à dessiner
+
+            const cx = zone.cx * mmW, cy = zone.cy * mmH;
+            const rx = zone.rx * mmW, ry = zone.ry * mmH;
+            const isUnlocked = mindmapState.metaUnlocked;
+            const SEGMENTS = 120;
+            const baseColor = hexToRgb(zone.color);
+            const pulse = isUnlocked ? (0.7 + 0.3 * Math.sin(mmTime * 1.2)) : 1;
+
+            for (let s = 0; s < SEGMENTS; s++) {
+                // Révéler proportionnellement : revealRatio * SEGMENTS segments allumés
+                // Distribués uniformément sur l'ellipse
+                const segReveal = (s / SEGMENTS) < revealRatio ? 1 : 0;
+                if (segReveal === 0) continue;
+
+                const t1 = (s / SEGMENTS) * Math.PI * 2;
+                const t2 = ((s + 1) / SEGMENTS) * Math.PI * 2;
+                const x1 = cx + Math.cos(t1) * rx * Math.cos(zone.angle) - Math.sin(t1) * ry * Math.sin(zone.angle);
+                const y1 = cy + Math.cos(t1) * rx * Math.sin(zone.angle) + Math.sin(t1) * ry * Math.cos(zone.angle);
+                const x2 = cx + Math.cos(t2) * rx * Math.cos(zone.angle) - Math.sin(t2) * ry * Math.sin(zone.angle);
+                const y2 = cy + Math.cos(t2) * rx * Math.sin(zone.angle) + Math.sin(t2) * ry * Math.cos(zone.angle);
+
+                const alpha = (isUnlocked ? 0.85 : 0.45) * pulse;
+                mmCtx.beginPath();
+                mmCtx.moveTo(x1, y1);
+                mmCtx.lineTo(x2, y2);
+                mmCtx.strokeStyle = `rgba(${baseColor}, ${alpha})`;
+                mmCtx.lineWidth = isUnlocked ? 2.5 : 1.5;
+                mmCtx.setLineDash(isUnlocked ? [] : [6, 4]);
+                mmCtx.stroke();
+                mmCtx.setLineDash([]);
+            }
+
+            // Label méta
+            const labelAlpha = Math.min(1, revealRatio * 2);
+            mmCtx.save();
+            mmCtx.globalAlpha = labelAlpha;
+            mmCtx.font = isUnlocked ? 'bold 11px system-ui' : '10px system-ui';
+            mmCtx.fillStyle = isUnlocked ? `rgba(${baseColor}, 1)` : `rgba(${baseColor}, 0.6)`;
+            mmCtx.textAlign = 'center';
+            mmCtx.textBaseline = 'bottom';
+            mmCtx.fillText(
+                (isUnlocked ? '✨ ' : '') + zone.title,
+                cx, cy - ry - 8
+            );
+            mmCtx.restore();
+        }
+
+        function triggerUnlockAnim(zone) {
+            const cx = zone.cx * mmW;
+            const cy = zone.cy * mmH;
+            mindmapState.unlockAnim = {
+                zoneId: zone.id,
+                startTime: mmTime,
+                cx, cy,
+                rx: zone.rx * mmW,
+                ry: zone.ry * mmH,
+                angle: zone.angle,
+                color: hexToRgb(zone.color),
+                isMeta: !!zone.isMeta,
+                particles: Array.from({ length: zone.isMeta ? 40 : 24 }, (_, i) => ({
+                    angle: Math.random() * Math.PI * 2,
+                    speed: 0.6 + Math.random() * 1.4,
+                    size: 2 + Math.random() * (zone.isMeta ? 5 : 3),
+                    opacity: 0.7 + Math.random() * 0.3,
+                    drift: (Math.random() - 0.5) * 0.04,
+                    // Point de départ sur l'ellipse
+                    t: (i / (zone.isMeta ? 40 : 24)) * Math.PI * 2,
+                })),
+            };
+        }
+
+        function drawUnlockAnim() {
+            const anim = mindmapState.unlockAnim;
+            if (!anim) return;
+
+            const elapsed = mmTime - anim.startTime;
+            const duration = anim.isMeta ? 3.5 : 2.2;
+            if (elapsed > duration) { mindmapState.unlockAnim = null; return; }
+
+            const progress = elapsed / duration;
+            const fadeOut = progress > 0.7 ? 1 - (progress - 0.7) / 0.3 : 1;
+
+            // Flash initial de l'ellipse
+            if (progress < 0.25) {
+                const flashAlpha = (1 - progress / 0.25) * 0.35;
+                mmCtx.save();
+                mmCtx.translate(anim.cx, anim.cy);
+                mmCtx.rotate(anim.angle);
+                mmCtx.scale(1, anim.ry / anim.rx);
+                const grd = mmCtx.createRadialGradient(0, 0, 0, 0, 0, anim.rx);
+                grd.addColorStop(0, `rgba(${anim.color}, ${flashAlpha})`);
+                grd.addColorStop(1, `rgba(${anim.color}, 0)`);
+                mmCtx.fillStyle = grd;
+                mmCtx.beginPath();
+                mmCtx.arc(0, 0, anim.rx, 0, Math.PI * 2);
+                mmCtx.fill();
+                mmCtx.restore();
+            }
+
+            // Onde de choc circulaire qui s'expand
+            if (progress < 0.5) {
+                const waveProgress = progress / 0.5;
+                const waveR = anim.rx * (1 + waveProgress * 0.6);
+                const waveAlpha = (1 - waveProgress) * 0.6;
+                mmCtx.save();
+                mmCtx.translate(anim.cx, anim.cy);
+                mmCtx.rotate(anim.angle);
+                mmCtx.scale(1, anim.ry / anim.rx);
+                mmCtx.beginPath();
+                mmCtx.arc(0, 0, waveR, 0, Math.PI * 2);
+                mmCtx.strokeStyle = `rgba(${anim.color}, ${waveAlpha})`;
+                mmCtx.lineWidth = 3;
+                mmCtx.stroke();
+                mmCtx.restore();
+            }
+
+            // Particules qui s'envolent depuis l'ellipse
+            anim.particles.forEach(p => {
+                p.angle += p.drift;
+                const dist = p.speed * elapsed * 40;
+                // Position de départ sur l'ellipse
+                const ex = anim.cx + Math.cos(p.t) * anim.rx * Math.cos(anim.angle) - Math.sin(p.t) * anim.ry * Math.sin(anim.angle);
+                const ey = anim.cy + Math.cos(p.t) * anim.rx * Math.sin(anim.angle) + Math.sin(p.t) * anim.ry * Math.cos(anim.angle);
+                const px = ex + Math.cos(p.angle) * dist;
+                const py = ey + Math.sin(p.angle) * dist;
+                const alpha = p.opacity * fadeOut * (1 - progress * 0.5);
+                const size = p.size * (1 - progress * 0.3);
+                if (alpha < 0.02 || size < 0.3) return;
+                mmCtx.beginPath();
+                mmCtx.arc(px, py, size, 0, Math.PI * 2);
+                mmCtx.fillStyle = `rgba(${anim.color}, ${alpha})`;
+                mmCtx.fill();
+            });
+
+            // Texte central "Histoire révélée !" qui apparaît
+            if (progress > 0.15 && progress < 0.85) {
+                const textAlpha = progress < 0.3
+                    ? (progress - 0.15) / 0.15
+                    : progress > 0.7 ? (0.85 - progress) / 0.15 : 1;
+                const scale = progress < 0.25 ? 0.7 + (progress / 0.25) * 0.35 : 1.05 - progress * 0.05;
+                mmCtx.save();
+                mmCtx.globalAlpha = textAlpha * fadeOut;
+                mmCtx.translate(anim.cx, anim.cy);
+                mmCtx.scale(scale, scale);
+                mmCtx.textAlign = 'center';
+                mmCtx.textBaseline = 'middle';
+                mmCtx.font = `bold ${anim.isMeta ? 15 : 13}px system-ui`;
+                mmCtx.fillStyle = `rgba(${anim.color}, 1)`;
+                mmCtx.fillText(anim.isMeta ? '✨ Récit complet débloqué !' : '✦ Fragment révélé', 0, -16);
+                mmCtx.font = `${anim.isMeta ? 11 : 10}px system-ui`;
+                mmCtx.fillStyle = 'rgba(255,255,255,0.7)';
+                mmCtx.restore();
+            }
+        }
+
+        function drawFragmentAnims() {
+            const now = mmTime;
+            mindmapState.fragmentAnims = mindmapState.fragmentAnims.filter(f => {
+                const elapsed = now - f.startTime;
+                const APPEAR = 0.6;
+                const HOLD   = 2.5;
+                const SETTLE = 5.0;
+                const total  = APPEAR + HOLD;
+
+                if (elapsed > SETTLE && f.settled) return true;
+                if (elapsed > total && !f.settled) {
+                    f.settled = true;
+                    f.settleAlpha = 0.18;
+                }
+
+                let alpha;
+                if (f.settled) {
+                    alpha = f.settleAlpha;
+                } else if (elapsed < APPEAR) {
+                    alpha = (elapsed / APPEAR) * 0.85;
+                } else {
+                    alpha = 0.85;
+                }
+
+                const drift = f.settled ? 0 : Math.sin(now * 0.8 + f.x) * 1.5;
+
+                mmCtx.save();
+                mmCtx.globalAlpha = alpha;
+                mmCtx.font = f.settled ? 'italic 9px system-ui' : 'italic 11px system-ui';
+                mmCtx.fillStyle = f.settled
+                    ? `rgba(${f.color}, 0.9)`
+                    : `rgba(255, 255, 255, 0.95)`;
+                mmCtx.textAlign = 'center';
+                mmCtx.textBaseline = 'middle';
+                if (!f.settled) {
+                    mmCtx.shadowColor = `rgba(${f.color}, 0.8)`;
+                    mmCtx.shadowBlur = 8;
+                }
+                mmCtx.fillText(f.text, f.x, f.y + drift);
+                mmCtx.shadowBlur = 0;
+                mmCtx.restore();
+
+                return true;
+            });
+        }
+
+        function drawStarfield() {
+            // Petits points fixes (seed déterministe)
+            mmCtx.fillStyle = 'rgba(255,255,255,0.08)';
+            for (let i = 0; i < 60; i++) {
+                const sx = ((i * 137.508) % 1) * mmW;
+                const sy = ((i * 93.241) % 1) * mmH;
+                const r = ((i * 31.7) % 1) > 0.7 ? 1.2 : 0.6;
+                mmCtx.beginPath();
+                mmCtx.arc(sx, sy, r, 0, Math.PI * 2);
+                mmCtx.fill();
+            }
+        }
+
+        function drawZoneArc(zone, allC) {
+            // Méta-zone : révélation basée sur les sous-histoires débloquées
+            if (zone.isMeta) {
+                drawMetaZoneArc(zone);
+                return;
+            }
+
+            const cx = zone.cx * mmW;
+            const cy = zone.cy * mmH;
+            const rx = zone.rx * mmW;
+            const ry = zone.ry * mmH;
+
+            const LIGHT_RADIUS = Math.min(mmW, mmH) * 0.22;
+            const SEGMENTS = 120;
+            const lit = new Float32Array(SEGMENTS); // 0..1 intensité par segment
+
+            allC.forEach(card => {
+                if (!collectedCards.includes(card.id)) return;
+                const pos = mindmapState.cardPositions[card.id];
+                if (!pos) return;
+
+                for (let s = 0; s < SEGMENTS; s++) {
+                    const t = (s / SEGMENTS) * Math.PI * 2;
+                    // Point sur l'ellipse (avec rotation)
+                    const ex = cx + Math.cos(t) * rx * Math.cos(zone.angle) - Math.sin(t) * ry * Math.sin(zone.angle);
+                    const ey = cy + Math.cos(t) * rx * Math.sin(zone.angle) + Math.sin(t) * ry * Math.cos(zone.angle);
+                    const dist = Math.hypot(pos.x - ex, pos.y - ey);
+                    const influence = Math.max(0, 1 - dist / LIGHT_RADIUS);
+                    if (influence > lit[s]) lit[s] = influence;
+                }
+            });
+
+            // Dessiner l'ellipse segment par segment
+            const isUnlocked = mindmapState.unlockedSubstories.has(zone.id);
+            const isWhispered = mindmapState.whisperedSubstories.has(zone.id);
+            const baseColor = hexToRgb(zone.color);
+
+            for (let s = 0; s < SEGMENTS; s++) {
+                if (lit[s] < 0.02) continue;
+
+                const t1 = (s / SEGMENTS) * Math.PI * 2;
+                const t2 = ((s + 1) / SEGMENTS) * Math.PI * 2;
+
+                const x1 = cx + Math.cos(t1) * rx * Math.cos(zone.angle) - Math.sin(t1) * ry * Math.sin(zone.angle);
+                const y1 = cy + Math.cos(t1) * rx * Math.sin(zone.angle) + Math.sin(t1) * ry * Math.cos(zone.angle);
+                const x2 = cx + Math.cos(t2) * rx * Math.cos(zone.angle) - Math.sin(t2) * ry * Math.sin(zone.angle);
+                const y2 = cy + Math.cos(t2) * rx * Math.sin(zone.angle) + Math.sin(t2) * ry * Math.cos(zone.angle);
+
+                // Pulsation légère si unlocked
+                const pulse = isUnlocked ? (0.7 + 0.3 * Math.sin(mmTime * 2 + s * 0.1)) : 1;
+                const alpha = lit[s] * pulse * (isUnlocked ? 0.9 : isWhispered ? 0.6 : 0.35);
+
+                mmCtx.beginPath();
+                mmCtx.moveTo(x1, y1);
+                mmCtx.lineTo(x2, y2);
+                mmCtx.strokeStyle = `rgba(${baseColor}, ${alpha})`;
+                mmCtx.lineWidth = isUnlocked ? 2.5 : 1.5;
+                mmCtx.stroke();
+            }
+
+            // Si débloquée : halo intérieur doux
+            if (isUnlocked) {
+                mmCtx.save();
+                mmCtx.translate(cx, cy);
+                mmCtx.rotate(zone.angle);
+                mmCtx.scale(1, ry / rx);
+                const grd = mmCtx.createRadialGradient(0, 0, rx * 0.3, 0, 0, rx * 0.95);
+                grd.addColorStop(0, `rgba(${baseColor}, 0.06)`);
+                grd.addColorStop(1, `rgba(${baseColor}, 0)`);
+                mmCtx.fillStyle = grd;
+                mmCtx.beginPath();
+                mmCtx.arc(0, 0, rx, 0, Math.PI * 2);
+                mmCtx.fill();
+                mmCtx.restore();
+            }
+
+            // Label de zone si suffisamment révélée
+            const totalLit = lit.reduce((a, b) => a + b, 0) / SEGMENTS;
+            if (totalLit > 0.08) {
+                const labelAlpha = Math.min(1, (totalLit - 0.08) / 0.15);
+                mmCtx.save();
+                mmCtx.globalAlpha = labelAlpha * (isUnlocked ? 1 : 0.5);
+                // Position du label au-dessus de l'ellipse
+                const labelX = cx;
+                const labelY = cy - ry - 10;
+                mmCtx.font = `${isUnlocked ? 700 : 400} 10px system-ui`;
+                mmCtx.fillStyle = isUnlocked ? `rgba(${baseColor}, 0.9)` : `rgba(${baseColor}, 0.6)`;
+                mmCtx.textAlign = 'center';
+                mmCtx.textBaseline = 'bottom';
+                mmCtx.fillText((isUnlocked ? '✦ ' : '') + zone.title, labelX, labelY);
+                mmCtx.restore();
+            }
+        }
+
+        function drawCardGlow(x, y, card) {
+            const info = SUPERTYPES[card.supertype] || {};
+            const color = info.color || '#a78bfa';
+            const rgb = hexToRgb(color);
+            const radius = Math.min(mmW, mmH) * 0.18;
+            const pulse = 0.85 + 0.15 * Math.sin(mmTime * 1.5 + x * 0.01 + y * 0.01);
+
+            const grd = mmCtx.createRadialGradient(x, y, 0, x, y, radius * pulse);
+            grd.addColorStop(0, `rgba(${rgb}, 0.18)`);
+            grd.addColorStop(0.5, `rgba(${rgb}, 0.06)`);
+            grd.addColorStop(1, `rgba(${rgb}, 0)`);
+            mmCtx.fillStyle = grd;
+            mmCtx.beginPath();
+            mmCtx.arc(x, y, radius * pulse, 0, Math.PI * 2);
+            mmCtx.fill();
+        }
+
+        function drawCardNode(x, y, card, isCollected) {
+            const R = 18;
+            const info = SUPERTYPES[card.supertype] || {};
+            const color = info.color || '#a78bfa';
+            const rgb = hexToRgb(color);
+            const level = (cardLevels[card.id]?.level) || 0;
+
+            if (isCollected) {
+                // ── Halo de niveau (dessiné en premier, sous la carte) ──
+                if (level >= 1) {
+                    const pulse = 0.6 + 0.4 * Math.sin(mmTime * 2.2 + x * 0.05);
+
+                    if (level === 1) {
+                        // Niveau 1 : anneau simple
+                        mmCtx.beginPath();
+                        mmCtx.arc(x, y, R + 5, 0, Math.PI * 2);
+                        mmCtx.strokeStyle = `rgba(${rgb}, ${0.45 * pulse})`;
+                        mmCtx.lineWidth = 2;
+                        mmCtx.stroke();
+
+                    } else if (level === 2) {
+                        // Niveau 2 : double anneau + halo diffus
+                        const haloGrd = mmCtx.createRadialGradient(x, y, R, x, y, R + 14);
+                        haloGrd.addColorStop(0, `rgba(${rgb}, ${0.35 * pulse})`);
+                        haloGrd.addColorStop(1, `rgba(${rgb}, 0)`);
+                        mmCtx.fillStyle = haloGrd;
+                        mmCtx.beginPath();
+                        mmCtx.arc(x, y, R + 14, 0, Math.PI * 2);
+                        mmCtx.fill();
+                        mmCtx.beginPath();
+                        mmCtx.arc(x, y, R + 5, 0, Math.PI * 2);
+                        mmCtx.strokeStyle = `rgba(${rgb}, ${0.6 * pulse})`;
+                        mmCtx.lineWidth = 1.5;
+                        mmCtx.stroke();
+                        mmCtx.beginPath();
+                        mmCtx.arc(x, y, R + 9, 0, Math.PI * 2);
+                        mmCtx.strokeStyle = `rgba(${rgb}, ${0.3 * pulse})`;
+                        mmCtx.lineWidth = 1;
+                        mmCtx.stroke();
+
+                    } else if (level >= 3) {
+                        // Niveau 3 : couronne dorée pulsante + éclats rayonnants
+                        const goldRgb = '251,191,36';
+                        const haloGrd = mmCtx.createRadialGradient(x, y, R, x, y, R + 20);
+                        haloGrd.addColorStop(0, `rgba(${goldRgb}, ${0.4 * pulse})`);
+                        haloGrd.addColorStop(0.5, `rgba(${rgb}, ${0.2 * pulse})`);
+                        haloGrd.addColorStop(1, `rgba(${rgb}, 0)`);
+                        mmCtx.fillStyle = haloGrd;
+                        mmCtx.beginPath();
+                        mmCtx.arc(x, y, R + 20, 0, Math.PI * 2);
+                        mmCtx.fill();
+                        // Anneau doré
+                        mmCtx.beginPath();
+                        mmCtx.arc(x, y, R + 6, 0, Math.PI * 2);
+                        mmCtx.strokeStyle = `rgba(${goldRgb}, ${0.85 * pulse})`;
+                        mmCtx.lineWidth = 2;
+                        mmCtx.stroke();
+                        // 8 éclats rayonnants
+                        for (let i = 0; i < 8; i++) {
+                            const angle = (i / 8) * Math.PI * 2 + mmTime * 0.4;
+                            const r1 = R + 9;
+                            const r2 = R + 14 + 3 * Math.sin(mmTime * 3 + i);
+                            mmCtx.beginPath();
+                            mmCtx.moveTo(x + Math.cos(angle) * r1, y + Math.sin(angle) * r1);
+                            mmCtx.lineTo(x + Math.cos(angle) * r2, y + Math.sin(angle) * r2);
+                            mmCtx.strokeStyle = `rgba(${goldRgb}, ${0.7 * pulse})`;
+                            mmCtx.lineWidth = 1.5;
+                            mmCtx.stroke();
+                        }
+                    }
+                }
+
+                // ── Corps de la carte ──
+                const grd = mmCtx.createRadialGradient(x - R * 0.3, y - R * 0.3, 1, x, y, R);
+                grd.addColorStop(0, `rgba(${rgb}, 0.95)`);
+                grd.addColorStop(1, `rgba(${rgb}, 0.55)`);
+                mmCtx.fillStyle = grd;
+                mmCtx.beginPath();
+                mmCtx.arc(x, y, R, 0, Math.PI * 2);
+                mmCtx.fill();
+
+                // Contour (doré si niveau max)
+                mmCtx.strokeStyle = level >= 3 ? `rgba(251,191,36,0.9)` : `rgba(${rgb}, 0.9)`;
+                mmCtx.lineWidth = level >= 3 ? 2 : 1.5;
+                mmCtx.stroke();
+
+                // Symbole
+                mmCtx.font = '12px system-ui';
+                mmCtx.fillStyle = 'white';
+                mmCtx.textAlign = 'center';
+                mmCtx.textBaseline = 'middle';
+                mmCtx.fillText(info.symbol || '✦', x, y);
+
+                // Nom sous la carte
+                mmCtx.font = level >= 3 ? 'bold 8px system-ui' : '8px system-ui';
+                mmCtx.fillStyle = level >= 3 ? `rgba(251,191,36,0.9)` : `rgba(${rgb}, 0.85)`;
+                mmCtx.fillText(card.name.split(' ')[0], x, y + R + 9);
+
+            } else {
+                // Fantôme : cercle transparent
+                mmCtx.beginPath();
+                mmCtx.arc(x, y, R * 0.75, 0, Math.PI * 2);
+                mmCtx.strokeStyle = 'rgba(255,255,255,0.12)';
+                mmCtx.lineWidth = 1;
+                mmCtx.stroke();
+                mmCtx.fillStyle = 'rgba(255,255,255,0.03)';
+                mmCtx.fill();
+            }
+        }
+
+        // ── Interaction : tap uniquement ──
+
+        function mmGetCardAt(px, py) {
+            const allC = Object.values(COLLECTIONS).flatMap(c => c.cards);
+            const narrativeIds = new Set(MINDMAP_ZONES.flatMap(z => z.requiredCards));
+            for (const cid of narrativeIds) {
+                const base = MINDMAP_CARD_POSITIONS[cid];
+                if (!base) continue;
+                const cx = base.x * mmW, cy = base.y * mmH;
+                if (Math.hypot(px - cx, py - cy) < 24) {
+                    return allC.find(c => c.id === cid) || null;
+                }
+            }
+            return null;
+        }
+
+        function mmGetTapTarget(px, py) {
+            // D'abord les cartes (collectées ou non)
+            const card = mmGetCardAt(px, py);
+            if (card) return { type: 'card', card };
+            // Ensuite les zones
+            for (const zone of MINDMAP_ZONES) {
+                const cx = zone.cx * mmW, cy = zone.cy * mmH;
+                const rx = zone.rx * mmW, ry = zone.ry * mmH;
+                const dx = px - cx, dy = py - cy;
+                if ((dx * dx) / (rx * rx) + (dy * dy) / (ry * ry) < 1) {
+                    return { type: 'zone', zone };
+                }
+            }
+            return null;
+        }
+
+        let mmTouchId = null;
+
+
+
+        function mmOnClick(e) {
+            const rect = mmCanvas.getBoundingClientRect();
+            const px = e.clientX - rect.left, py = e.clientY - rect.top;
+            const target = mmGetTapTarget(px, py);
+            if (!target) { closeFragmentPanel(); return; }
+            if (target.type === 'card') handleCardTap(target.card);
+            else if (target.type === 'zone') showFragmentForZone(target.zone);
+        }
+
+        function mmOnTouchStart(e) {
+            e.preventDefault();
+            const t = e.changedTouches[0];
+            mmTouchId = t.identifier;
+            mmTouchStartX = t.clientX;
+            mmTouchStartY = t.clientY;
+        }
+        function mmOnTouchEnd(e) {
+            const t = e.changedTouches[0];
+            const dx = Math.abs(t.clientX - mmTouchStartX);
+            const dy = Math.abs(t.clientY - mmTouchStartY);
+            if (dx < 8 && dy < 8) {
+                // Tap net
+                const rect = mmCanvas.getBoundingClientRect();
+                const px = t.clientX - rect.left, py = t.clientY - rect.top;
+                const target = mmGetTapTarget(px, py);
+                if (target) {
+                    if (target.type === 'card') handleCardTap(target.card);
+                    else if (target.type === 'zone') showFragmentForZone(target.zone);
+                } else {
+                    closeFragmentPanel();
+                }
+            }
+        }
+
+        // ── Fragment panel ──
+        function handleCardTap(card) {
+            if (collectedCards.includes(card.id)) {
+                closeMindmap();
+                setTimeout(() => openCardDetail(card), 380);
+            } else {
+                const zone = MINDMAP_ZONES.find(z => z.requiredCards.includes(card.id));
+                if (zone) showFragmentForZone(zone);
+            }
+        }
+
+        function showFragmentForZone(zone) {
+            const isUnlocked = mindmapState.unlockedSubstories.has(zone.id);
+            const isWhispered = mindmapState.whisperedSubstories.has(zone.id);
+            // Méta débloquée : ouvrir directement le récit complet
+            if (zone.isMeta && isUnlocked) { openSubstory(zone); return; }
+
+            document.getElementById('fragmentZoneLabel').textContent = zone.title.toUpperCase();
+            document.getElementById('fragmentTitle').textContent = isUnlocked ? zone.title : (isWhispered ? '...' : '— Fragment voilé —');
+            document.getElementById('fragmentText').textContent = isUnlocked ? zone.text : (isWhispered ? zone.whisper : '');
+            const hint = document.getElementById('fragmentLockedHint');
+
+            if (isUnlocked) {
+                hint.style.display = 'none';
+                // Bouton "Lire" si unlocked
+                document.getElementById('fragmentTitle').onclick = () => openSubstory(zone);
+                document.getElementById('fragmentTitle').style.cursor = 'pointer';
+                document.getElementById('fragmentTitle').style.textDecoration = 'underline dotted';
+            } else {
+                hint.style.display = 'block';
+                hint.textContent = isWhispered ? 'Continuez à explorer pour révéler ce fragment...' : 'Explorez Lyon pour faire apparaître ce fragment.';
+                document.getElementById('fragmentTitle').onclick = null;
+                document.getElementById('fragmentTitle').style.cursor = 'default';
+                document.getElementById('fragmentTitle').style.textDecoration = 'none';
+            }
+
+            document.getElementById('fragmentPanel').classList.add('show');
+        }
+
+        function closeFragmentPanel() {
+            document.getElementById('fragmentPanel').classList.remove('show');
+        }
+
+        // ── Helpers ──
+        function hexToRgb(hex) {
+            if (!hex || hex[0] !== '#') return '167,139,250';
+            const r = parseInt(hex.slice(1,3),16);
+            const g = parseInt(hex.slice(3,5),16);
+            const b = parseInt(hex.slice(5,7),16);
+            return `${r},${g},${b}`;
+        }
+
+        function openSubstory(sub) {
+            const art = document.getElementById('substoryModalArt');
+            art.style.background = sub.artBg;
+            art.innerHTML = '<span style="font-size:54px">' + sub.icon + '</span>';
+            document.getElementById('substoryModalTitle').textContent = sub.title;
+            const media = document.getElementById('substoryModalMedia');
+            media.innerHTML = (sub.mediaTypes || []).map(m => '<div class="substory-media-chip">' + m + '</div>').join('');
+            document.getElementById('substoryModalText').textContent = sub.text;
+            document.getElementById('substoryModal').classList.add('show');
+        }
+
+        function closeSubstoryModal() {
+            document.getElementById('substoryModal').classList.remove('show');
+        }
+
+        function handleSubstoryModalBackdrop(e) {
+            if (e.target === document.getElementById('substoryModal')) closeSubstoryModal();
+        }
+
 
     </script>
 </body>
