@@ -16,7 +16,7 @@ exports.handler = async function(event) {
       'api-key': process.env.BREVO_API_KEY
     },
     body: JSON.stringify({
-      sender: { name: 'ExpLore Site', email: 'ExpLoreStudio@proton.me' },
+      sender: { name: 'ExpLore Site', email: 'plesel.david@gmail.com' },
       to: [{ email: 'ExpLoreStudio@proton.me', name: 'ExpLore Studio' }],
       replyTo: { email: email, name: name },
       subject: 'Contact depuis le site — ' + name,
