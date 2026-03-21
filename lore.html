@@ -54,20 +54,29 @@ nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 500;
   padding: 20px 40px;
   display: flex; align-items: center; justify-content: space-between;
-  background: linear-gradient(to bottom, rgba(10,8,16,0.95) 0%, transparent 100%);
+  background: rgba(10,8,16,0); backdrop-filter: blur(0px);
+  border-bottom: 1px solid rgba(201,145,58,0);
+  transition: background 0.4s, border-color 0.4s, backdrop-filter 0.4s;
 }
-.nav-back {
-  font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px;
-  text-transform: uppercase; color: var(--gold); opacity: 0.7;
-  text-decoration: none; display: flex; align-items: center; gap: 10px;
-  transition: opacity 0.2s;
+nav.sc {
+  background: rgba(10,8,16,0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(201,145,58,0.1);
 }
-.nav-back:hover { opacity: 1; }
-.nav-back::before { content: '←'; font-size: 14px; }
-.nav-title {
-  font-family: 'Cormorant Garamond', serif; font-size: 13px; letter-spacing: 4px;
-  text-transform: uppercase; color: var(--text-dim);
+
+.logo {
+  font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 600;
+  letter-spacing: 3px; color: var(--gold); text-decoration: none;
+  text-transform: uppercase;
 }
+
+.nav-links { display: flex; gap: 28px; list-style: none; }
+.nav-links a { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); text-decoration: none; transition: color 0.2s; }
+.nav-links a:hover { color: var(--gold); }
+.nav-active { color: var(--gold) !important; }
+.lang-btn { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-dim); background: none; border: 1px solid rgba(201,145,58,0.25); padding: 5px 12px; border-radius: 20px; transition: all 0.2s; cursor: none; }
+.lang-btn:hover { border-color: var(--gold); color: var(--gold); }
+@media(max-width:800px){ .nav-links { display: none; } }
 
 /* ── INTRO ── */
 #intro {
@@ -446,9 +455,16 @@ nav {
 <div id="cur-ring"></div>
 
 <!-- Nav -->
-<nav>
-  <a href="index.html" class="nav-back" data-fr="Retour au site" data-en="Back to site">Retour au site</a>
-  <span class="nav-title">L'Univers · ExpLore</span>
+<nav id="nav">
+  <a href="index.html" class="logo">ExpLore</a>
+  <ul class="nav-links">
+    <li><a href="index.html#concept">Le concept</a></li>
+    <li><a href="lore.html" class="nav-active">L'univers</a></li>
+    <li><a href="index.html#how">Comment ça marche</a></li>
+    <li><a href="index.html#partners">Partenaires</a></li>
+    <li><a href="index.html#about">À propos</a></li>
+  </ul>
+  <button class="lang-btn">EN</button>
 </nav>
 
 <!-- Pages tombantes (fixed, toute la page) -->

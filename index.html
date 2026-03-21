@@ -175,7 +175,7 @@ a, button, input { cursor: none; }
 }
 
 /* Hero restructuré */
-.hero-inner { display: grid; grid-template-columns: 1fr auto; gap: 60px; align-items: center; width: 100%; }
+.hero-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; width: 100%; }
 .hero-text { max-width: 520px; }
 .h-dots { display: flex; gap: 8px; margin-top: 28px; }
 .h-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(201,145,58,0.25); border: none; padding: 0; transition: all 0.3s; }
@@ -238,8 +238,9 @@ nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 20px 40
 nav.sc { background: rgba(14,12,24,0.9); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(201,145,58,0.1); }
 .logo { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 600; letter-spacing: 3px; color: var(--gold); text-decoration: none; text-transform: uppercase; }
 .nav-links { display: flex; gap: 28px; list-style: none; }
-.nav-links a { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); text-decoration: none; transition: color 0.2s; }
+.nav-links a { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); text-decoration: none; transition: color 0.2s; }
 .nav-links a:hover { color: var(--gold); }
+.nav-active { color: var(--gold) !important; }
 .lang-btn { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-dim); background: none; border: 1px solid rgba(201,145,58,0.25); padding: 5px 12px; border-radius: 20px; transition: all 0.2s; }
 .lang-btn:hover { border-color: var(--gold); color: var(--gold); }
 @media(max-width:800px){ nav { padding: 16px 20px; } .nav-links { display: none; } }
@@ -399,6 +400,31 @@ footer { padding:52px 10vw 34px; border-top:1px solid rgba(201,145,58,0.1); }
 /* Toast */
 .toast { position:fixed; bottom:26px; left:50%; z-index:1000; transform:translateX(-50%) translateY(70px); background:rgba(16,12,28,0.96); border:1px solid rgba(201,145,58,0.3); color:var(--gold-light); padding:12px 24px; font-size:13px; letter-spacing:1px; border-radius:2px; transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1),opacity 0.4s; opacity:0; backdrop-filter:blur(12px); white-space:nowrap; }
 .toast.on { transform:translateX(-50%) translateY(0); opacity:1; }
+/* ── Améliorations UX ── */
+.h-title { font-size: clamp(58px,8vw,108px) !important; }
+.h-sub { font-size: clamp(18px,1.8vw,22px) !important; line-height: 1.55 !important; color: var(--text) !important; font-family: 'Cormorant Garamond', serif !important; font-style: italic !important; font-weight: 300 !important; max-width: 480px !important; margin-bottom: 16px !important; }
+.h-sub-detail { font-size: 15px; line-height: 1.75; color: var(--text-dim); max-width: 420px; margin-bottom: 44px; }
+.h-social-proof { margin-top: 22px; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--text-faint); text-transform: uppercase; }
+.h-social-proof span { color: rgba(201,145,58,0.5); margin: 0 6px; }
+.btn-proto-primary { background: var(--gold); color: var(--ink); font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; text-decoration: none; padding: 17px 36px; border-radius: 2px; display: inline-block; transition: background 0.2s, transform 0.2s; }
+.btn-proto-primary:hover { background: var(--gold-light); transform: translateY(-1px); }
+.btn-proto-primary::after { content: ''; display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: var(--ink); margin-left: 10px; vertical-align: middle; animation: protoDot 2s ease-in-out infinite; }
+.burger { display: none; flex-direction: column; gap: 5px; background: none; border: none; padding: 6px; cursor: none; }
+.burger span { display: block; width: 22px; height: 1.5px; background: var(--text-dim); transition: all 0.3s; border-radius: 1px; }
+.burger.open span:nth-child(1) { transform: rotate(45deg) translate(4.5px,4.5px); }
+.burger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.burger.open span:nth-child(3) { transform: rotate(-45deg) translate(4.5px,-4.5px); }
+.mobile-nav { display: none; position: fixed; inset: 0; top: 57px; z-index: 98; background: rgba(14,12,24,0.97); backdrop-filter: blur(20px); flex-direction: column; align-items: center; justify-content: center; gap: 40px; }
+.mobile-nav.open { display: flex; }
+.mobile-nav a { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 300; color: var(--text); text-decoration: none; letter-spacing: 2px; transition: color 0.2s; }
+.mobile-nav a:hover { color: var(--gold); }
+.sb { line-height: 2 !important; }
+.at { font-size: 16px; line-height: 2; color: var(--text-dim); margin-bottom: 20px; }
+@media(max-width:800px) {
+  .burger { display: flex; }
+  section { padding: 72px 6vw !important; }
+  #hero { padding: 100px 6vw 60px !important; }
+}
 </style>
 </head>
 <body>
@@ -417,25 +443,39 @@ footer { padding:52px 10vw 34px; border-top:1px solid rgba(201,145,58,0.1); }
     <li><a href="#about" data-fr="À propos" data-en="About">À propos</a></li>
   </ul>
   <button class="lang-btn" id="langBtn" onclick="toggleLang()">EN</button>
+  <button class="burger" id="burgerBtn" aria-label="Menu" onclick="toggleMobileNav()">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
-
+<div class="mobile-nav" id="mobileNav">
+  <a href="#concept" onclick="closeMobileNav()">Le concept</a>
+  <a href="lore.html" onclick="closeMobileNav()">L'univers</a>
+  <a href="#how" onclick="closeMobileNav()">Comment ça marche</a>
+  <a href="#waitlist" onclick="closeMobileNav()">Liste d'attente</a>
+  <a href="#about" onclick="closeMobileNav()">À propos</a>
+</div>
 <!-- HERO -->
 <section id="hero">
   <div class="h-grid"></div>
   <div class="h-orb"></div>
   <div class="hero-inner">
     <div class="hero-text">
-      <p class="h-ey" data-fr="Bientôt disponible" data-en="Coming soon">Bientôt disponible</p>
+      <p class="h-ey" data-fr="Lyon · Bientôt disponible" data-en="Lyon · Coming soon">Lyon · Bientôt disponible</p>
       <h1 class="h-title">
         <span data-fr="Ta ville" data-en="Your city">Ta ville</span><br>
         <em data-fr="autrement" data-en="differently">autrement</em>
       </h1>
-      <p class="h-sub" data-fr="ExpLore transforme chaque quartier en terrain d'exploration. Collecte des cartes, découvre des histoires cachées, relie les lieux à leur mémoire — à pied, en vrai." data-en="ExpLore turns every neighbourhood into a space of discovery. Collect cards, uncover hidden stories, connect places to their memory — on foot, in the real world.">
-        ExpLore transforme chaque quartier en terrain d'exploration. Collecte des cartes, découvre des histoires cachées, relie les lieux à leur mémoire — à pied, en vrai.
+      <p class="h-sub" data-fr="Explore. Collecte. Sauve la mémoire." data-en="Explore. Collect. Save the memory.">
+        Explore. Collecte. Sauve la mémoire.
+      </p>
+      <p class="h-sub-detail" data-fr="Un jeu géolocalisé ancré dans le territoire — des cartes à collecter, des histoires à retrouver, à pied, en vrai." data-en="A location-based game rooted in the city — cards to collect, stories to recover, on foot, for real.">
+        Un jeu géolocalisé ancré dans le territoire — des cartes à collecter, des histoires à retrouver, à pied, en vrai.
       </p>
       <div class="h-actions">
-        <a href="#waitlist" class="btn-p" data-fr="Rejoindre la liste" data-en="Join the list">Rejoindre la liste</a>
-        <a href="prototype.html" class="btn-g btn-proto" data-fr="Tester le prototype →" data-en="Try the prototype →">Tester le prototype →</a>      </div>
+      <a href="lore.html" class="btn-p" data-fr="Entrer dans l'univers →" data-en="Enter the world →">Entrer dans l'univers →</a>
+        <a href="#waitlist" class="btn-g" data-fr="Rejoindre la liste" data-en="Join the list">Rejoindre la liste</a>
+      </div>
+      <p class="h-social-proof">Accès anticipé<span>·</span>Lyon pilote<span>·</span>France bientôt</p>
       <div class="h-dots">
         <button class="h-dot on" onclick="switchScreen(0)" aria-label="Carte"></button>
         <button class="h-dot" onclick="switchScreen(1)" aria-label="Fiche"></button>
@@ -927,6 +967,27 @@ document.addEventListener('mousemove', function(e) {
   ring.style.top = e.clientY + 'px';
 });
 
+// Lien nav actif au scroll
+(function() {
+  var sections = ['concept','how','partners','about'];
+  var links = {};
+  sections.forEach(function(id) {
+    var a = document.querySelector('.nav-links a[href="#' + id + '"]');
+    if (a) links[id] = a;
+  });
+  window.addEventListener('scroll', function() {
+    var scrollY = window.scrollY + 120;
+    var current = '';
+    sections.forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el && el.offsetTop <= scrollY) current = id;
+    });
+    Object.keys(links).forEach(function(id) {
+      links[id].classList.toggle('nav-active', id === current);
+    });
+  });
+})();
+
 // Nav
 window.addEventListener('scroll', function() {
   document.getElementById('nav').classList.toggle('sc', window.scrollY > 40);
@@ -945,6 +1006,18 @@ if (window.IntersectionObserver) {
 
 // Langue
 var lang = 'fr';
+function toggleMobileNav() {
+  var btn = document.getElementById('burgerBtn');
+  var menu = document.getElementById('mobileNav');
+  btn.classList.toggle('open');
+  menu.classList.toggle('open');
+  document.body.style.overflow = menu.classList.contains('open') ? 'hidden' : '';
+}
+function closeMobileNav() {
+  document.getElementById('burgerBtn').classList.remove('open');
+  document.getElementById('mobileNav').classList.remove('open');
+  document.body.style.overflow = '';
+}
 function toggleLang() {
   lang = lang === 'fr' ? 'en' : 'fr';
   document.getElementById('langBtn').textContent = lang === 'fr' ? 'EN' : 'FR';
@@ -1053,6 +1126,11 @@ function spawnFP() {
 }
 function startFP() { if (fi) return; spawnFP(); fi = setInterval(spawnFP, 1900); }
 function stopFP() { clearInterval(fi); fi = null; }
+
+// Nav scroll lore
+window.addEventListener('scroll', function() {
+  document.querySelector('nav').classList.toggle('sc', window.scrollY > 40);
+});
 
 var loreEl = document.getElementById('lore');
 if (loreEl && window.IntersectionObserver) {
