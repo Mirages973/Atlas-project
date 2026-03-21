@@ -425,10 +425,13 @@ footer { padding:52px 10vw 34px; border-top:1px solid rgba(201,145,58,0.1); }
   section { padding: 72px 6vw !important; }
   #hero { padding: 100px 6vw 60px !important; }
 }
+/* Transition fondu */
+#transition-overlay { position:fixed; inset:0; z-index:9000; background:#000; opacity:0; pointer-events:none; transition:opacity 0.5s ease; }
+#transition-overlay.active { opacity:1; pointer-events:all; }
 </style>
 </head>
 <body>
-
+<div id="transition-overlay"></div>
 <div id="cur"></div>
 <div id="cur-ring"></div>
 
@@ -1158,7 +1161,15 @@ document.addEventListener('DOMContentLoaded', function() {
   if (minis[1]) minis[1].src = _imgs.card;
   if (minis[2]) minis[2].src = _imgs.journal;
 });
-
+// Fondu sortant vers lore.html
+document.querySelectorAll('a[href="lore.html"]').forEach(function(a) {
+  a.addEventListener('click', function(e) {
+    e.preventDefault();
+    var o = document.getElementById('transition-overlay');
+    o.classList.add('active');
+    setTimeout(function() { window.location.href = 'lore.html'; }, 500);
+  });
+});
 </script>
 </body>
 </html>

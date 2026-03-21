@@ -447,10 +447,13 @@ nav.sc {
   .grand-livre { height: min(280px, 75vw); }
   #fragments { padding: 0 6vw 80px; }
 }
+/* Transition fondu */
+#transition-overlay { position:fixed; inset:0; z-index:9000; background:#000; opacity:1; pointer-events:all; transition:opacity 0.6s ease; }
+#transition-overlay.fade-in { opacity:0; pointer-events:none; }
 </style>
 </head>
 <body>
-
+<div id="transition-overlay"></div>
 <div id="cur"></div>
 <div id="cur-ring"></div>
 
@@ -858,6 +861,20 @@ document.addEventListener('mousemove', function(e) {
   var cx = (e.clientX - (r.left + r.width / 2)) / (window.innerWidth / 2);
   var cy = (e.clientY - (r.top + r.height / 2)) / (window.innerHeight / 2);
   livre.style.transform = 'perspective(1200px) rotateY(' + (cx * 5) + 'deg) rotateX(' + (-cy * 3) + 'deg)';
+});
+// Fondu entrant depuis index.html
+window.addEventListener('load', function() {
+  var o = document.getElementById('transition-overlay');
+  setTimeout(function() { o.classList.add('fade-in'); }, 50);
+});
+// Fondu sortant vers index.html
+document.querySelectorAll('a[href="index.html"]').forEach(function(a) {
+  a.addEventListener('click', function(e) {
+    e.preventDefault();
+    var o = document.getElementById('transition-overlay');
+    o.classList.remove('fade-in');
+    setTimeout(function() { window.location.href = 'index.html'; }, 500);
+  });
 });
 </script>
 </body>
