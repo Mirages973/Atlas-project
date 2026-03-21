@@ -312,7 +312,7 @@ section { padding: 110px 10vw; }
   flex-wrap: wrap;
 }
 .carde {
-  width: 220px;
+  width: 240px;
   border-radius: 12px;
   border: 1px solid rgba(201,145,58,0.45);
   background: #0e0c18;
@@ -323,20 +323,20 @@ section { padding: 110px 10vw; }
 }
 .carde:hover { transform: translateY(-8px) rotate(0deg) !important; box-shadow: 0 30px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(201,145,58,0.3); }
 .carde.center { width: 240px; transform: translateY(-16px); box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(201,145,58,0.2); }
+.carde.center .carde-img { height: 180px; }
 .carde.left { transform: rotate(-3deg); }
 .carde.right { transform: rotate(3deg); }
-.carde-img { width: 100%; height: 200px; object-fit: cover; object-position: center top; display: block; }
-.carde-fade { position: absolute; top: 44%; left: 0; right: 0; height: 100px; background: linear-gradient(to bottom, transparent, #0e0c18); pointer-events: none; }
+.carde-img { width: 100%; height: 220px; object-fit: cover; object-position: center top; display: block; }
 .carde-badge-type { position: absolute; top: 9px; left: 9px; font-family: 'DM Mono', monospace; font-size: 7px; letter-spacing: 2px; text-transform: uppercase; color: #c9913a; background: rgba(10,8,16,0.85); border: 1px solid rgba(201,145,58,0.4); padding: 3px 8px; border-radius: 8px; }
 .carde-badge-rarity-rare { position: absolute; top: 9px; right: 9px; font-family: 'DM Mono', monospace; font-size: 7px; letter-spacing: 2px; text-transform: uppercase; color: #c8a8f0; background: rgba(107,79,160,0.2); border: 1px solid rgba(107,79,160,0.45); padding: 3px 8px; border-radius: 8px; }
 .carde-badge-rarity-commun { position: absolute; top: 9px; right: 9px; font-family: 'DM Mono', monospace; font-size: 7px; letter-spacing: 2px; text-transform: uppercase; color: #c9913a; background: rgba(201,145,58,0.1); border: 1px solid rgba(201,145,58,0.3); padding: 3px 8px; border-radius: 8px; }
-.carde-body { padding: 10px 13px 12px; }
-.carde-fragment { font-family: 'DM Mono', monospace; font-size: 7px; letter-spacing: 2px; text-transform: uppercase; color: rgba(201,145,58,0.4); margin-bottom: 3px; display: block; }
-.carde-name { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 300; color: #f0ece2; line-height: 1.1; margin-bottom: 2px; }
+.carde-body { padding: 10px 13px 12px; background: #0e0c18; }
+.carde-fragment { font-family: 'DM Mono', monospace; font-size: 7px; letter-spacing: 2px; text-transform: uppercase; color: rgba(201,145,58,0.7); margin-bottom: 3px; display: block; }
+.carde-name { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 400; color: #f0ece2; line-height: 1.1; margin-bottom: 2px; }
 .carde-name em { font-style: italic; color: #c9913a; }
-.carde-subtitle { font-family: 'Cormorant Garamond', serif; font-size: 11px; font-style: italic; color: rgba(201,145,58,0.6); margin-bottom: 6px; display: block; }
-.carde-divider { height: 1px; background: linear-gradient(90deg, transparent, rgba(201,145,58,0.3), transparent); margin-bottom: 6px; }
-.carde-quote { font-family: 'Cormorant Garamond', serif; font-size: 10px; font-style: italic; color: rgba(240,236,226,0.5); line-height: 1.5; }
+.carde-subtitle { font-family: 'Cormorant Garamond', serif; font-size: 11px; font-style: italic; color: rgba(201,145,58,0.85); margin-bottom: 6px; display: block; }
+.carde-divider { height: 1px; background: rgba(201,145,58,0.3); margin-bottom: 6px; }
+.carde-quote { font-family: 'Cormorant Garamond', serif; font-size: 10px; font-style: italic; color: rgba(240,236,226,0.75); line-height: 1.5; }
 @media(max-width:800px) { .cards-grid { gap: 16px; } .carde { width: 160px; } .carde.center { width: 175px; } .carde-img { height: 150px; } }
 .lore-whisper { margin-top:26px; font-family:'Cormorant Garamond',serif; font-size:13px; font-style:italic; letter-spacing:2px; color:rgba(201,145,58,0.4); }
 .book-side { display:flex; justify-content:center; align-items:center; min-height:360px; }
@@ -664,7 +664,6 @@ footer { padding:52px 10vw 34px; border-top:1px solid rgba(201,145,58,0.1); }
     <!-- Carte Objet — Lumignon -->
     <div class="carde left">
       <img class="carde-img" src="https://explorestudio.github.io/expLore-project/Lumignon.png" alt="Lumignon"/>
-      <div class="carde-fade"></div>
       <span class="carde-badge-type">Objet</span>
       <span class="carde-badge-rarity-commun">Commun</span>
       <div class="carde-body">
@@ -679,7 +678,6 @@ footer { padding:52px 10vw 34px; border-top:1px solid rgba(201,145,58,0.1); }
     <!-- Carte Lieu — Vieux-Lyon (centre) -->
     <div class="carde center">
       <img class="carde-img" src="https://explorestudio.github.io/expLore-project/vieux-lyon.png" alt="Le Vieux-Lyon" style="height:220px;"/>
-      <div class="carde-fade"></div>
       <span class="carde-badge-type">Lieu</span>
       <span class="carde-badge-rarity-rare">Rare</span>
       <div class="carde-body">
@@ -694,7 +692,6 @@ footer { padding:52px 10vw 34px; border-top:1px solid rgba(201,145,58,0.1); }
     <!-- Carte Personnage — Juliette Récamier -->
     <div class="carde right">
       <img class="carde-img" src="https://explorestudio.github.io/expLore-project/Juliette-recamier.png" alt="Juliette Récamier"/>
-      <div class="carde-fade"></div>
       <span class="carde-badge-type">Personnage</span>
       <span class="carde-badge-rarity-rare">Rare</span>
       <div class="carde-body">
