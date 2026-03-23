@@ -962,8 +962,33 @@
             from { opacity: 0; transform: translateY(4px); }
             to   { opacity: 1; transform: translateY(0); }
         }
-        .journal-entry-new {
-            animation: inkWrite 0.4s ease both;
+        /* ── N0 : écriture à même le carnet ── */
+        .scrap-n0-new {
+            animation: n0Write 0.6s ease both;
+        }
+        @keyframes n0Write {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        /* ── N1 : collage ── */
+        .scrap-n1-new {
+            animation: n1Stick 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        }
+
+        .scrap-n1-new .scrap-tape {
+            animation: tapeAppear 0.3s ease 0.35s both;
+        }
+        @keyframes tapeAppear {
+            from { opacity: 0; transform: scaleX(0.5); }
+            to   { opacity: 0.85; transform: scaleX(1); }
+        }
+
+        @keyframes n1Stick {
+            0%   { opacity: 0;   transform: rotate(var(--scrap-rot, 0deg)) translateY(-32px) scale(0.9) rotate(-2deg); }
+            60%  { opacity: 1;   transform: rotate(var(--scrap-rot, 0deg)) translateY(4px)   scale(1.02); }
+            80%  { transform: rotate(var(--scrap-rot, 0deg)) translateY(-2px) scale(0.99); }
+            100% { transform: rotate(var(--scrap-rot, 0deg)) translateY(0)   scale(1); }
         }
 
         @keyframes bubblePop {
@@ -1227,103 +1252,7 @@
 .journal-bio-header-name { font-size: 15px; font-weight: 700; font-family: Georgia, serif; color: #fef3c7; }
 .journal-bio-header-type { font-size: 11px; opacity: 0.8; color: #fde68a; }
 .journal-bio-content { padding: 16px; position: relative; z-index: 1; }
-.journal-page-bio.swiped {
-    transform: translateX(-100%);
-    opacity: 0.7;
-    pointer-events: none;
-}
-.journal-page-annexe {
-    position: absolute;
-    inset: 0;
-    overflow-y: auto;
-    z-index: 10;
-    padding: 16px 16px 16px 44px;
-    background: #ede4c0;
-    transition: transform 0.38s cubic-bezier(0.32,0.72,0,1);
-    transform: translateX(100%);
-    pointer-events: none;
-    box-shadow: -4px 0 12px rgba(0,0,0,0.12);
-}
-.journal-page-annexe.swiped {
-    transform: translateX(0);
-    pointer-events: auto;
-}
-.journal-page-annexe-tab {
-    position: absolute; top: 0; right: 0;
-    width: 28px;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    gap: 4px; cursor: pointer; z-index: 3;
-    padding: 12px 0;
-    transition: opacity 0.2s;
-    background: linear-gradient(180deg, #92400e 0%, #b45309 100%);
-    border-radius: 0 8px 8px 0;
-    box-shadow: 2px 0 8px rgba(0,0,0,0.3);
-}
-.journal-page-annexe-tab.hidden-tab { opacity: 0; pointer-events: none; }
-.journal-page-bio-tab {
-    position: absolute; top: 0; left: 0;
-    width: 28px;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    gap: 4px; cursor: pointer; z-index: 4;
-    padding: 12px 0;
-    transition: opacity 0.2s;
-    background: linear-gradient(180deg, #78350f 0%, #92400e 100%);
-    border-radius: 8px 0 0 8px;
-    box-shadow: -2px 0 8px rgba(0,0,0,0.3);
-}
-.journal-page-bio-tab.hidden-tab { opacity: 0; pointer-events: none; }
-.journal-page-bio-tab-label {
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-    transform: rotate(180deg);
-    font-size: 9px; font-weight: 700;
-    letter-spacing: 1.5px; text-transform: uppercase;
-    color: rgba(254,243,199,0.92);
-}
-.journal-page-annexe-tab-label {
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-    font-size: 9px; font-weight: 700;
-    letter-spacing: 1.5px; text-transform: uppercase;
-    color: rgba(254,243,199,0.92);
-}
-.journal-page-annexe-tab-dot {
-    width: 5px; height: 5px; border-radius: 50%;
-    background: #fde68a; opacity: 0; transition: opacity 0.3s;
-}
-.journal-page-annexe-tab-dot.has-echo { opacity: 1; animation: tabPulse 2s infinite; }
-@keyframes tabPulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.5);} }
-.journal-spine {
-    position: absolute; top: 0; bottom: 0; left: 28px;
-    width: 3px;
-    background: linear-gradient(to bottom, #d4a017, #f59e0b, #d4a017);
-    z-index: 4; pointer-events: none; opacity: 0.6;
-    transition: opacity 0.3s;
-}
-.journal-annexe-page {
-    background: #ede4c0;
-    border: 1.5px solid rgba(212,160,23,0.4);
-    border-radius: 8px;
-    min-height: 380px; padding: 20px;
-    position: relative;
-}
-.journal-annexe-page-header {
-    text-align: center; margin-bottom: 20px;
-    padding-bottom: 14px;
-    border-bottom: 1px solid rgba(212,160,23,0.3);
-}
-.journal-annexe-page-title {
-    font-size: 10px; font-weight: 700;
-    letter-spacing: 2px; text-transform: uppercase;
-    color: #92400e; opacity: 0.7;
-}
-.journal-annexe-page-subtitle {
-    font-size: 13px; color: #78350f;
-    margin-top: 4px; font-style: italic;
-    font-family: Georgia, serif;
-}
+
 .journal-annexe-card {
     border-radius: 6px; padding: 14px; margin-bottom: 14px;
     background: rgba(255,255,255,0.5);
@@ -1368,11 +1297,20 @@
     background: transparent;
     border: none;
     border-radius: 0;
-    padding: 8px 16px 16px;
+    padding: 8px 14px 24px;
     min-height: 400px;
     position: relative;
     z-index: 1;
     margin-bottom: 16px;
+    /* Lignes de cahier */
+    background-image: repeating-linear-gradient(
+        to bottom,
+        transparent,
+        transparent 27px,
+        rgba(160,120,50,0.1) 27px,
+        rgba(160,120,50,0.1) 28px
+    );
+    background-position: 0 36px;
 }
 
         /* Overlays de niveau — wrappers inline dans renderJournalBio */
@@ -1452,46 +1390,206 @@
         .orb-slot-sub   { font-size: 10px; color: #92400e; opacity: 0.65; margin-top: 2px; font-style: italic; }
 
         /* ── Entrées niveau 0 — contemplation ── */
+        /* ── Entrées niveau 0 — contemplation ── */
         .scrap-n0 {
             position: relative;
-            margin-bottom: 20px;
-            background: rgba(255,255,255,0.45);
-            border-radius: 3px;
-            padding: 12px 14px 10px;
-            box-shadow: 1px 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            padding: 0 4px;
         }
         .scrap-tape {
-            position: absolute; top: -7px;
-            height: 14px; background: rgba(212,160,23,0.3);
+            position: absolute; top: -8px;
+            height: 15px;
             border-radius: 2px;
+            opacity: 0.85;
         }
 
-        /* ── Entrées niveau 1 — folder simple ── */
+        /* ── Entrées niveau 1 — folder cliquable ── */
         .scrap-n1 {
             position: relative;
-            margin-bottom: 20px;
-            background: rgba(255,255,255,0.5);
-            border-radius: 3px;
-            padding: 12px 14px 10px;
-            box-shadow: 1px 2px 8px rgba(0,0,0,0.1);
+            background: rgba(255,248,225,0.8);
+            border-radius: 2px;
+            padding: 11px 13px 10px;
+            box-shadow: 2px 3px 10px rgba(0,0,0,0.15), 0 1px 0 rgba(255,255,255,0.6) inset;
             cursor: pointer;
-            transition: box-shadow 0.2s, transform 0.2s;
+            transition: box-shadow 0.2s, transform 0.15s;
         }
-        .scrap-n1:active { transform: scale(0.99) !important; }
+        .scrap-n1:active { transform: scale(0.985) rotate(var(--scrap-rot, 0deg)) !important; }
+        .scrap-n1:hover  { box-shadow: 3px 5px 16px rgba(0,0,0,0.2); }
+
+        /* Coin corné — signal discret d'interactivité */
         .scrap-corner {
             position: absolute; bottom: 0; right: 0;
-            width: 0; height: 0;
-            border-style: solid;
-            border-width: 0 0 18px 18px;
-            border-color: transparent transparent rgba(160,120,50,0.35) transparent;
+            width: 22px; height: 22px;
+            background: linear-gradient(225deg, rgba(180,130,50,0.22) 50%, transparent 50%);
+            border-radius: 0 0 2px 0;
         }
         .scrap-corner::after {
             content: '';
-            position: absolute; bottom: -16px; right: -14px;
+            position: absolute; bottom: 3px; right: 3px;
             width: 0; height: 0;
             border-style: solid;
-            border-width: 0 0 14px 14px;
-            border-color: transparent transparent rgba(245,234,212,0.9) transparent;
+            border-width: 0 0 10px 10px;
+            border-color: transparent transparent rgba(245,234,212,0.95) transparent;
+        }
+
+        @keyframes n2Write {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Enveloppe N2 — verrouillée ── */
+        .scrap-n2-locked {
+            position: relative;
+            border-radius: 3px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.2s;
+        }
+        .scrap-n2-locked:active { transform: scale(0.985) !important; }
+        .scrap-n2-locked:hover  { box-shadow: 3px 5px 16px rgba(0,0,0,0.18); }
+        .scrap-n2-envelope {
+            padding: 14px 16px 14px;
+            display: flex; align-items: center; gap: 12px;
+        }
+        .scrap-n2-seal {
+            width: 36px; height: 36px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px; flex-shrink: 0;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        .scrap-n2-body { flex: 1; min-width: 0; }
+        .scrap-n2-title {
+            font-family: Georgia, serif; font-size: 12px; font-weight: 700;
+            margin-bottom: 3px;
+        }
+        .scrap-n2-hint {
+            font-size: 10px; font-family: Georgia, serif; font-style: italic;
+            opacity: 0.6; line-height: 1.4;
+        }
+        .scrap-n2-cost {
+            display: flex; align-items: center; gap: 4px;
+            margin-top: 4px; font-size: 10px; font-weight: 700; opacity: 0.75;
+        }
+        /* ── Enveloppe N2 — ouverte ── */
+        .scrap-n2-open {
+            position: relative;
+            background: rgba(255,252,240,0.82);
+            border-radius: 2px;
+            padding: 11px 13px 12px;
+            box-shadow: 2px 3px 10px rgba(0,0,0,0.15);
+        }
+        .scrap-n2-open-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 9px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1px; padding: 2px 8px; border-radius: 10px;
+            margin-bottom: 8px; opacity: 0.85;
+        }
+        /* ── Animation ouverture enveloppe ── */
+        @keyframes envelopeOpen {
+            0%   { opacity: 0; transform: rotate(var(--scrap-rot,0deg)) scaleY(0.7); }
+            100% { opacity: 1; transform: rotate(var(--scrap-rot,0deg)) scaleY(1); }
+        }
+        .scrap-n2-opening { animation: envelopeOpen 0.5s cubic-bezier(0.34,1.56,0.64,1) both; }
+        /* ── Modale confirmation écho ── */
+        .echo-unlock-modal {
+            position: absolute; inset: 0; z-index: 900;
+            background: rgba(10,6,24,0.9);
+            display: none; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 12px; padding: 32px 24px;
+        }
+        .echo-unlock-modal.show { display: flex; }
+        /* ── Lightbox N2 ── */
+        .scrap-lb-n2-btn {
+            display: flex; align-items: center; gap: 8px;
+            width: 100%; margin-top: 14px;
+            padding: 10px 14px; border-radius: 8px;
+            border: 1px dashed rgba(255,255,255,0.25);
+            background: rgba(255,255,255,0.07);
+            cursor: pointer;
+            font-family: Georgia, serif; font-style: italic;
+            font-size: 12px; color: rgba(255,255,255,0.75);
+            box-sizing: border-box;
+        }
+        .scrap-lb-n2-btn.no-echo { opacity: 0.4; cursor: default; pointer-events: none; }
+        .scrap-lb-n2-content {
+            margin-top: 14px; padding: 12px 14px;
+            border-radius: 6px; border-left: 2px solid;
+        }
+        .scrap-lb-n2-title {
+            font-size: 10px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1px; margin-bottom: 6px;
+        }
+        .scrap-lb-n2-text {
+            font-size: 13px; font-family: Georgia, serif; font-style: italic;
+            line-height: 1.75; color: rgba(255,255,255,0.85);
+        }
+        @keyframes n2Write {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .scrap-lb-n2-content.animating { animation: n2Write 0.5s ease both; }
+        /* ── Pastille signal N2 ── */
+        .scrap-echo-dot {
+            position: absolute; top: 7px; right: 7px;
+            width: 14px; height: 14px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .echo-unlock-modal-icon  { font-size: 44px; }
+        .echo-unlock-modal-title { font-size: 16px; font-weight: 900; color: #fef3c7; text-align: center; font-family: Georgia, serif; }
+        .echo-unlock-modal-text  { font-size: 13px; color: rgba(255,255,255,0.7); text-align: center; font-family: Georgia, serif; font-style: italic; line-height: 1.6; max-width: 260px; }
+        .echo-unlock-modal-cost  { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; }
+        .echo-unlock-modal-btns  { display: flex; gap: 12px; margin-top: 6px; }
+        .echo-unlock-btn-confirm { background: rgba(251,191,36,0.18); border: 1px solid rgba(251,191,36,0.45); color: #fbbf24; padding: 10px 24px; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; }
+        .echo-unlock-btn-cancel  { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.5); padding: 10px 20px; border-radius: 20px; font-size: 13px; cursor: pointer; }
+
+        /* ── Polaroid ── */
+        .scrap-polaroid {
+            background: #f0e8d0;
+            border: 1px solid rgba(160,120,50,0.2);
+            border-radius: 2px;
+            padding: 5px 5px 16px;
+            box-shadow: 1px 2px 5px rgba(0,0,0,0.15);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; color: rgba(100,70,20,0.5);
+            font-style: italic; text-align: center;
+            line-height: 1.4;
+        }
+        .scrap-polaroid-sm  { min-height: 48px; margin-bottom: 8px; }
+        .scrap-polaroid-lg  { min-height: 80px; margin-bottom: 10px; font-size: 11px; }
+
+        /* ── Étiquette kraft (alternative à la polaroid) ── */
+        .scrap-label {
+            background: #d4a853;
+            border-radius: 2px;
+            padding: 4px 10px;
+            display: inline-block;
+            font-size: 10px; font-weight: 700;
+            color: rgba(60,30,0,0.75);
+            text-transform: uppercase; letter-spacing: 1px;
+            margin-bottom: 8px;
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.18);
+        }
+
+        /* ── Texte manuscrit ── */
+        .scrap-hand {
+            font-family: Georgia, serif;
+            font-style: italic;
+            font-size: 12px;
+            color: #5c3a1e;
+            line-height: 1.75;
+        }
+        .scrap-hand-sm { font-size: 11px; opacity: 0.75; }
+
+        /* ── Audio inline ── */
+        .scrap-audio {
+            display: flex; align-items: center; gap: 6px;
+            margin-top: 8px;
+            font-size: 10px; color: #92400e; opacity: 0.55;
+            font-family: Georgia, serif; font-style: italic;
         }
 
         /* ── Lightbox scrapbook ── */
@@ -1721,119 +1819,6 @@
 
         .journal-item-with-slot { display: flex; gap: 12px; margin-bottom: 16px; align-items: flex-start; position: relative; }
 
-        /* ── Séparateur biographie / annexes ── */
-        .journal-annexe-separator {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin: 24px 0 16px;
-            position: relative;
-            z-index: 2;
-        }
-        .journal-annexe-separator::before,
-        .journal-annexe-separator::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: #d97706;
-            opacity: 0.4;
-        }
-        .journal-annexe-separator-label {
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            color: #92400e;
-            opacity: 0.6;
-            white-space: nowrap;
-        }
-
-        /* ── Fiche annexe (écho placé) ── */
-        .journal-annexe {
-            border-radius: 10px;
-            padding: 14px;
-            margin-bottom: 14px;
-            position: relative;
-            z-index: 2;
-            background: rgba(255,255,255,0.7);
-            border-left: 4px solid #ccc;
-        }
-        .journal-annexe-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 10px;
-        }
-        .journal-annexe-icon {
-            width: 26px; height: 26px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 13px;
-            flex-shrink: 0;
-        }
-        .journal-annexe-title {
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            opacity: 0.75;
-        }
-        .journal-annexe-text {
-            font-size: 13px;
-            line-height: 1.7;
-            color: #374151;
-            font-style: italic;
-            font-family: 'Georgia', serif;
-        }
-
-        /* ── Emplacement vide (écho à associer) ── */
-        .journal-annexe-empty {
-            border-radius: 10px;
-            padding: 14px;
-            margin-bottom: 14px;
-            position: relative;
-            z-index: 2;
-            background: rgba(255,255,255,0.35);
-            border: 2px dashed rgba(0,0,0,0.12);
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .journal-annexe-empty:active { transform: scale(0.98); }
-        .journal-annexe-empty-inner {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .journal-annexe-empty-icon {
-            width: 26px; height: 26px;
-            border-radius: 50%;
-            border: 2px dashed rgba(0,0,0,0.15);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 13px;
-            opacity: 0.4;
-            flex-shrink: 0;
-        }
-        .journal-annexe-empty-label {
-            font-size: 12px;
-            color: #92400e;
-            opacity: 0.5;
-            font-style: italic;
-        }
-        .journal-annexe-available {
-            border-color: currentColor;
-            background: rgba(255,255,255,0.55);
-            opacity: 1;
-        }
-        .journal-annexe-available .journal-annexe-empty-icon {
-            opacity: 0.85;
-        }
-        .journal-annexe-available .journal-annexe-empty-label {
-            opacity: 0.85;
-            font-style: normal;
-            font-weight: 600;
-        }
-        .journal-content-wrapper { flex: 1; }
-
         .echo-inventory {
             display: flex;
             justify-content: center;
@@ -2030,6 +2015,30 @@
         /* Level-up overlay */
         .levelup-overlay { position: absolute; inset: 0; background: rgba(15,10,30,0.85); z-index: 800; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; pointer-events: none; opacity: 0; transition: opacity 0.3s; }
         .levelup-overlay.show { opacity: 1; pointer-events: all; }
+        /* Overlay synthèse narrative (orbe level up) */
+.orb-synthesis-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 6, 24, 0.92);
+    z-index: 850;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 32px 24px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.35s;
+    text-align: center;
+}
+.orb-synthesis-overlay.show { opacity: 1; pointer-events: all; }
+.orb-synth-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.45); }
+.orb-synth-card-name { font-size: 22px; font-weight: 900; color: #fef3c7; font-family: Georgia, serif; }
+.orb-synth-level { font-size: 13px; font-weight: 700; color: #a78bfa; letter-spacing: 1px; }
+.orb-synth-orb { font-size: 56px; animation: levelBurst 0.6s cubic-bezier(0.34,1.56,0.64,1); }
+.orb-synth-text { font-size: 14px; color: rgba(255,255,255,0.8); font-family: Georgia, serif; font-style: italic; line-height: 1.7; max-width: 280px; }
+.orb-synth-btn { margin-top: 8px; background: rgba(168,85,247,0.2); border: 1px solid rgba(168,85,247,0.4); color: #c084fc; padding: 10px 28px; border-radius: 20px; font-size: 14px; font-weight: 700; cursor: pointer; }
         .levelup-burst { font-size: 64px; animation: levelBurst 0.6s cubic-bezier(0.34,1.56,0.64,1); }
         @keyframes levelBurst { 0% { transform: scale(0) rotate(-20deg); } 100% { transform: scale(1) rotate(0deg); } }
         .levelup-text { font-size: 28px; font-weight: 900; color: #e9d5ff; text-align: center; letter-spacing: 1px; }
@@ -4518,6 +4527,29 @@
                 </div>
             </div>
 
+            <!-- Délai cartes thématiques -->
+            <div style="padding:16px; border-bottom:1px solid rgba(255,255,255,0.08);">
+                <div style="font-size:12px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Délai cartes thématiques</div>
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                    <input type="range" id="thematicDelaySlider" min="10" max="300" step="10" value="90"
+                        oninput="updateThematicDelay(this.value)"
+                        style="flex:1;accent-color:#6366f1;">
+                    <span id="thematicDelayLabel" style="font-size:18px;font-weight:800;min-width:50px;text-align:right;">90s</span>
+                </div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                    <button onclick="setThematicDelay(10)"  class="test-time-btn">10s</button>
+                    <button onclick="setThematicDelay(30)"  class="test-time-btn">30s</button>
+                    <button onclick="setThematicDelay(90)"  class="test-time-btn">90s</button>
+                    <button onclick="setThematicDelay(180)" class="test-time-btn">3min</button>
+                </div>
+            </div>
+
+            <!-- Donner des échos -->
+            <div style="padding:16px; border-bottom:1px solid rgba(255,255,255,0.08);">
+                <div style="font-size:12px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Donner des échos</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;" id="testEchoBtns"></div>
+            </div>
+
             <!-- Actions de test -->
             <div style="padding:16px; border-bottom:1px solid rgba(255,255,255,0.08);">
                 <div style="font-size:12px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Actions</div>
@@ -4754,7 +4786,8 @@
                 <div style="flex:1;min-width:0;cursor:pointer;" onclick="openEchoesFromToast()">
                     <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(167,139,250,0.7);margin-bottom:3px;">Écho collecté ✦ <span style="color:rgba(255,255,255,0.3);font-weight:400;font-size:10px;">Appuyer pour voir</span></div>
                     <div style="font-size:15px;font-weight:800;color:white;" id="echoTutoName">Écho Histoire</div>
-                    <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:2px;">Glisse-le sur une carte pour débloquer un souvenir</div>
+                    <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:2px;" id="echoTutoDesc"></div>
+                    <div style="font-size:12px;font-weight:700;margin-top:5px;display:none;cursor:pointer;" id="echoTutoTarget"></div>
                 </div>
                 <button onclick="closeEchoTutoToast()" style="
                     background:rgba(255,255,255,0.1);border:none;color:rgba(255,255,255,0.6);
@@ -4810,7 +4843,7 @@
                         <div class="card-category-badge" id="cardCategory">Personnage</div>
                         <div class="card-art-area">
                             <div class="card-art-placeholder" onclick="showClickDialogue()">👤</div>
-                            <div class="card-art-title" id="cardDetailName">Marie Curie</div>
+                            <div class="card-art-title" id="cardDetailName"></div>
                             <div class="card-footer">
                                 <div class="rarity-gem" id="cardRarityGem"></div>
                                 <div class="card-level-info">
@@ -5085,16 +5118,7 @@
             </div>
         </div>
 
-        <!-- ── LEVEL-UP OVERLAY ── -->
-        <div id="levelupOverlay" class="levelup-overlay" onclick="closeLevelupOverlay()">
-            <div class="levelup-burst" id="levelupBurst">⭐</div>
-            <div class="levelup-text">NIVEAU <span id="levelupNum">2</span></div>
-            <div class="levelup-rank" id="levelupRank">Chroniqueur</div>
-            <div class="levelup-xp" id="levelupXpBonus">Nouveau rang débloqué !</div>
-            <!-- Récompenses débloquées à ce niveau -->
-            <div id="levelupRewards" class="levelup-rewards"></div>
-            <button class="levelup-close" onclick="closeLevelupOverlay()">Continuer →</button>
-        </div>
+        
 
         <div id="studioScreen" class="studio-screen">
             <div class="studio-header">
@@ -5496,7 +5520,7 @@
                 <div class="journal-screen-card-mini">
                     <div class="journal-screen-card-image">🎴</div>
                     <div class="journal-screen-card-info">
-                        <h3 id="journalScreenCardName">Marie Curie</h3>
+                        <h3 id="journalScreenCardName"></h3>
                         <p id="journalScreenCardType">Personnage</p>
                     </div>
                 </div>
@@ -5505,38 +5529,9 @@
             <div class="journal-screen-body">
                 <div class="journal-pages-wrapper" id="journalPagesWrapper">
 
-                    <!-- Reliure visible -->
-                    <div class="journal-spine" id="journalSpine"></div>
-
-                    <!-- Onglet trombone -->
-                    <div style="position:sticky;top:calc(50% - 60px);width:100%;height:0;overflow:visible;z-index:11;">
-                    <div class="journal-page-annexe-tab" id="journalAnnexeTab" onclick="goToJournalPage(1)">
-                        <div class="journal-page-annexe-tab-dot" id="journalAnnexeTabDot"></div>
-                        <span class="journal-page-annexe-tab-label">Savoirs</span>
-                    </div>
-                    </div><!-- /tab-wrapper -->
-
-                    <!-- Languette retour "Biographie" (sur page annexe, côté gauche) -->
-                    <div style="position:sticky;top:calc(50% - 60px);width:100%;height:0;overflow:visible;z-index:11;">
-                    <div class="journal-page-bio-tab hidden-tab" id="journalBioTab" onclick="goToJournalPage(0)">
-                        <span class="journal-page-bio-tab-label">Biographie</span>
-                    </div>
-                    </div><!-- /biotab-wrapper -->
-
-                    <!-- PAGE 2 : Savoirs annexes (derrière) -->
-                    <div class="journal-page-annexe" id="journalPage1">
-                        <div class="journal-annexe-page">
-                            <div class="journal-annexe-page-header">
-                                <div class="journal-annexe-page-title">Savoirs annexes</div>
-                                <div class="journal-annexe-page-subtitle" id="journalAnnexeSubtitle">Associe des échos pour révéler des savoirs</div>
-                            </div>
-                            <div id="journalAnnexesContainer"></div>
-                        </div>
-                    </div>
-
                     <!-- PAGE 1 : Biographie (devant) -->
                     <div class="journal-page-bio" id="journalPage0">
-<div class="journal-notebook">
+                        <div class="journal-notebook">
                             <!-- contenu injecté dynamiquement par renderJournalBio -->
                         </div>
                     </div>
@@ -5688,7 +5683,31 @@
             <div class="scrap-lightbox-photo" id="scrapLbPhoto"></div>
             <div class="scrap-lightbox-text" id="scrapLbText"></div>
             <div class="scrap-lightbox-audio" id="scrapLbAudio"></div>
+            <div id="scrapLbN2"></div>
         </div>
+        </div>
+
+        <!-- ── LEVEL-UP OVERLAY ── -->
+        <div id="levelupOverlay" class="levelup-overlay" onclick="closeLevelupOverlay()">
+            <div class="levelup-burst" id="levelupBurst">⭐</div>
+            <div class="levelup-text">NIVEAU <span id="levelupNum">2</span></div>
+            <div class="levelup-rank" id="levelupRank">Chroniqueur</div>
+            <div class="levelup-xp" id="levelupXpBonus">Nouveau rang débloqué !</div>
+            <!-- Récompenses débloquées à ce niveau -->
+            <div id="levelupRewards" class="levelup-rewards"></div>
+            <button class="levelup-close" onclick="closeLevelupOverlay()">Continuer →</button>
+        </div>
+
+        <!-- Modale déverrouillage écho N2 -->
+        <div class="echo-unlock-modal" id="echoUnlockModal">
+            <div class="echo-unlock-modal-icon" id="echoUnlockIcon">✨</div>
+            <div class="echo-unlock-modal-title" id="echoUnlockTitle"></div>
+            <div class="echo-unlock-modal-text" id="echoUnlockText"></div>
+            <div class="echo-unlock-modal-cost" id="echoUnlockCost"></div>
+            <div class="echo-unlock-modal-btns">
+                <button class="echo-unlock-btn-cancel" onclick="closeEchoUnlockModal()">Annuler</button>
+                <button class="echo-unlock-btn-confirm" id="echoUnlockConfirmBtn" onclick="confirmEchoUnlock()">Utiliser l'écho</button>
+            </div>
         </div>
 
         </div><!-- fin mainApp -->
@@ -5740,7 +5759,7 @@
                       incipit: 'J\'ai été le cœur de mille révolutions et de mille fêtes. Les villes oublient, moi jamais.' },
                     { id: 'card7', cardKind: 'local', collections: ["arts_scene", "pierres_memoire"], name: 'Opéra de Lyon', type: 'Lieu', poiId: 'opera', rarity: 'rare', supertype: 'arts',
                       clue: 'Regarde la verrière bombée sur le toit — deux courbes parfaites que Jean Nouvel a posées sur l\'ancien.', clueIcon: '🎭',
-                      incipit: 'On m\'a ouvert, refermé, reconstruit. Mais la musique n\'a jamais cessé de résonner dans mes murs.' },
+                      incipit: 'On m\'a ouvert, refermé, reconstruit. Mais la musique n\'a jamais cessé de résonner dans mes murs.', },
                     { id: 'card8', cardKind: 'local', collections: ["pierres_memoire"], name: 'Hôtel de Ville', type: 'Lieu', poiId: 'hotel_ville', rarity: 'common', supertype: 'societe',
                       clue: 'Trouve les deux lions sculptés de part et d\'autre du portail principal.', clueIcon: '🦁',
                       incipit: 'Tout ce qui a gouverné cette ville est passé sous mon fronton. Le pouvoir change, la pierre reste.' },
@@ -5775,7 +5794,10 @@
                       incipit: 'On m\'a mis trois siècles à bâtir. Je suis l\'œuvre de mains qui ne se sont jamais rencontrées.' },
                     { id: 'card14', cardKind: 'local', collections: ["pierres_memoire"], name: 'Traboule Renaissance', type: 'Lieu', poiId: 'vieux_lyon', rarity: 'common', supertype: 'societe', supertype2: 'histoire',
                       clue: 'Pousse la porte cochère au 27 rue Saint-Jean — la traboule s\'ouvre de l\'autre côté.', clueIcon: '🚪',
-                      incipit: 'Je suis un secret que tout le monde connaît. Un passage qui traverse les murs et les siècles.' },
+                      incipit: 'Je suis un secret que tout le monde connaît. Un passage qui traverse les murs et les siècles.',
+                        echoEntries: {
+                            'card14_0_1': { titre: 'La Résistance par les traboules', texte: 'Durant l\'Occupation, les traboules du Vieux-Lyon ont permis aux résistants de circuler sans être vus. Klaus Barbie le savait — ses agents ont cartographié les passages. Mais les Lyonnais en connaissaient toujours un de plus.' }
+                        } },
                     { id: 'card15', cardKind: 'local', collections: ["esprit_lumieres", "pierres_memoire"], name: 'Horloge Astronomique', type: 'Objet', poiId: 'saint_jean', rarity: 'common', supertype: 'science',
                       clue: 'Regarde le cadran bleu en haut du mécanisme — il représente le mouvement des astres.', clueIcon: '⏰',
                       incipit: 'Je mesure le temps, les saisons, et les éclipses depuis 1379. Les humains, eux, n\'ont jamais su me lire entièrement.' },
@@ -6399,6 +6421,35 @@
             return pool[Math.floor(Math.random() * pool.length)];
         }
 
+        function stackNearbyPanels() {
+            const ids = ['nearbyPOI','nearbyInfo','nearbyPanneau','nearbyDust','nearbyEcho','nearbyOrb','nearbyScroll'];
+            const gap = 8;
+            const base = 20;
+            let currentBottom = base;
+            // Parcourir dans l'ordre inverse pour empiler du bas vers le haut
+            ids.slice().reverse().forEach(id => {
+                const el = document.getElementById(id);
+                if (!el || el.classList.contains('hidden')) return;
+                el.style.bottom = currentBottom + 'px';
+                currentBottom += el.offsetHeight + gap;
+            });
+            // Remettre bottom:20px sur les panneaux cachés
+            ids.forEach(id => {
+                const el = document.getElementById(id);
+                if (el && el.classList.contains('hidden')) el.style.bottom = base + 'px';
+            });
+        }
+
+        function updateThematicDelay(val) {
+            THEMATIC_COOLDOWN_MS = val * 1000;
+            document.getElementById('thematicDelayLabel').textContent = val + 's';
+        }
+        function setThematicDelay(val) {
+            THEMATIC_COOLDOWN_MS = val * 1000;
+            document.getElementById('thematicDelaySlider').value = val;
+            document.getElementById('thematicDelayLabel').textContent = val + 's';
+        }
+
         // Vérifie et déclenche les tirages pour tous les POIs éligibles
         function refreshThematicDraws() {
             const now = Date.now();
@@ -6584,8 +6635,9 @@
             objets:     [],   // [{ id, name, desc, qty }]
             parchemins: [],   // [{ id, name, desc }]
             boussoles:  [],   // [{ id, name, zone, desc, active }]
-            orbes:      10,
-            lumens:     0,
+            orbes:               10,
+            lumens:              0,
+            echoFoldersUnlocked: {},  // { cardId: true }
         };
         let collectedDustPoints = [];
 
@@ -6605,7 +6657,7 @@
         let collectedOrbs = [];
 
         // ── Système thématique ──
-        const THEMATIC_COOLDOWN_MS = 30 * 1000; // 30s en prototype (sera variable en prod)
+        let THEMATIC_COOLDOWN_MS = 90 * 1000; // 90s en prototype (sera variable en prod)
         let thematicState = {}; // { poiId: { drawnCardId, drawnAt, collected } }
         let currentNearbyThematic = null;
         let collectedScrolls = [];
@@ -6666,6 +6718,32 @@
             playerPos = { ...LYON_CENTER };
             document.getElementById('dustCounter').textContent = memorialDust;
             createMap();
+        }
+
+        function initTestEchoBtns() {
+            const container = document.getElementById('testEchoBtns');
+            if (!container) return;
+            container.innerHTML = Object.entries(SUPERTYPES).map(([key, st]) =>
+                `<button onclick="giveTestEcho('${key}')"
+                    style="display:flex;align-items:center;gap:6px;padding:7px 12px;
+                    border-radius:8px;border:1px solid ${st.color};
+                    background:${st.color}22;color:white;font-size:13px;cursor:pointer;">
+                    ${st.symbol} +1 ${st.name}
+                </button>`
+            ).join('');
+        }
+
+        function giveTestEcho(supertype) {
+            bagInv.echos[supertype] = (bagInv.echos[supertype] || 0) + 1;
+            saveProgress();
+            const st = SUPERTYPES[supertype];
+            const toast = document.createElement('div');
+            toast.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);'
+                + 'background:' + st.color + ';color:white;padding:8px 18px;border-radius:16px;'
+                + 'font-size:13px;font-weight:700;z-index:9999;pointer-events:none;';
+            toast.textContent = st.symbol + ' +1 Écho ' + st.name;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
         }
 
         // Mapbox uses pixel offset in flyTo/easeTo - no lat offset needed
@@ -7184,6 +7262,7 @@
 
         function openTestPanel() {
             document.getElementById('testPanel').style.display = 'flex';
+            initTestEchoBtns();
             updateTestHour(document.getElementById('testHourSlider').value);
             refreshTestState();
         }
@@ -7646,6 +7725,7 @@
             } else {
                 nearbyInfoDiv.classList.add('hidden');
             }
+            stackNearbyPanels();
         }
 
         // ==================== VISIBILITY ====================
@@ -8596,9 +8676,6 @@
                 document.getElementById('journalNotification').classList.add('hidden');
                 restoreJournalState(card.id);
                 renderJournalBio();
-                renderJournalAnnexes();
-                initJournalSwipe();
-                goToJournalPage(0);
                 // Fermer le sac
                 document.getElementById('bagScreen').classList.remove('show');
                 document.getElementById('journalScreen').classList.add('show');
@@ -8611,109 +8688,144 @@
             const info = SUPERTYPES[supertype];
             if (!info) return;
 
-            // Cartes collectées de ce supertype avec texte d'écho rédigé
-            const cards = collectedCards.map(id => {
-                for (const col of Object.values(COLLECTIONS)) {
-                    const c = col.cards.find(c => c.id === id);
-                    if (c) return c;
-                }
-                return null;
-            }).filter(c => c
-                && (c.supertype === supertype || c.supertype2 === supertype)
-                && ECHO_TEXTS[c.id]?.[supertype]  // seulement si texte rédigé
+            const allCardsFlat = Object.values(COLLECTIONS).flatMap(c => c.cards || []);
+
+            // Cartes avec entrées carnet et echoFolder non encore débloqué
+            const eligible = allCardsFlat.filter(c => {
+                if (!collectedCards.includes(c.id)) return false;
+                if (!(c.supertype === supertype || c.supertype2 === supertype)) return false;
+                const entries = cardJournalEntries[c.id] || [];
+                return entries.some(e =>
+                    e.echoContent &&
+                    !(bagInv.echoFoldersUnlocked && bagInv.echoFoldersUnlocked[e.id])
+                );
+            });
+
+            const notReady = allCardsFlat.filter(c => {
+                if (!collectedCards.includes(c.id)) return false;
+                if (!(c.supertype === supertype || c.supertype2 === supertype)) return false;
+                if (!c.echoEntries) return false;
+                const entries = cardJournalEntries[c.id] || [];
+                const hasUnlockable = entries.some(e => e.echoContent);
+                return !hasUnlockable;
+            });
+
+            // Cartes déjà débloquées
+            const unlocked = allCardsFlat.filter(c =>
+                collectedCards.includes(c.id) &&
+                (c.supertype === supertype || c.supertype2 === supertype) &&
+                c.echoFolder &&
+                bagInv.echoFoldersUnlocked && bagInv.echoFoldersUnlocked[c.id]
             );
 
-            if (cards.length === 0) {
-                bagShowEchoAssignPanel(supertype, info, []);
-                return;
-            }
-            bagShowEchoAssignPanel(supertype, info, cards);
+            bagShowEchoAssignPanel(supertype, info, eligible, notReady, unlocked);
         }
 
-        function bagShowEchoAssignPanel(supertype, info, cards) {
-            // Build overlay inside bag screen
+        function bagShowEchoAssignPanel(supertype, info, eligible, notReady, unlocked) {
             let existing = document.getElementById('bagEchoAssignPanel');
             if (existing) existing.remove();
 
-            const panel = document.createElement('div');
-            panel.id = 'bagEchoAssignPanel';
-            panel.style.cssText = `
-                position:absolute; inset:0; z-index:50;
-                background:rgba(10,8,20,0.97);
-                display:flex; flex-direction:column;
-                border-radius: inherit;
-                overflow:hidden;
-            `;
-
-            const placed = cards.filter(c => cardEchoes[c.id] && cardEchoes[c.id][supertype]);
-            const available = cards.filter(c => !cardEchoes[c.id] || !cardEchoes[c.id][supertype]);
             const qty = bagInv.echos[supertype] || 0;
-
             let cardsHtml = '';
-            if (cards.length === 0) {
-                cardsHtml = `<div style="color:#9ca3af;text-align:center;padding:32px 20px;font-size:13px;">
-                    Aucune carte ${info.name} collectée.<br>
-                    <span style="color:#6b7280;font-size:11px;">Explore Lyon pour en trouver !</span>
+
+            const hasAnything = eligible.length > 0 || notReady.length > 0 || unlocked.length > 0;
+
+            if (!hasAnything) {
+                cardsHtml = `<div style="color:#9ca3af;text-align:center;padding:40px 24px;">
+                    <div style="font-size:36px;margin-bottom:12px;">${info.symbol}</div>
+                    <div style="font-size:13px;font-weight:700;color:white;margin-bottom:6px;">
+                        Aucune carte ${info.name} dans ton carnet</div>
+                    <div style="font-size:12px;color:#6b7280;line-height:1.6;">
+                        Explore Lyon pour en trouver une.</div>
                 </div>`;
             } else {
-                if (available.length > 0) {
-                    cardsHtml += `<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#6b7280;padding:0 16px 8px;">Disponible (${qty} écho${qty>1?'s':''})</div>`;
-                    cardsHtml += available.map(c => `
-                        <div onclick="bagAssignEchoToCard('${c.id}','${supertype}')"
-                            style="display:flex;align-items:center;gap:12px;padding:12px 16px;
-                            cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.06);
-                            transition:background 0.15s;"
-                            onmouseover="this.style.background='rgba(${hexToRgb(info.color)},0.12)'"
+                if (eligible.length > 0) {
+                    cardsHtml += `<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#6b7280;padding:16px 16px 8px;">Fragment à débloquer (${eligible.length})</div>`;
+                    cardsHtml += eligible.map(c => `
+                        <div onclick="bagEchoGoToJournal('${c.id}')"
+                            style="display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;
+                            border-bottom:1px solid rgba(255,255,255,0.06);transition:background 0.15s;"
+                            onmouseover="this.style.background='rgba(255,255,255,0.05)'"
                             onmouseout="this.style.background='transparent'">
-                            <div style="width:36px;height:36px;border-radius:50%;
-                                background:${info.color}22;border:2px solid ${info.color};
-                                display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">
-                                ${info.symbol}
-                            </div>
+                            <div style="width:40px;height:40px;border-radius:8px;background:${info.color}20;
+                                border:1.5px solid ${info.color}60;display:flex;align-items:center;
+                                justify-content:center;font-size:20px;flex-shrink:0;">${info.symbol}</div>
                             <div style="flex:1;min-width:0;">
-                                <div style="font-size:13px;font-weight:700;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.name}</div>
-                                <div style="font-size:11px;color:#9ca3af;">${c.type || ''} · ${SUPERTYPES[c.supertype]?.name || ''}</div>
+                                <div style="font-size:13px;font-weight:700;color:white;white-space:nowrap;
+                                    overflow:hidden;text-overflow:ellipsis;">${c.name}</div>
+                                <div style="font-size:11px;color:#9ca3af;margin-top:2px;">${c.type || ''} · fragment scellé</div>
                             </div>
-                            <div style="font-size:11px;color:${info.color};font-weight:700;">Ouvrir le carnet →</div>
+                            <div style="font-size:11px;color:${info.color};font-weight:700;">Ouvrir →</div>
                         </div>`).join('');
                 }
-                if (placed.length > 0) {
-                    cardsHtml += `<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#6b7280;padding:16px 16px 8px;">Déjà associé</div>`;
-                    cardsHtml += placed.map(c => `
+
+                if (notReady.length > 0) {
+                    cardsHtml += `<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#6b7280;padding:16px 16px 8px;">Fais progresser ces cartes</div>`;
+                    cardsHtml += notReady.map(c => `
                         <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;
-                            border-bottom:1px solid rgba(255,255,255,0.06);opacity:0.45;">
-                            <div style="width:36px;height:36px;border-radius:50%;
-                                background:${info.color}22;border:2px solid ${info.color};
-                                display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">
-                                ✓
-                            </div>
+                            border-bottom:1px solid rgba(255,255,255,0.06);opacity:0.35;">
+                            <div style="width:40px;height:40px;border-radius:8px;background:${info.color}10;
+                                border:1.5px solid ${info.color}30;display:flex;align-items:center;
+                                justify-content:center;font-size:20px;flex-shrink:0;filter:grayscale(0.6);">${info.symbol}</div>
                             <div style="flex:1;min-width:0;">
                                 <div style="font-size:13px;font-weight:700;color:white;">${c.name}</div>
-                                <div style="font-size:11px;color:#9ca3af;">Écho déjà assigné</div>
+                                <div style="font-size:11px;color:#9ca3af;margin-top:2px;">Offre de la poudre pour révéler le fragment</div>
                             </div>
+                        </div>`).join('');
+                }
+
+                if (unlocked.length > 0) {
+                    cardsHtml += `<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#6b7280;padding:16px 16px 8px;">Déjà révélé</div>`;
+                    cardsHtml += unlocked.map(c => `
+                        <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;
+                            border-bottom:1px solid rgba(255,255,255,0.06);opacity:0.4;">
+                            <div style="width:40px;height:40px;border-radius:8px;background:${info.color}20;
+                                border:1.5px solid ${info.color}60;display:flex;align-items:center;
+                                justify-content:center;font-size:20px;">✓</div>
+                            <div style="flex:1;"><div style="font-size:13px;font-weight:700;color:white;">${c.name}</div>
+                            <div style="font-size:11px;color:#9ca3af;">Fragment révélé</div></div>
                         </div>`).join('');
                 }
             }
 
+            const panel = document.createElement('div');
+            panel.id = 'bagEchoAssignPanel';
+            panel.style.cssText = 'position:absolute;inset:0;z-index:50;background:rgba(10,8,20,0.97);display:flex;flex-direction:column;border-radius:inherit;overflow:hidden;';
             panel.innerHTML = `
                 <div style="display:flex;align-items:center;gap:12px;padding:16px 20px 14px;
-                    border-bottom:1px solid rgba(255,255,255,0.07);
-                    background:linear-gradient(180deg,${info.color}12 0%,transparent 100%);flex-shrink:0;">
+                    border-bottom:1px solid rgba(255,255,255,0.07);flex-shrink:0;
+                    background:linear-gradient(180deg,${info.color}15 0%,transparent 100%);">
                     <button onclick="document.getElementById('bagEchoAssignPanel').remove()"
                         style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:20px;cursor:pointer;padding:4px;">←</button>
-                    <div style="width:32px;height:32px;border-radius:50%;background:${info.color}22;
-                        border:2px solid ${info.color};display:flex;align-items:center;justify-content:center;font-size:16px;">
-                        ${info.symbol}
-                    </div>
+                    <div style="width:36px;height:36px;border-radius:50%;background:${info.color}22;
+                        border:2px solid ${info.color};display:flex;align-items:center;justify-content:center;font-size:18px;">
+                        ${info.symbol}</div>
                     <div>
-                        <div style="font-size:13px;font-weight:800;color:white;">Assigner écho ${info.name}</div>
-                        <div style="font-size:10px;color:rgba(255,255,255,0.4);">${qty} écho${qty>1?'s':''} disponible${qty>1?'s':''}</div>
+                        <div style="font-size:13px;font-weight:800;color:white;">Écho ${info.name}</div>
+                        <div style="font-size:10px;color:rgba(255,255,255,0.4);">${qty} disponible${qty > 1 ? 's' : ''}</div>
                     </div>
                 </div>
-                <div style="flex:1;overflow-y:auto;">${cardsHtml}</div>
-            `;
-
+                <div style="flex:1;overflow-y:auto;">${cardsHtml}</div>`;
             document.getElementById('bagScreen').appendChild(panel);
+        }
+
+        function bagEchoGoToJournal(cardId) {
+            const panel = document.getElementById('bagEchoAssignPanel');
+            if (panel) panel.remove();
+            document.getElementById('bagScreen').classList.remove('show');
+            const card = getAllCards().find(c => c.id === cardId);
+            if (card) { selectedCard = card; openJournalScreen(); }
+        }
+
+        function bagEchoGoToJournal(cardId) {
+            // Fermer le sac et ouvrir directement le carnet de cette carte
+            const panel = document.getElementById('bagEchoAssignPanel');
+            if (panel) panel.remove();
+            document.getElementById('bagScreen').classList.remove('show');
+
+            const allCardsFlat = Object.values(COLLECTIONS).flatMap(c => c.cards);
+            selectedCard = allCardsFlat.find(c => c.id === cardId);
+            if (selectedCard) openJournalScreen();
         }
 
         function hexToRgb(hex) {
@@ -8759,9 +8871,6 @@
                 document.getElementById('journalNotification').classList.add('hidden');
                 restoreJournalState(card.id);
                 renderJournalBio();
-                renderJournalAnnexes();
-                initJournalSwipe();
-                goToJournalPage(1); // directement sur la page annexe
                 document.getElementById('journalScreen').classList.add('show');
             }, 50);
         }
@@ -9036,26 +9145,55 @@
 
         function collectEcho() {
             if (!currentNearbyEcho) return;
-            const isFirst = !hasSeenEchoTuto && collectedEchoes.length === 0;
-            // Capturer les infos AVANT que checkNearbyPOI() les efface
+
             const capturedSupertype = currentNearbyEcho.supertype;
             collectedEchoes.push(currentNearbyEcho.id);
             bagInv.echos[capturedSupertype] = (bagInv.echos[capturedSupertype] || 0) + 1;
             updateEchoVisibility();
             checkNearbyPOI();
-            if (isFirst) {
-                hasSeenEchoTuto = true;
-                saveProgress();
-                const supertypeInfo = SUPERTYPES[capturedSupertype] || {};
-                setTimeout(() => {
-                    const toast = document.getElementById('echoTutoToast');
-                    document.getElementById('echoTutoName').textContent =
-                        (supertypeInfo.symbol || '✨') + ' Écho ' + (supertypeInfo.name || '');
-                    document.getElementById('echoTutoIcon').textContent = supertypeInfo.symbol || '✨';
-                    toast.style.display = 'block';
-                    setTimeout(() => closeEchoTutoToast(), 6000);
-                }, 500);
-            }
+
+            if (!hasSeenEchoTuto) hasSeenEchoTuto = true;
+            saveProgress();
+
+            // Toast à chaque collecte
+            const supertypeInfo = SUPERTYPES[capturedSupertype] || {};
+            setTimeout(() => {
+                const allCardsFlat = Object.values(COLLECTIONS).flatMap(c => c.cards);
+
+                // Chercher une carte possédée du bon supertype avec folder non encore débloqué
+                const targetCard = allCardsFlat.find(c =>
+                    collectedCards.includes(c.id) &&
+                    (c.supertype === capturedSupertype || c.supertype2 === capturedSupertype) &&
+                    c.echoFolder &&
+                    !(bagInv.echoFoldersUnlocked && bagInv.echoFoldersUnlocked[c.id])
+                );
+
+                document.getElementById('echoTutoName').textContent =
+                    (supertypeInfo.symbol || '✨') + ' Écho ' + (supertypeInfo.name || '');
+                document.getElementById('echoTutoIcon').textContent = supertypeInfo.symbol || '✨';
+
+                const descEl   = document.getElementById('echoTutoDesc');
+                const targetEl = document.getElementById('echoTutoTarget');
+
+                if (targetCard) {
+                    descEl.textContent        = 'Un fragment t\'attend dans le carnet de :';
+                    targetEl.style.display    = 'block';
+                    targetEl.style.color      = supertypeInfo.color || '#a78bfa';
+                    targetEl.textContent      = '→ ' + targetCard.name;
+                    targetEl.onclick = () => {
+                        closeEchoTutoToast();
+                        selectedCard = allCardsFlat.find(c => c.id === targetCard.id);
+                        if (selectedCard) openJournalScreen();
+                    };
+                } else {
+                    descEl.textContent        = 'Explore Lyon pour trouver une carte ' + (supertypeInfo.name || '') + ' à qui le confier.';
+                    targetEl.style.display    = 'none';
+                }
+
+                const toast = document.getElementById('echoTutoToast');
+                toast.style.display = 'block';
+                setTimeout(() => closeEchoTutoToast(), 7000);
+            }, 500);
         }
         function collectOrb() {
             if (!currentNearbyOrb) return;
@@ -9421,7 +9559,6 @@
             }
             updateCardLevelDisplay();
             switchTabProgrammatically('general');
-            setTimeout(renderJournalAnnexes, 0); // badge carnet
             // Relancer l'animation d'entrée
             const inner = document.querySelector('.card-detail-inner');
             if (inner) {
@@ -9571,11 +9708,17 @@
                 const LEVEL_LABELS = ['Chapitre I', 'Chapitre II', 'Chapitre III'];
                 const label = LEVEL_LABELS[level] || 'Chapitre';
                 const dialogueText = '[Dialogue palier ' + (palierIdx + 1) + ' — ' + cardName + ', ' + label + ']';
+                const entryId = cardId + '_' + level + '_' + palierIdx;
+                const cardDef = getAllCards().find(c => c.id === cardId);
+                const echoContent = cardDef && cardDef.echoEntries && cardDef.echoEntries[entryId]
+                    ? cardDef.echoEntries[entryId] : null;
                 const entry = {
-                    date: label + ' · Palier ' + (palierIdx + 1),
-                    text: '[Entrée carnet ' + (palierIdx + 1) + ' — ' + cardName + ', ' + label + ']',
+                    id:    entryId,
+                    date:  label + ' · Palier ' + (palierIdx + 1),
+                    text:  '[Entrée carnet ' + (palierIdx + 1) + ' — ' + cardName + ', ' + label + ']',
                     photo: '[Fragment visuel ' + (palierIdx + 1) + ']',
-                    audio: '[Extrait audio ' + (palierIdx + 1) + ']'
+                    audio: '[Extrait audio ' + (palierIdx + 1) + ']',
+                    echoContent: echoContent
                 };
                 gainAutoLumen();
                 showMilestoneEffect();
@@ -9632,11 +9775,30 @@
             const entries = document.querySelectorAll('#journalPage0 .journal-entry-new');
             if (!entries.length) return;
             const last = entries[entries.length - 1];
-            // Pas de scrollIntoView — le header reste stable
-            // Juste un highlight discret
-            last.style.outline = '2px solid rgba(146,64,14,0.3)';
-            last.style.borderRadius = '4px';
-            setTimeout(function() { last.style.outline = ''; }, 1500);
+
+            if (last.classList.contains('scrap-n1')) {
+                // Collage N1
+                last.classList.add('scrap-n1-new');
+                setTimeout(() => last.classList.remove('scrap-n1-new'), 600);
+            } else {
+                // Écriture N0 — lettre par lettre
+                last.classList.add('scrap-n0-new');
+                const textEl = last.querySelector('.journal-text, .scrap-hand');
+                if (textEl) {
+                    const full = textEl.textContent;
+                    textEl.textContent = '';
+                    let i = 0;
+                    function writeChar() {
+                        if (i < full.length) {
+                            textEl.textContent += full[i++];
+                            setTimeout(writeChar, 22);
+                        } else {
+                            last.classList.remove('scrap-n0-new');
+                        }
+                    }
+                    setTimeout(writeChar, 150);
+                }
+            }
         }
 
 
@@ -9809,9 +9971,25 @@
             const sealedLvl = selectedCard ? (cardLevels[selectedCard.id].level - 1) : undefined;
 
             // Ouvrir le carnet si pas déjà ouvert
+            // Ouvrir le carnet si pas déjà ouvert
             const journalEl = document.getElementById('journalScreen');
             if (!journalEl.classList.contains('show')) {
-                openJournalScreen();
+                // Ouvrir sans déclencher renderJournalBio (on le fait nous-mêmes juste après)
+                journalOpenedFromCollections = document.getElementById('collectionsPanel')?.classList.contains('show') ?? false;
+                journalOpenedFromBag = document.getElementById('bagScreen')?.classList.contains('show') ?? false;
+                journalOpenedFromCardDetail = false;
+                document.getElementById('journalScreenCardName').textContent = selectedCard.name;
+                document.getElementById('journalScreenCardType').textContent = selectedCard.type;
+                const bhn = document.getElementById('journalBioHeaderName');
+                const bht = document.getElementById('journalBioHeaderType');
+                if (bhn) bhn.textContent = selectedCard.name;
+                if (bht) bht.textContent = selectedCard.type;
+                document.getElementById('journalNotification').classList.add('hidden');
+                goToJournalPage(0);
+                journalEl.classList.add('show');
+                renderEchoInventory();
+                renderJournalAnnexes();
+                initJournalSwipe();
             }
 
             // Rendre sans la couleur finale sur le niveau scellé
@@ -9839,8 +10017,6 @@
 
             // Préparer le groupe comme conteneur
             group.style.position = 'relative';
-            group.style.borderLeft = '3px solid ' + color;
-            group.style.background = 'transparent';
             group.style.overflow = 'hidden';
 
             // Div qui monte de bas en haut comme une jauge
@@ -9862,7 +10038,6 @@
 
             // Une fois rempli, stabiliser le fond sur le groupe et retirer le fill
             setTimeout(function() {
-                group.style.background = color + '18';
                 fill.remove();
             }, 2600);
         }
@@ -9871,6 +10046,8 @@
             // Conservé pour compatibilité — redirige vers le clic
             showClickDialogue();
         }
+
+        let animatingN2CardId = null;
 
         function renderJournalBio(animateLevel, skipColorLevel) {
             if (!selectedCard) return;
@@ -9891,18 +10068,52 @@
             entries.forEach(e => { if (byLevel[e.level] !== undefined) byLevel[e.level].push(e); });
 
             // Variations de layout pour le désordre scrapbook
+            // ── Variations de layout scrapbook ──
+            // width, alignement, rotation, chevauchement, scotch
             const LAYOUTS = [
-                { rotate: '-1.2deg', ml: '0px',   mr: '18px',  tapeLeft: '30%', tapeW: '55px' },
-                { rotate: '0.8deg',  ml: '12px',  mr: '4px',   tapeLeft: '45%', tapeW: '48px' },
-                { rotate: '-0.5deg', ml: '4px',   mr: '24px',  tapeLeft: '20%', tapeW: '64px' },
-                { rotate: '1.4deg',  ml: '20px',  mr: '0px',   tapeLeft: '55%', tapeW: '50px' },
-                { rotate: '-0.3deg', ml: '8px',   mr: '12px',  tapeLeft: '35%', tapeW: '58px' },
+                { w: '88%', ml: '0',    mt: '0px',   rotate: '-1.8deg', tapeL: '28%', tapeW: '52px', tapeC: 'rgba(212,160,23,0.32)'  },
+                { w: '78%', ml: 'auto', mt: '-6px',  rotate: '1.2deg',  tapeL: '50%', tapeW: '44px', tapeC: 'rgba(180,83,9,0.26)'    },
+                { w: '92%', ml: '4%',   mt: '4px',   rotate: '-0.6deg', tapeL: '18%', tapeW: '60px', tapeC: 'rgba(146,64,14,0.22)'   },
+                { w: '72%', ml: '0',    mt: '-4px',  rotate: '2.1deg',  tapeL: '60%', tapeW: '40px', tapeC: 'rgba(217,119,6,0.28)'   },
+                { w: '85%', ml: '8%',   mt: '2px',   rotate: '-1.1deg', tapeL: '38%', tapeW: '56px', tapeC: 'rgba(212,160,23,0.24)'  },
+                { w: '80%', ml: 'auto', mt: '-8px',  rotate: '0.7deg',  tapeL: '22%', tapeW: '48px', tapeC: 'rgba(180,83,9,0.3)'     },
+                { w: '95%', ml: '0',    mt: '6px',   rotate: '-0.4deg', tapeL: '70%', tapeW: '36px', tapeC: 'rgba(146,64,14,0.2)'    },
             ];
-            const TAPE_COLORS = [
-                'rgba(212,160,23,0.28)',
-                'rgba(180,83,9,0.22)',
-                'rgba(146,64,14,0.25)',
-                'rgba(217,119,6,0.2)',
+
+            // ── Templates de contenu hétérogènes ──
+            // Chaque template génère une mise en page différente pour la même entrée
+            const TEMPLATES = [
+                // 0 — Grande polaroid + texte court
+                function(entry) {
+                    return '<div class="scrap-polaroid scrap-polaroid-lg">' + entry.photo + '</div>'
+                         + '<div class="scrap-hand">' + entry.text + '</div>'
+                         + (entry.audio ? '<div class="scrap-audio">♪ ' + entry.audio + '</div>' : '');
+                },
+                // 1 — Étiquette kraft + texte seul (pas de polaroid)
+                function(entry) {
+                    return '<div class="scrap-label">📍 ' + (entry.date || 'Note') + '</div>'
+                         + '<div class="scrap-hand">' + entry.text + '</div>'
+                         + (entry.audio ? '<div class="scrap-audio">♪ ' + entry.audio + '</div>' : '');
+                },
+                // 2 — Petite polaroid à gauche + texte à droite (flex)
+                function(entry) {
+                    return '<div style="display:flex;gap:10px;align-items:flex-start;">'
+                         +   '<div class="scrap-polaroid scrap-polaroid-sm" style="width:72px;flex-shrink:0;">' + entry.photo + '</div>'
+                         +   '<div style="flex:1;"><div class="scrap-hand-sm" style="font-family:Georgia,serif;font-style:italic;font-size:11px;color:#5c3a1e;line-height:1.7;">' + entry.text + '</div>'
+                         +   (entry.audio ? '<div class="scrap-audio">♪ ' + entry.audio + '</div>' : '')
+                         +   '</div>'
+                         + '</div>';
+                },
+                // 3 — Texte pur, légèrement plus grand, pas d'image
+                function(entry) {
+                    return '<div class="scrap-hand" style="font-size:13px;line-height:1.8;">' + entry.text + '</div>'
+                         + (entry.audio ? '<div class="scrap-audio" style="margin-top:10px;">♪ ' + entry.audio + '</div>' : '');
+                },
+                // 4 — Grande polaroid seule (photo dominante)
+                function(entry) {
+                    return '<div class="scrap-polaroid scrap-polaroid-lg" style="min-height:96px;">' + entry.photo + '</div>'
+                         + '<div class="scrap-hand-sm" style="font-family:Georgia,serif;font-style:italic;font-size:10px;color:#5c3a1e;opacity:0.7;margin-top:4px;text-align:center;">' + (entry.date || '') + '</div>';
+                },
             ];
 
             let html2 = '';
@@ -9915,60 +10126,81 @@
                 const isClosed  = cl.level > lvl;
                 const isAnimate = (animateLevel === lvl + 1);
 
-                html2 += '<div class="journal-level-group' + (isAnimate ? ' animating' : '') + '" id="journalGroup_' + lvl + '">';
-
-                // Label chapitre
+                const SEAL_COLORS = ['#10B981', '#3B82F6', '#F59E0B'];
+                const sealColor = SEAL_COLORS[lvl] || '#10B981';
+                const sealStyle = isClosed
+                    ? 'border-left:3px solid ' + sealColor + ';background:' + sealColor + '18;'
+                    : '';
+                html2 += '<div class="journal-level-group' + (isAnimate ? ' animating' : '') + '" id="journalGroup_' + lvl + '" style="' + sealStyle + '">';
                 html2 += '<div class="journal-level-group-label">' + LEVEL_LABELS[lvl] + '</div>';
 
                 lvlEntries.forEach(function(entry, i) {
                     const isNew  = !isClosed && i === lvlEntries.length - 1;
-                    const newCls = isNew ? ' journal-entry-new' : '';
-                    const delay  = isNew ? 'animation-delay:' + (i*0.12) + 's;' : '';
-                    const lay    = LAYOUTS[globalIdx % LAYOUTS.length];
-                    const tape   = TAPE_COLORS[globalIdx % TAPE_COLORS.length];
+                    const delay  = isNew ? 'animation-delay:' + (i * 0.12) + 's;' : '';
 
-                    // Niveau 1 : folder cliquable (signalé par coin corné)
-                    // Niveau 0 : contemplation pure
-                    // On alterne : 1 sur 3 est cliquable
+                    const lay  = LAYOUTS[globalIdx % LAYOUTS.length];
+                    // 1 entrée sur 3 est cliquable (niveau 1)
                     const isClickable = (globalIdx % 3 === 1);
-                    const cls = isClickable ? 'scrap-n1' : 'scrap-n0';
+                    const cls  = isClickable ? 'scrap-n1' : 'scrap-n0';
+                    const newCls = isNew ? ' journal-entry-new' : '';
                     const entryId = 'scrap_' + cardId + '_' + lvl + '_' + i;
 
-                    html2 += '<div class="' + cls + newCls + '" ';
-                    html2 += 'style="transform:rotate(' + lay.rotate + ');margin-left:' + lay.ml + ';margin-right:' + lay.mr + ';' + delay + '"';
+                    // Tronquer le texte pour les éléments cliquables
+                    const displayEntry = isClickable
+                        ? Object.assign({}, entry, { text: entry.text.length > 75 ? entry.text.substring(0, 75) + '…' : entry.text })
+                        : entry;
+
+                    // Choisir le template : cliquable → template varié, non-cliquable → pool différent
+                    const tplIdx = isClickable
+                        ? (globalIdx % 3)          // templates 0,1,2 pour les folders
+                        : (globalIdx % 2) + 3;     // templates 3,4 pour la contemplation
+
+                    const innerHtml = TEMPLATES[tplIdx](displayEntry);
+                    const hasEcho   = !!entry.echoContent;
+                    const isEchoUnlocked = hasEcho && bagInv.echoFoldersUnlocked && bagInv.echoFoldersUnlocked[entry.id];
+
+                    html2 += '<div class="' + cls + newCls + '" '
+                           + 'style="'
+                           +   '--scrap-rot:' + lay.rotate + ';'
+                           +   'width:' + lay.w + ';'
+                           +   'margin-left:' + lay.ml + ';'
+                           +   'margin-top:' + lay.mt + ';'
+                           +   'margin-bottom:18px;'
+                           +   'transform:rotate(' + lay.rotate + ');'
+                           +   delay
+                           + '"';
+
                     if (isClickable) {
                         html2 += ' onclick="openScrapLightbox(\'' + entryId + '\')"';
                         html2 += ' data-entry-id="' + entryId + '"';
                     }
                     html2 += '>';
 
-                    // Bande de scotch
-                    html2 += '<div class="scrap-tape" style="left:' + lay.tapeLeft + ';width:' + lay.tapeW + ';background:' + tape + ';"></div>';
-
-                    // Photo polaroid (toujours visible)
-                    html2 += '<div style="background:#e8dcc8;border:1px solid rgba(160,120,50,0.25);border-radius:2px;padding:5px 5px 18px;margin-bottom:8px;box-shadow:1px 1px 4px rgba(0,0,0,0.12);min-height:52px;display:flex;align-items:center;justify-content:center;">';
-                    html2 += '<div style="font-size:10px;color:rgba(120,80,30,0.5);font-style:italic;text-align:center;">' + entry.photo + '</div>';
-                    html2 += '</div>';
-
-                    // Date
-                    html2 += '<div class="journal-date">' + (entry.date || '') + '</div>';
-
-                    // Texte — tronqué si cliquable (invite à ouvrir)
-                    if (isClickable) {
-                        var shortText = entry.text.length > 80 ? entry.text.substring(0, 80) + '...' : entry.text;
-                        html2 += '<div class="journal-text" style="margin-bottom:6px;">' + shortText + '</div>';
-                        html2 += '<div class="scrap-corner"></div>';
-                    } else {
-                        html2 += '<div class="journal-text">' + entry.text + '</div>';
-                        if (entry.audio) {
-                            html2 += '<div style="margin-top:6px;font-size:10px;color:#92400e;opacity:0.45;font-family:Georgia,serif;font-style:italic;">♪ ' + entry.audio + '</div>';
-                        }
+                    // Scotch sur N1 et N2 uniquement (pas sur N0)
+                    if (isClickable || entry.echoContent) {
+                        html2 += '<div class="scrap-tape" style="left:' + lay.tapeL + ';width:' + lay.tapeW + ';background:' + lay.tapeC + ';"></div>';
                     }
 
-                    // Stocker les données pour le lightbox
-                    html2 += '<script type="application/json" id="' + entryId + '" style="display:none">' +
-                        JSON.stringify({ date: entry.date, text: entry.text, photo: entry.photo, audio: entry.audio }) +
-                        '<\/script>';
+                    // Contenu selon template
+                    html2 += innerHtml;
+
+                    // Coin corné si cliquable
+                    if (isClickable) html2 += '<div class="scrap-corner"></div>';
+
+                    // Données lightbox
+                    html2 += '<script type="application/json" id="' + entryId + '" style="display:none">'
+                           + JSON.stringify({ id: entry.id, date: entry.date, text: entry.text, photo: entry.photo, audio: entry.audio, echoContent: entry.echoContent || null })
+                           + '<\/script>';
+
+                    // Pastille discrète si echoContent présent
+                    if (hasEcho) {
+                        const stEcho = SUPERTYPES[selectedCard.supertype] || {};
+                        html2 += '<div class="scrap-echo-dot" style="background:'
+                               + stEcho.color + (isEchoUnlocked ? '55' : '22')
+                               + ';border:1px solid ' + stEcho.color + ';">'
+                               + echoSvg(stEcho.color, 9)
+                               + '</div>';
+                    }
 
                     html2 += '</div>';
                     globalIdx++;
@@ -10075,9 +10307,7 @@
             const hasPending = supertypes.some(s => (bagInv.echos[s]||0) > 0 && !placed[s]);
             const badge = document.getElementById('journalNotification');
             if (badge && hasPending) badge.classList.remove('hidden');
-            // Dot trombone
-            const tabDot = document.getElementById('journalAnnexeTabDot');
-            if (tabDot) tabDot.classList.toggle('has-echo', hasPending);
+
         }
 
         function renderEchoTab() {
@@ -10155,8 +10385,6 @@
             playerStats.echoes_placed = (playerStats.echoes_placed || 0) + 1;
             updateStat('echoes_placed', playerStats.echoes_placed);
             // Rafraîchir les annexes + aller sur la page annexe
-            renderJournalAnnexes();
-            goToJournalPage(1);
             setTimeout(() => animateAnnexeText(cardId, supertype), 80);
         }
 
@@ -10236,12 +10464,9 @@
             document.getElementById('journalNotification').classList.add('hidden');
             // Restore this card's journal state (maxLevel limits overlay restore for animation)
             restoreJournalState(selectedCard.id, maxLevel);
-            goToJournalPage(0); // toujours démarrer sur la bio
             document.getElementById('journalScreen').classList.add('show');
             renderEchoInventory();
             renderJournalBio();
-            renderJournalAnnexes();
-            initJournalSwipe();
         }
 
         const OVERLAY_COLORS = [
@@ -10267,54 +10492,8 @@
             renderJournalBio(); // overlays déduits du niveau courant
         }
 
-        let journalCurrentPage = 0;
-
         function goToJournalPage(n) {
-            journalCurrentPage = n;
-            const bio     = document.getElementById('journalPage0');
-            const annexe  = document.getElementById('journalPage1');
-            const tab     = document.getElementById('journalAnnexeTab');
-            const bioTab  = document.getElementById('journalBioTab');
-            const spine   = document.getElementById('journalSpine');
-            if (n === 1) {
-                bio?.classList.add('swiped');
-                annexe?.classList.add('swiped');
-                tab?.classList.add('hidden-tab');
-                bioTab?.classList.remove('hidden-tab');
-                if (spine) spine.style.opacity = '0';
-            } else {
-                bio?.classList.remove('swiped');
-                annexe?.classList.remove('swiped');
-                tab?.classList.remove('hidden-tab');
-                bioTab?.classList.add('hidden-tab');
-                if (spine) spine.style.opacity = '0.5';
-            }
-        }
-
-        // Swipe horizontal sur le carnet
-        function initJournalSwipe() {
-            const wrapper = document.getElementById('journalPagesWrapper');
-            if (!wrapper || wrapper._swipeInited) return;
-            wrapper._swipeInited = true;
-            let startX = 0, startY = 0, isDragging = false;
-
-            function onStart(x, y) { startX = x; startY = y; isDragging = true; }
-            function onEnd(x, y) {
-                if (!isDragging) return;
-                isDragging = false;
-                const dx = x - startX;
-                const dy = Math.abs(y - startY);
-                if (Math.abs(dx) > 40 && dy < 80) {
-                    if (dx < 0 && journalCurrentPage === 0) goToJournalPage(1);
-                    if (dx > 0 && journalCurrentPage === 1) goToJournalPage(0);
-                }
-            }
-            // Touch
-            wrapper.addEventListener('touchstart', e => onStart(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
-            wrapper.addEventListener('touchend',   e => onEnd(e.changedTouches[0].clientX, e.changedTouches[0].clientY), { passive: true });
-            // Mouse (PC)
-            wrapper.addEventListener('mousedown',  e => onStart(e.clientX, e.clientY));
-            wrapper.addEventListener('mouseup',    e => onEnd(e.clientX, e.clientY));
+            // supprimé
         }
 
         function journalBackBtn() {
@@ -11239,6 +11418,61 @@
             saveProgress();
         }
         function closeLevelupOverlay() { document.getElementById('levelupOverlay').classList.remove('show'); }
+
+        // ── Folders N2 — déverrouillage par écho ──
+        let _echoUnlockPending = null;
+
+        function openEchoUnlockModal(entryId, supertype) {
+            const st  = SUPERTYPES[supertype];
+            if (!st) return;
+
+            // Retrouver l'entrée et son echoContent
+            let echoContent = null;
+            if (selectedCard) {
+                const entries = cardJournalEntries[selectedCard.id] || [];
+                const entry   = entries.find(e => e.id === entryId);
+                if (entry) echoContent = entry.echoContent;
+            }
+            if (!echoContent) return;
+
+            const qty = bagInv.echos[supertype] || 0;
+            _echoUnlockPending = { entryId, supertype };
+
+            document.getElementById('echoUnlockIcon').textContent  = st.symbol;
+            document.getElementById('echoUnlockTitle').textContent = '« ' + echoContent.titre + ' »';
+            document.getElementById('echoUnlockText').textContent  = qty > 0
+                ? 'Un écho ' + st.name + ' sera consommé pour approfondir ce récit.'
+                : 'Il te faut un écho ' + st.name + ' pour révéler ce fragment.';
+            document.getElementById('echoUnlockCost').innerHTML =
+                echoSvg(st.color, 16) +
+                '<span style="color:' + st.color + ';">' + qty + ' écho' + (qty > 1 ? 's' : '') + ' disponible' + (qty > 1 ? 's' : '') + '</span>';
+
+            const confirmBtn = document.getElementById('echoUnlockConfirmBtn');
+            confirmBtn.style.display = qty > 0 ? '' : 'none';
+            document.getElementById('echoUnlockModal').classList.add('show');
+        }
+
+        function closeEchoUnlockModal() {
+            document.getElementById('echoUnlockModal').classList.remove('show');
+            _echoUnlockPending = null;
+        }
+
+        function confirmEchoUnlock() {
+            if (!_echoUnlockPending) return;
+            const { entryId, supertype } = _echoUnlockPending;
+            if ((bagInv.echos[supertype] || 0) <= 0) return;
+
+            bagInv.echos[supertype]--;
+            if (!bagInv.echoFoldersUnlocked) bagInv.echoFoldersUnlocked = {};
+            bagInv.echoFoldersUnlocked[entryId] = true;
+            saveProgress();
+            closeEchoUnlockModal();
+            renderJournalBio();
+        }
+
+        function getAllCards() {
+            return Object.values(COLLECTIONS).flatMap(c => c.cards || []);
+        }
 
         // ── Progression Screen ──
         function openProgressionScreen() {
@@ -14680,7 +14914,9 @@
         }
         function openEchoesFromToast() {
             closeEchoTutoToast();
-            openBagScreen(); // _bagCat=0 = Échos par défaut
+            _bagCat = 0; _bagSel = null;
+            document.getElementById('bagScreen').classList.add('show');
+            _bagRender();
         }
 
         function openScrapLightbox(entryId) {
@@ -14694,12 +14930,109 @@
                 var audioEl = document.getElementById('scrapLbAudio');
                 audioEl.textContent = data.audio ? '♪ ' + data.audio : '';
                 audioEl.style.display = data.audio ? 'flex' : 'none';
+
+                var n2El = document.getElementById('scrapLbN2');
+                if (n2El) {
+                    n2El.innerHTML = '';
+                    if (data.echoContent && selectedCard) {
+                        var st         = SUPERTYPES[selectedCard.supertype] || {};
+                        var isUnlocked = bagInv.echoFoldersUnlocked && bagInv.echoFoldersUnlocked[data.id];
+                        var qty        = bagInv.echos[selectedCard.supertype] || 0;
+                        if (isUnlocked) {
+                            n2El.innerHTML = _n2ContentHtml(st, data.echoContent, false);
+                        } else {
+                            var disabled = qty <= 0 ? 'opacity:0.45;cursor:default;pointer-events:none;' : 'cursor:pointer;';
+                            n2El.innerHTML =
+                                '<div style="margin-top:16px;">'
+                                + '<div style="font-size:10px;font-family:Georgia,serif;font-style:italic;'
+                                + 'color:#92400e;opacity:0.7;margin-bottom:8px;text-align:center;">'
+                                + 'Fragment scellé</div>'
+                                + '<div onclick="unlockN2FromLightbox(\'' + (data.id||'') + '\',\'' + selectedCard.supertype + '\')" '
+                                + 'style="display:flex;align-items:center;justify-content:center;gap:10px;'
+                                + 'padding:13px 18px;border-radius:10px;'
+                                + 'background:' + st.color + '22;'
+                                + 'border:1.5px solid ' + st.color + '60;'
+                                + 'font-family:Georgia,serif;font-size:14px;font-weight:700;'
+                                + 'color:' + st.color + ';' + disabled + '">'
+                                + echoSvg(st.color, 18)
+                                + '<span>Révéler · 1 écho ' + (st.name||'') + '</span>'
+                                + '<span style="font-size:11px;opacity:0.6;font-weight:400;">'
+                                + (qty > 0 ? '(' + qty + ' dispo)' : '— aucun') + '</span>'
+                                + '</div>'
+                                + '</div>';
+                        }
+                    }
+                }
                 document.getElementById('scrapLightbox').classList.add('open');
-            } catch(e) {}
+            } catch(e) { console.error(e); }
         }
+
         function closeScrapLightbox(e) {
             if (e && e.target !== document.getElementById('scrapLightbox') && !e.target.classList.contains('scrap-lightbox-close')) return;
             document.getElementById('scrapLightbox').classList.remove('open');
+        }
+
+        function _n2ContentHtml(st, echoContent, animate) {
+            return '<div style="margin-top:14px;padding:12px 14px;border-radius:6px;'
+                + 'border-left:3px solid ' + st.color + ';background:' + st.color + '18;'
+                + (animate ? 'animation:n2Write 0.6s cubic-bezier(0.34,1.56,0.64,1) both;' : '')
+                + '">'
+                + '<div style="font-size:10px;font-weight:700;text-transform:uppercase;'
+                + 'letter-spacing:1px;color:' + st.color + ';margin-bottom:6px;">'
+                + (st.symbol||'') + ' ' + (echoContent.titre||'') + '</div>'
+                + '<div style="font-size:13px;font-family:Georgia,serif;font-style:italic;'
+                + 'line-height:1.75;color:#3d2b1f;">'
+                + (echoContent.texte||'') + '</div>'
+                + '</div>';
+        }
+
+        function unlockN2FromLightbox(entryId, supertype) {
+            var st  = SUPERTYPES[supertype];
+            var qty = bagInv.echos[supertype] || 0;
+            if (!st || qty <= 0 || !entryId) return;
+
+            var echoContent = null;
+            if (selectedCard) {
+                var entries = cardJournalEntries[selectedCard.id] || [];
+                var found   = entries.find(function(e) { return e.id === entryId; });
+                if (found) echoContent = found.echoContent;
+            }
+            if (!echoContent) return;
+
+            bagInv.echos[supertype]--;
+            if (!bagInv.echoFoldersUnlocked) bagInv.echoFoldersUnlocked = {};
+            bagInv.echoFoldersUnlocked[entryId] = true;
+            saveProgress();
+
+            var n2El = document.getElementById('scrapLbN2');
+            if (n2El) {
+                // Afficher le conteneur avec titre immédiatement
+                n2El.innerHTML =
+                    '<div id="n2WriteBlock" style="margin-top:14px;padding:12px 14px;border-radius:6px;'
+                    + 'border-left:3px solid ' + st.color + ';background:' + st.color + '18;">'
+                    + '<div style="font-size:10px;font-weight:700;text-transform:uppercase;'
+                    + 'letter-spacing:1px;color:' + st.color + ';margin-bottom:6px;">'
+                    + (st.symbol||'') + ' ' + (echoContent.titre||'') + '</div>'
+                    + '<div id="n2WriteText" style="font-size:13px;font-family:Georgia,serif;'
+                    + 'font-style:italic;line-height:1.75;color:#3d2b1f;min-height:1.75em;"></div>'
+                    + '</div>';
+
+                // Écriture lettre par lettre
+                var textEl  = document.getElementById('n2WriteText');
+                var fullText = echoContent.texte || '';
+                var i = 0;
+                var speed = 28; // ms par caractère
+                function writeChar() {
+                    if (i < fullText.length) {
+                        textEl.textContent += fullText[i];
+                        i++;
+                        setTimeout(writeChar, speed);
+                    }
+                }
+                setTimeout(writeChar, 200); // légère pause avant de commencer
+            }
+
+            renderJournalBio();
         }
 
         function closeSubstoryModal() {
