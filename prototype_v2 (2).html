@@ -1114,25 +1114,7 @@
         }
 
         .card-tab.journal-tab .notification-badge {
-            display: none;
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: #7c3aed;
-            color: white;
-            font-size: 10px;
-            font-weight: 700;
-            min-width: 17px;
-            height: 17px;
-            border-radius: 9px;
-            padding: 0 4px;
-            line-height: 17px;
-            text-align: center;
-            border: 2px solid white;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.25);
-        }
-        .card-tab.journal-tab .notification-badge.visible {
-            display: inline-block;
+            display: none !important;
         }
 
         @keyframes journalOutlineBlink {
@@ -5228,7 +5210,7 @@
 
                             <button class="card-tab journal-tab" onclick="openJournalScreen()" id="journalTabBtn">
                                 <span id="journalTabIcon">📖</span> Carnet
-                                <span class="notification-badge" id="journalNotification"></span>
+                                <span class="notification-badge hidden" id="journalNotification" style="display:none!important;"></span>
                             </button>
                         </div>
 
@@ -6166,22 +6148,22 @@
                 type: 'thématique',
                 description: 'Les grands personnages qui ont fait Lyon',
                 cards: [
-                    { id: 'card1', cardKind: 'local', collections: ["arts_scene"], name: 'Antoine de Saint-Exupéry', type: 'Personnage', poiId: 'bellecour', rarity: 'rare', supertype: 'arts',
+                    { id: 'card1', cardKind: 'local', collections: ["figures_lyon", "arts_scene"], name: 'Antoine de Saint-Exupéry', type: 'Personnage', poiId: 'bellecour', rarity: 'rare', supertype: 'arts',
                       clue: 'Cherche la statue de bronze face au sud de la place — il regarde le ciel.', clueIcon: '✈️',
                       incipit: 'On m\'a toujours dit que Lyon était trop sérieuse pour rêver. Moi, j\'y ai appris à voler.' },
-                    { id: 'card2', cardKind: 'local', collections: ["figures_lyon"], name: 'Les Frères Lumière', type: 'Personnage', poiId: 'institut_lumiere', rarity: 'legendary', supertype: 'science',
+                    { id: 'card2', cardKind: 'local', collections: ["figures_lyon", "esprit_lumieres"], name: 'Les Frères Lumière', type: 'Personnage', poiId: 'institut_lumiere', rarity: 'legendary', supertype: 'science',
                       clue: 'Trouve la plaque commémorative sur la façade de l\'Institut — deux noms, une date.', clueIcon: '🎬',
                       incipit: 'Nous n\'avons pas inventé un spectacle. Nous avons capturé le temps lui-même.' },
                     { id: 'card3', cardKind: 'local', collections: ["figures_lyon"], name: 'Paul Bocuse', type: 'Personnage', poiId: 'halles_bocuse', rarity: 'rare', supertype: 'societe',
                       clue: 'Repère son portrait peint sur le mur extérieur des halles, côté rue de Cuire.', clueIcon: '👨‍🍳',
                       incipit: 'Une cuisine sans mémoire n\'est qu\'une chimie. Ici, chaque plat raconte Lyon.' },
-                    { id: 'card4', cardKind: 'local', collections: ["figures_lyon"], name: 'Guignol', type: 'Personnage', poiId: 'vieux_lyon', rarity: 'common', supertype: 'arts', supertype2: 'societe',
+                    { id: 'card4', cardKind: 'local', collections: ["figures_lyon", "arts_scene"], name: 'Guignol', type: 'Personnage', poiId: 'vieux_lyon', rarity: 'common', supertype: 'arts', supertype2: 'societe',
                       clue: 'Cherche la marionnette sculptée sur la porte d\'entrée du théâtre dans la ruelle.', clueIcon: '🎭',
                       incipit: 'Je suis la voix de ceux qui n\'osent pas parler. Depuis deux siècles, je dis tout haut ce que Lyon pense tout bas.' },
                     { id: 'card5', cardKind: 'local', collections: ["pierres_memoire"], name: 'Tony Garnier', type: 'Personnage', poiId: 'guillotiere', rarity: 'common', supertype: 'histoire', supertype2: 'arts',
                       clue: 'Observe la fresque monumentale sur le mur pignon — une cité idéale dessinée à l\'encre.', clueIcon: '🏗️',
                       incipit: 'Une ville n\'est pas une accumulation de pierres. C\'est une promesse faite aux générations futures.' },
-                    { id: 'card18', cardKind: 'local', collections: ["esprit_lumieres"], name: 'Auguste Comte', type: 'Personnage', poiId: 'croix_rousse', rarity: 'rare', supertype: 'science',
+                    { id: 'card18', cardKind: 'local', collections: ["figures_lyon", "esprit_lumieres"], name: 'Auguste Comte', type: 'Personnage', poiId: 'croix_rousse', rarity: 'rare', supertype: 'science',
                       clue: 'Trouve la plaque discrète encastrée dans le mur du passage — regarde à hauteur des yeux.', clueIcon: '🔭',
                       incipit: 'L\'ordre et le progrès. Deux mots que j\'ai gravés dans le marbre, et que Lyon a gravés dans ses rues.' },
                 ]
@@ -6195,7 +6177,7 @@
                     { id: 'card6', cardKind: 'local', collections: ["pierres_memoire"], name: 'Place Bellecour', type: 'Lieu', poiId: 'bellecour', rarity: 'legendary', supertype: 'histoire',
                       clue: 'Lève les yeux vers le centre — cherche l\'équestre de bronze qui domine la place.', clueIcon: '🏇',
                       incipit: 'J\'ai été le cœur de mille révolutions et de mille fêtes. Les villes oublient, moi jamais.' },
-                    { id: 'card7', cardKind: 'local', collections: ["arts_scene"], name: 'Opéra de Lyon', type: 'Lieu', poiId: 'opera', rarity: 'rare', supertype: 'arts',
+                    { id: 'card7', cardKind: 'local', collections: ["arts_scene", "pierres_memoire"], name: 'Opéra de Lyon', type: 'Lieu', poiId: 'opera', rarity: 'rare', supertype: 'arts',
                       clue: 'Regarde la verrière bombée sur le toit — deux courbes parfaites que Jean Nouvel a posées sur l\'ancien.', clueIcon: '🎭',
                       incipit: 'On m\'a ouvert, refermé, reconstruit. Mais la musique n\'a jamais cessé de résonner dans mes murs.', },
                     { id: 'card8', cardKind: 'local', collections: ["pierres_memoire"], name: 'Hôtel de Ville', type: 'Lieu', poiId: 'hotel_ville', rarity: 'common', supertype: 'societe',
@@ -6236,7 +6218,7 @@
                         echoEntries: {
                             'card14_0_1': { titre: 'La Résistance par les traboules', texte: 'Durant l\'Occupation, les traboules du Vieux-Lyon ont permis aux résistants de circuler sans être vus. Klaus Barbie le savait — ses agents ont cartographié les passages. Mais les Lyonnais en connaissaient toujours un de plus.' }
                         } },
-                    { id: 'card15', cardKind: 'local', collections: ["esprit_lumieres"], name: 'Horloge Astronomique', type: 'Objet', poiId: 'saint_jean', rarity: 'common', supertype: 'science',
+                    { id: 'card15', cardKind: 'local', collections: ["esprit_lumieres", "pierres_memoire"], name: 'Horloge Astronomique', type: 'Objet', poiId: 'saint_jean', rarity: 'common', supertype: 'science',
                       clue: 'Regarde le cadran bleu en haut du mécanisme — il représente le mouvement des astres.', clueIcon: '⏰',
                       incipit: 'Je mesure le temps, les saisons, et les éclipses depuis 1379. Les humains, eux, n\'ont jamais su me lire entièrement.' },
                     { id: 'card17', cardKind: 'local', collections: ["le_vivant"], name: 'Jardin des Curiosités', type: 'Lieu', poiId: 'jardins_curiosites', rarity: 'common', supertype: 'nature', supertype2: 'science',
@@ -6272,19 +6254,19 @@
                 name: 'Cartes Thématiques — Saison 1',
                 icon: '⋆',
                 cards: [
-                    { id: 'tc_marie_curie', cardKind: 'thematic', collections: ["esprit_lumieres"], seasons: ['s1','s2'], memorielEligible: true,
+                    { id: 'tc_marie_curie', cardKind: 'thematic', collections: ["esprit_lumieres", "passeurs"], seasons: ['s1','s2'], memorielEligible: true,
                       name: 'Marie Curie', type: 'Personnage', rarity: 'rare', supertype: 'science',
                       clue: 'Une femme qui a changé la physique deux fois. Deux Nobel, aucun compromis.', clueIcon: '☢️',
                       incipit: 'On m\'a dit que la science n\'était pas faite pour moi. J\'ai découvert deux éléments.' },
-                    { id: 'tc_darwin', cardKind: 'thematic', collections: ["le_vivant"], seasons: ['s1','s2'], memorielEligible: true,
+                    { id: 'tc_darwin', cardKind: 'thematic', collections: ["le_vivant", "mesure_monde"], seasons: ['s1','s2'], memorielEligible: true,
                       name: 'Charles Darwin', type: 'Personnage', rarity: 'rare', supertype: 'science',
                       clue: 'Un voyage de cinq ans a changé notre vision du vivant pour toujours.', clueIcon: '🐢',
                       incipit: 'Ce n\'est pas le plus fort qui survit, mais celui qui s\'adapte.' },
-                    { id: 'tc_linne', cardKind: 'thematic', collections: ["le_vivant"], seasons: ['s1','s2'], memorielEligible: true,
+                    { id: 'tc_linne', cardKind: 'thematic', collections: ["le_vivant", "mesure_monde"], seasons: ['s1','s2'], memorielEligible: true,
                       name: 'Carl von Linné', type: 'Personnage', rarity: 'rare', supertype: 'science',
                       clue: 'Il a donné un nom à chaque être vivant. Sans lui, la biologie serait une tour de Babel.', clueIcon: '🌿',
                       incipit: 'Nommer, c\'est connaître. J\'ai nommé dix mille espèces.' },
-                    { id: 'tc_microscope', cardKind: 'thematic', collections: ["mesure_monde"], seasons: ['s1','s2'], memorielEligible: true,
+                    { id: 'tc_microscope', cardKind: 'thematic', collections: ["mesure_monde", "esprit_lumieres"], seasons: ['s1','s2'], memorielEligible: true,
                       name: 'Le Microscope', type: 'Objet', rarity: 'rare', supertype: 'science',
                       clue: 'Un tube, deux lentilles, et soudain l\'invisible est devenu visible.', clueIcon: '🔬',
                       incipit: 'Sous mes lentilles, un monde entier attendait qu\'on le regarde.' },
@@ -6292,15 +6274,15 @@
                       name: "L'Herbier", type: 'Objet', rarity: 'common', supertype: 'science',
                       clue: 'Des plantes séchées entre deux feuilles de papier — la première base de données du vivant.', clueIcon: '🍃',
                       incipit: 'Je suis une plante qui a survécu à son époque en devenant papier.' },
-                    { id: 'tc_imprimerie', cardKind: 'thematic', collections: ["memoire_formes"], seasons: ['s1','s2'], memorielEligible: true,
+                    { id: 'tc_imprimerie', cardKind: 'thematic', collections: ["memoire_formes", "passeurs", "esprit_lumieres"], seasons: ['s1','s2'], memorielEligible: true,
                       name: "L'Imprimerie", type: 'Objet/Concept', rarity: 'rare', supertype: 'histoire',
                       clue: 'Une presse, des caractères mobiles, et le savoir s\'échappe des monastères.', clueIcon: '📜',
                       incipit: 'Avant moi, un livre coûtait la vie d\'un moine. Après moi, il coûta quelques deniers.' },
-                    { id: 'tc_masque', cardKind: 'thematic', collections: ["arts_scene"], seasons: ['s1','s2'], memorielEligible: true,
+                    { id: 'tc_masque', cardKind: 'thematic', collections: ["arts_scene", "memoire_formes"], seasons: ['s1','s2'], memorielEligible: true,
                       name: 'Le Masque', type: 'Objet', rarity: 'rare', supertype: 'arts',
                       clue: 'Avant les projecteurs, avant les écrans — un visage en bois pour jouer mille vies.', clueIcon: '🎭',
                       incipit: 'Je cache un visage pour en révéler cent autres.' },
-                    { id: 'tc_commedia', cardKind: 'thematic', collections: ["arts_scene"], seasons: ['s1','s2'], memorielEligible: true,
+                    { id: 'tc_commedia', cardKind: 'thematic', collections: ["arts_scene", "memoire_formes"], seasons: ['s1','s2'], memorielEligible: true,
                       name: "La Commedia dell'arte", type: 'Concept', rarity: 'rare', supertype: 'arts',
                       clue: 'Arlequin, Pantalone, la Colombine — les mêmes masques parcourent l\'Europe depuis cinq siècles.', clueIcon: '🃏',
                       incipit: 'Je suis née dans les rues d\'Italie. J\'ai engendré Guignol à Lyon, Punch à Londres.' },
@@ -6308,19 +6290,19 @@
                       name: 'Molière', type: 'Personnage', rarity: 'rare', supertype: 'arts',
                       clue: 'Il riait de tout, surtout du pouvoir. Il est mort sur scène, dans son propre rôle.', clueIcon: '🎪',
                       incipit: 'Je joue les médecins malgré eux. Et parfois je meurs pour de vrai.' },
-                    { id: 'tc_academie', cardKind: 'thematic', collections: ["pouvoir_lieux"], seasons: ['s1','s2'], memorielEligible: true,
+                    { id: 'tc_academie', cardKind: 'thematic', collections: ["esprit_lumieres", "pouvoir_lieux"], seasons: ['s1','s2'], memorielEligible: true,
                       name: "L'Académie des Sciences", type: 'Institution', rarity: 'rare', supertype: 'science',
                       clue: 'Fondée par Colbert, elle devait mesurer le monde. Elle l\'a transformé.', clueIcon: '🏛️',
                       incipit: 'Nous avons décidé que la Terre était plate. Puis ronde. Puis aplatie aux pôles. La vérité se corrige.' },
-                    { id: 'tc_cabinet', cardKind: 'thematic', collections: ["pouvoir_lieux"], seasons: ['s1','s2'], memorielEligible: true,
+                    { id: 'tc_cabinet', cardKind: 'thematic', collections: ["le_vivant", "pouvoir_lieux"], seasons: ['s1','s2'], memorielEligible: true,
                       name: 'Le Cabinet de Curiosités', type: 'Lieu/Concept', rarity: 'rare', supertype: 'histoire',
                       clue: 'Avant les musées, les princes rassemblaient le monde entier dans une seule salle.', clueIcon: '🗄️',
                       incipit: 'Je contenais une corne de licorne, un crocodile empaillé et la mâchoire d\'un géant. Tout était vrai.' },
-                    { id: 'tc_bibliotheque', cardKind: 'thematic', collections: ["pouvoir_lieux"], seasons: ['s1','s2'], memorielEligible: true,
+                    { id: 'tc_bibliotheque', cardKind: 'thematic', collections: ["pouvoir_lieux", "passeurs"], seasons: ['s1','s2'], memorielEligible: true,
                       name: 'La Bibliothèque', type: 'Lieu/Concept', rarity: 'rare', supertype: 'histoire',
                       clue: 'Alexandrie brûla. Ses livres survécurent dans d\'autres bibliothèques, dans d\'autres langues.', clueIcon: '📚',
                       incipit: 'On m\'a brûlée plusieurs fois. Je reviens toujours.' },
-                    { id: 'tc_gutenberg', cardKind: 'thematic', collections: ["passeurs"], seasons: ['s1','s2'], memorielEligible: true,
+                    { id: 'tc_gutenberg', cardKind: 'thematic', collections: ["passeurs", "memoire_formes"], seasons: ['s1','s2'], memorielEligible: true,
                       name: 'Gutenberg', type: 'Personnage', rarity: 'rare', supertype: 'histoire',
                       clue: 'Il a fait faillite sur son invention. Quelqu\'un d\'autre s\'est enrichi. L\'humanité a gagné.', clueIcon: '✒️',
                       incipit: 'J\'ai imprimé la Bible. Puis Luther s\'en est servi pour déchirer l\'Église.' },
@@ -7738,7 +7720,6 @@
 
         function initApp() {
             loadProgress();
-            setTimeout(updateJournalBadge, 300);
             if (!_obDone) {
                 setTimeout(startOnboarding, 800);
             } else {
@@ -9857,7 +9838,7 @@
                 const bht = document.getElementById('journalBioHeaderType');
                 if (bhn) bhn.textContent = card.name;
                 if (bht) bht.textContent = card.type || '';
-                updateJournalBadge();
+                document.getElementById('journalTabBtn').classList.remove('journal-tab-blink');
                 restoreJournalState(card.id);
                 renderJournalBio();
                 // Fermer le sac
@@ -10052,7 +10033,7 @@
                 const bht = document.getElementById('journalBioHeaderType');
                 if (bhn) bhn.textContent = card.name;
                 if (bht) bht.textContent = card.type || '';
-                updateJournalBadge();
+                document.getElementById('journalTabBtn').classList.remove('journal-tab-blink');
                 restoreJournalState(card.id);
                 renderJournalBio();
                 document.getElementById('journalScreen').classList.add('show');
@@ -11176,25 +11157,6 @@
             }, delay);
         }
 
-        function updateJournalBadge() {
-            const badge = document.getElementById('journalNotification');
-            const btn   = document.getElementById('journalTabBtn');
-            if (!badge || !btn) return;
-            // Compte toutes les entrées disponibles et non encore révélées sur toutes les cartes
-            let count = 0;
-            Object.values(cardJournalEntries).forEach(entries => {
-                entries.forEach(e => { if (e._available && !e._revealed) count++; });
-            });
-            if (count > 0) {
-                badge.textContent = count;
-                badge.classList.add('visible');
-            } else {
-                badge.classList.remove('visible');
-            }
-            // Supprimer l'ancien clignotement si présent
-            btn.classList.remove('journal-tab-blink');
-        }
-
         function unlockJournalEntry(cardId, level, entry) {
             if (!cardJournalEntries[cardId]) cardJournalEntries[cardId] = [];
             const alreadyAdded = cardJournalEntries[cardId].some(e => e.id === entry.id);
@@ -11209,7 +11171,7 @@
             cardJournalEntries[cardId].push({ ...entry, level, _isNew: true, _available: true, _revealed: false, _type: entryType });
             saveProgress();
             // Badge carnet
-            updateJournalBadge();
+            document.getElementById('journalTabBtn').classList.add('journal-tab-blink');
             if (document.getElementById('journalScreen').classList.contains('show')) {
                 renderJournalBio();
                 setTimeout(() => animateLastJournalEntry(), 250);
@@ -11236,7 +11198,6 @@
             entry._revealed = true;
             entry._isNew = true;
             saveProgress();
-            updateJournalBadge();
             renderJournalBio();
             setTimeout(() => animateLastJournalEntry(), 250);
 
@@ -11493,7 +11454,7 @@
                 const bht = document.getElementById('journalBioHeaderType');
                 if (bhn) bhn.textContent = selectedCard.name;
                 if (bht) bht.textContent = selectedCard.type;
-                updateJournalBadge();
+                document.getElementById('journalTabBtn').classList.remove('journal-tab-blink');
                 journalEl.classList.add('show');
                 renderEchoInventory();
             }
@@ -11900,7 +11861,7 @@
             // Badge sur le bouton Carnet si écho disponible
             const hasPending = supertypes.some(s => (bagInv.echos[s]||0) > 0 && !placed[s]);
             const journalBtn = document.getElementById('journalTabBtn');
-            updateJournalBadge();
+            if (journalBtn && hasPending) journalBtn.classList.add('journal-tab-blink');
 
         }
 
@@ -12054,7 +12015,7 @@
             const bht = document.getElementById('journalBioHeaderType');
             if (bhn) bhn.textContent = selectedCard.name;
             if (bht) bht.textContent = selectedCard.type;
-            updateJournalBadge();
+            document.getElementById('journalTabBtn').classList.remove('journal-tab-blink');
             window._journalSessionDelta = 0; // Reset delta de session
             restoreJournalState(selectedCard.id, maxLevel);
             document.getElementById('journalScreen').classList.add('show');
@@ -12449,7 +12410,7 @@
                 if (bio) bio.scrollTop = 0;
             }
             setTimeout(() => {
-                updateJournalBadge();
+                document.getElementById('journalTabBtn').classList.add('journal-tab-blink');
             }, 800);
         }
 
